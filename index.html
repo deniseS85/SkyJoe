@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffe5b4">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script type="module" src="/js/script.js" defer></script>
+    <title>SkyJoe</title>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <h1>Skyjoe</h1>
+        
+        <div class="background-animations">
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+            <div class="card-shape"></div>
+        </div>
+
+        <div class="start-content">
+            <div class="cat-wrapper">
+                <img class="header-img" src="/assets/img/catWood.png" alt="Cat">
+                <img class="cat-paw" src="/assets/img/catPaw.png" alt="CatPaw">
+
+                <div class="paper-roll" id="paperRoll">
+                    <div class="paper-content" id="paperContent"></div>
+                </div>   
+            </div>
+        
+            <div class="menu-box">
+                <div class="menu-title">MENU</div>
+                <button class="menu-btn">SPIELREGELN</button>
+                <button class="menu-btn">EINSTELLUNGEN</button>
+                <div class="amount-player-btn">
+                    <button class="menu-btn">2 SPIELER</button>
+                    <button class="menu-btn">3 SPIELER</button>
+                </div>
+                <button class="start-btn" id="startBtn">NEUES SPIEL</button>   
+            </div>
+        </div>
+    </div>
+
+    <div class="game-screen" id="gameScreen" style="display: none;">
+        <div class="game-header">
+            <div class="back-btn" id="backBtn">
+                <img src="/assets/img/arrow.png" alt="Back">
+            </div>
+        </div>
+
+        <div class="game-content">
+            <div class="game-board">
+                <div class="stack-area">
+                    <div class="draw-discard-stack">
+                        <div class="card-field" id="stack-field-1"></div>
+                    </div>
+                    <img class="card-field" id="stack-field-2" style="visibility: hidden;">
+                </div>
+
+                <!-- <button id="animate-card-btn">Karte fliegen lassen</button> -->
+
+                <div class="rotation-wrapper"></div> 
+                
+                <div class="popup" id="popup">
+                    <div class="popup-content" id="popupContent"></div>
+                </div> 
+            </div>
+        </div>
+    </div>
+
+    <audio id="bgMusic" src="/assets/sounds/game-music.mp3" loop></audio>
+    
+</body>
+</html>
