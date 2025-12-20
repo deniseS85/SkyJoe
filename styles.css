@@ -631,7 +631,7 @@ input:checked + .settings-slider:before {
 }
 
 .flying-card {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     border: 1px solid black;
     z-index: 10;
@@ -679,6 +679,9 @@ input:checked + .settings-slider:before {
     position: absolute;
     right: 5px;
     top: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: clamp(1.5625rem, 1.4286rem + 0.6696vw, 2.5rem);
     height: clamp(1.5625rem, 1.4286rem + 0.6696vw, 2.5rem);
     border-radius: 50%;
@@ -686,6 +689,16 @@ input:checked + .settings-slider:before {
     border: 2px solid white;
     background: radial-gradient(circle at 30% 30%, #ffffff, #dddddd 30%, #666666 80%);
     box-shadow: inset 0 0 10px #ffffff, 0 4px 8px #333333;
+  
+    
+}
+
+.point-info span {
+    font-family: 'biscuit', sans-serif;
+    font-size: clamp(0.9375rem, 0.8482rem + 0.4464vw, 1.5625rem);
+    color: #5a3b1e;
+    text-shadow: 1px 1px rgba(255,255,255,0.4);
+    transform: translateY(3px);
 }
 
 .player-grid, .opponent-grid {   
@@ -737,6 +750,7 @@ input:checked + .settings-slider:before {
 
 .grid-wrapper.player-bottom .card-field {
     width: var(--player-card-width);
+    cursor: pointer;
 }
 
 .grid-wrapper.player-top .card-field {
@@ -815,22 +829,14 @@ input:checked + .settings-slider:before {
         top: 45%;
         left: 0;
         right: 0;
+        flex: unset;
         justify-content: center;
-        gap: 50px;
         flex-direction: row;
         gap: 50px;
         z-index: 10;
-
     }
 
-    .stack-area {
-        flex: unset;
-        flex-direction: row;
-        justify-content: center;
-        gap: 50px;
-    }
-
-     .stack-area > :nth-child(2) {
+    .stack-area > :nth-child(2) {
         transform: none;
     }
 

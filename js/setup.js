@@ -313,7 +313,6 @@ function createCardWrapper(card, width, borderRadius) {
         aspectRatio: '2/3',
         borderRadius,
         perspective: '1000px',
-        cursor: 'pointer'
     });
     return cardEl;
 }

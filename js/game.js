@@ -1,13 +1,16 @@
 import { generateCardImage } from "./setup.js";
 import { rotatePlayers, currentStep, incrementStep } from "./setup.js";
 
-const stackArea = document.querySelector('.stack-area');
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
 const cardDropSound = new Audio('/assets/sounds/card-drop.mp3');
+const stack1 = document.getElementById('stack-field-1');
+const stack2 = document.getElementById('stack-field-2');
 
 export const flippedCards = {};
 export let firstPlayerRotated = false;
+
+let turnState = 'WAIT'; //WAIT; START; DECIDE
 
 
 /**
@@ -18,6 +21,8 @@ export function startGame() {
         const inner = cardEl.querySelector('div');
         cardEl.addEventListener('click', () => flipCard(cardEl, inner));
     });
+    console.log('Auswahl Beginner: ', turnState)
+    firstGameMove(); 
 }
 
 
@@ -39,19 +44,23 @@ function canFlipCard(wrapper, cardEl, playerData) {
  * @param {HTMLElement} cardEl - Kartenelement (Wrapper)
  * @param {HTMLElement} inner - inneres Flip-Element
  */
-function flipCard(cardEl, inner) {
+function flipCard(cardEl, inner, changeCard = false) {
     const wrapper = cardEl.closest('.grid-wrapper');
     if (!wrapper) return;
 
     const playerData = getOrCreatePlayerData(wrapper);
-    if (!canFlipCard(wrapper, cardEl, playerData)) return;
+    if (!changeCard && !canFlipCard(wrapper, cardEl, playerData)) return;
 
     inner.style.transform = 'rotateY(0deg)';
     playSound(flipCardSound);
     cardEl.dataset.flipped = 'true';
-    playerData.count++;
     playerData.total += Number(cardEl.dataset.value);
-    checkAllPlayersFlipped();
+    updatePointInfo(playerData);
+
+    if (!changeCard) {
+        playerData.count++;
+        checkAllPlayersFlipped();
+    }
 }
 
 
@@ -105,7 +114,12 @@ function checkAllPlayersFlipped() {
     }
 
     if (allDone) {
-        const startingPlayer = flippedValues.reduce((prev, curr) => curr.total > prev.total ? curr : prev);
+        let startingPlayer = flippedValues.reduce((prev, curr) => curr.total > prev.total ? curr : prev);
+
+        const topPlayers = flippedValues.filter(p => p.total === startingPlayer.total);
+        if (topPlayers.length > 1) {
+            startingPlayer = topPlayers[Math.floor(Math.random() * topPlayers.length)];
+        }
         showPopup(startingPlayer);
     }
 }
@@ -186,33 +200,32 @@ function showPopup(player) {
                 rotatePlayers(currentStep);
             }
             revealDiscardCard();
+            turnState = 'START';
+            console.log('1. Spielzug ', turnState)
         }, 800);
     }, 2000);
 }
-
 
 /**
  * Lässt die oberste Karte vom Ziehstapel in den Ablagestapel fliegen.
  */
 function revealDiscardCard() {
     const drawDeck = window.stacks.stack1;
-    const fromEl = document.getElementById('stack-field-1');
-    if (!drawDeck?.length) return fromEl.style.visibility = 'hidden';
+    if (!drawDeck?.length) return stack1.style.visibility = 'hidden';
 
     const currentCard = drawDeck.shift();
-    const toEl = document.getElementById('stack-field-2');
-    const width = fromEl.offsetWidth;
+    const width = stack1.offsetWidth;
     const imgSrc = currentCard.img || generateCardImage(currentCard, width, width * 3 / 2);
-    const fromRect = fromEl.getBoundingClientRect();
-    const toRect = toEl.getBoundingClientRect();
+    const fromRect = stack1.getBoundingClientRect();
+    const toRect = stack2.getBoundingClientRect();
 
     const flyingCard = createFlyingCard(imgSrc, fromRect)
-    stackArea.appendChild(flyingCard);
+    document.body.appendChild(flyingCard);
 
     const delta = animationDirection(fromRect, toRect);
     playSound(cardDropSound, 1, 0, 0.7);
     animateFlyingCard(flyingCard, delta);
-    finalizeCard(flyingCard, toEl, currentCard, imgSrc);
+    finalizeCard(flyingCard, stack2, currentCard, imgSrc);
 }
 
 
@@ -231,7 +244,8 @@ function createFlyingCard(imgSrc, fromRect) {
         left:  `${fromRect.left}px`,
         top: `${fromRect.top}px`,
         transform: 'translate(0, 0) rotate(0deg)',
-        transformOrigin: 'center center'
+        transformOrigin: 'center center',
+        boxShadow: '4px 4px 8px rgba(0, 0, 0, 0.35)',
     })
     return card;
 }
@@ -276,9 +290,165 @@ function finalizeCard(card, toEl, currentCard, imgSrc) {
         card.remove();
         toEl.style.visibility = 'visible';
         toEl.style.border = '1px solid black';
+        toEl.style.boxShadow = '4px 4px 8px rgba(0, 0, 0, 0.35)';
         toEl.dataset.value = currentCard.value;
         toEl.src = imgSrc;
+        firstGameMove();
     }, { once: true });
+}
+
+
+function firstGameMove() {
+    if (turnState !== 'START') return;
+    enableStack1Click();
+    enableStack2Drag();
+}
+
+function enableStack1Click() {
+    stack1.style.cursor = 'pointer';
+
+    const handleClick = () => {
+        if (turnState !== 'START') return;
+        revealDiscardCard();
+        turnState = 'DECIDE';
+        console.log('Karte wurde gezogen', turnState)
+        stack1.removeEventListener('click', handleClick);
+    };
+    stack1.addEventListener('click', handleClick);
+}
+
+function enableStack2Drag() {
+    stack2.style.cursor = 'grab';
+
+    stack2.addEventListener('mousedown', e => {
+        if (turnState !== 'START') return;
+        e.preventDefault();
+        const rect = stack2.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+
+        handleCardDrag(stack2, offsetX, offsetY);
+    });
+}
+
+
+function createClone(element, offsetLeft = 15, offsetTop = 9) {
+    const rect = element.getBoundingClientRect();
+    const clone = element.cloneNode(true);
+
+    clone.style.position = 'absolute';
+    clone.style.left = `${rect.left + offsetLeft}px`;
+    clone.style.top = `${rect.top + offsetTop}px`;
+    clone.style.pointerEvents = 'none';
+    clone.style.transition = 'transform 0.5s ease';
+    clone.style.transform = window.getComputedStyle(element).transform;
+
+    document.body.appendChild(clone);
+    return clone;
+}
+
+function handleCardDrag(original, offsetX, offsetY) {
+    let clone = null;
+    let isDragging = false;
+
+    const playerCards = Array.from(document.querySelectorAll('.player-bottom .card'));
+
+    function startDrag(event) {
+        if (!isDragging) {
+            clone = createClone(original);
+            original.style.opacity = '0.01';
+            clone.style.transform = window.getComputedStyle(original).transform;
+
+            requestAnimationFrame(() => {
+                clone.style.transition = 'transform 0.3s ease';
+                clone.style.transform = 'rotate(0deg)';
+            });
+            
+            isDragging = true;
+        }
+        clone.style.left = `${event.clientX - offsetX}px`;
+        clone.style.top = `${event.clientY - offsetY}px`;
+    }
+
+    function stopDrag(event) {
+        document.removeEventListener('mousemove', startDrag);
+        document.removeEventListener('mouseup', stopDrag);
+
+        if (!isDragging) return;
+
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        let targetCard = null;
+        for (const card of playerCards) {
+            const rect = card.getBoundingClientRect();
+            if (
+                mouseX >= rect.left &&
+                mouseX <= rect.right &&
+                mouseY >= rect.top &&
+                mouseY <= rect.bottom
+            ) {
+                targetCard = card;
+                break;
+            }
+        }
+
+        if (targetCard && turnState === 'START') {
+            const targetImg = targetCard.querySelector('img');
+            const originalImg = original.tagName === 'IMG' ? original : original.querySelector('img'); 
+            const oldCard = { img: targetImg.src, value: targetImg.dataset.value };
+
+            targetImg.src = original.src;
+            targetImg.dataset.value = original.dataset.value;
+
+            if (targetCard.dataset.flipped !== 'true') {
+                const inner = targetCard.querySelector('div');
+                if (inner) {
+                    flipCard(targetCard, inner, true);
+                }
+            }
+
+            originalImg.src = oldCard.img;
+            originalImg.dataset.value = oldCard.value;
+
+            turnState = 'DECIDE';
+            console.log('Karte wurde gedropt', turnState)
+
+            clone.style.transition = 'transform 0.3s ease';
+                setTimeout(() => {
+                clone.remove();
+                original.style.opacity = '1';
+            }, 50);
+            return;
+        }
+
+
+        const originalRect = original.getBoundingClientRect(); 
+        clone.style.transition = 'left 0.5s ease, top 0.5s ease, transform 0.3s ease';       
+        clone.style.left = `${originalRect.left + 15}px`;
+        clone.style.top = `${originalRect.top + 9}px`;
+        clone.style.transform = window.getComputedStyle(original).transform;
+        clone.addEventListener('transitionend', () => {
+            clone.remove();
+            original.style.opacity = '1';
+        }, { once: true });
+
+        
+    }
+    document.addEventListener('mousemove', startDrag);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+
+
+/**
+ * Aktualisiert die Punkteanzeige eines Spielers
+ * @param {{id:string, total:number}} playerData
+ */
+function updatePointInfo(playerData) {
+    const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
+    const pointsEl = wrapper?.querySelector('.point-info');
+    pointsEl && (pointsEl.innerHTML = `<span>${playerData.total}</span>`);
 }
 
 
@@ -288,6 +458,7 @@ function finalizeCard(card, toEl, currentCard, imgSrc) {
 export function resetCards() {
     for (const key in flippedCards) delete flippedCards[key];
     firstPlayerRotated = false;
+    turnState = 'WAIT';
 
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';
