@@ -750,7 +750,7 @@ input:checked + .settings-slider:before {
 
 .grid-wrapper.player-bottom .card-field {
     width: var(--player-card-width);
-    cursor: pointer;
+   /*  cursor: pointer; */
 }
 
 .grid-wrapper.player-top .card-field {
@@ -762,8 +762,34 @@ input:checked + .settings-slider:before {
     top: 0;
     left: 0;
     z-index: 100;
+    transition: transform 0.15s ease;
+    will-change: transform, box-shadow;
+
 }
 
+
+.card.drop-hover {
+    transform: scale(1.03);
+    animation: glowPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow:
+            0 0 0 2px rgba(0, 255, 0, 0.9),
+            0 0 8px 4px rgba(0, 255, 0, 0.4);
+    }
+    50% {
+        box-shadow:
+            0 0 0 2px rgba(0, 255, 0, 0.9),
+            0 0 14px 8px rgba(0, 255, 0, 0.7);
+    }
+    100% {
+        box-shadow:
+            0 0 0 2px rgba(0, 255, 0, 0.9),
+            0 0 8px 4px rgba(0, 255, 0, 0.4);
+    }
+}
 
 #rotateTestBtn {
     position: absolute;

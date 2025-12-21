@@ -1,5 +1,5 @@
 import { generateCardImage } from "./setup.js";
-import { rotatePlayers, currentStep, incrementStep } from "./setup.js";
+import { rotatePlayers, currentStep, incrementStep, setTurnState, turnState } from "./setup.js";
 
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
@@ -10,18 +10,19 @@ const stack2 = document.getElementById('stack-field-2');
 export const flippedCards = {};
 export let firstPlayerRotated = false;
 
-let turnState = 'WAIT'; //WAIT; START; DECIDE
-
 
 /**
  * Startet das Spiel und setzt Klickevent auf die Karten
  */
 export function startGame() {
+    setTurnState('WAIT'); 
+    console.log('Wer fängt an? ', turnState)
     document.querySelectorAll('.card').forEach(cardEl => {
+        cardEl.dataset.flipped = 'false';
         const inner = cardEl.querySelector('div');
         cardEl.addEventListener('click', () => flipCard(cardEl, inner));
     });
-    console.log('Auswahl Beginner: ', turnState)
+    updateClickableCards();
     firstGameMove(); 
 }
 
@@ -35,7 +36,7 @@ export function startGame() {
  */
 function canFlipCard(wrapper, cardEl, playerData) {
     return isPlayerBottom(wrapper) &&
-           cardEl.dataset.flipped !== 'true' &&
+           cardEl.dataset.flipped == 'false' &&
            playerData.count < 2;
 }
 
@@ -126,19 +127,98 @@ function checkAllPlayersFlipped() {
 
 
 /**
- * Setzt Klickbarkeit der Karten
+ * Setzt Pointer-Events und Cursor auf eine Karte.
+ * @param {HTMLElement} card 
+ * @param {boolean} clickable 
+ * @param {string} cursor 
  */
-function updateClickableCards() {
-    document.querySelectorAll('.card').forEach(cardEl => {
-        const wrapper = cardEl.closest('.grid-wrapper');
-        cardEl.style.pointerEvents = isPlayerBottom(wrapper) ? 'auto' : 'none';
-    });
+function setCardInteractive(card, clickable, cursor = 'pointer') {
+    card.style.pointerEvents = clickable ? 'auto' : 'none';
+    card.style.cursor = clickable ? cursor : 'default';
 }
 
+/**
+ * Aktualisiert Klickbarkeit und Event-Handler für Spielerkarten.
+ * @param {HTMLElement} card 
+ * @param {HTMLElement} wrapper 
+ */
+function updatePlayerCard(card, wrapper) {
+    const bottom = isPlayerBottom(wrapper);
 
-/* document.getElementById('animate-card-btn').addEventListener('click', () => {
-    revealDiscardCard(); 
-}); */
+    switch (turnState) {
+        case 'WAIT':
+            setCardInteractive(card, bottom, 'pointer');
+            break;
+
+        case 'DRAWN': {
+            const isFlipped = card.dataset.flipped !== 'false';
+
+            if (bottom && !isFlipped) {
+                setCardInteractive(card, true);
+
+                card.onclick = () => {
+                    if (turnState !== 'DRAWN') return;
+                    if (card.dataset.flipped !== 'false') return;
+
+                    const inner = card.querySelector('div');
+                    if (!inner) return;
+
+                    flipCard(card, inner, true);
+                    refreshPoints(wrapper);
+                    setTurnState('DECIDE');
+                    updateClickableCards();
+                    console.log('Karte im Grid wurde aufgedeckt, Spielzug beendet ', turnState)
+                };
+            } else {
+                setCardInteractive(card, false);
+                card.onclick = null;
+            }
+            break;
+        }
+
+        case 'INIT':
+        case 'START':
+        case 'DECIDE':
+        default:
+            setCardInteractive(card, false);
+    }
+}
+
+/**
+ * Aktualisiert Klickbarkeit für Stapelkarten.
+ * @param {HTMLElement} card 
+ */
+function updateStackCard(card) {
+    switch (turnState) {
+        case 'START':
+            if (card.id === 'stack-field-1') setCardInteractive(card, true, 'pointer');
+            else if (card.id === 'stack-field-2') setCardInteractive(card, true, 'grab');
+            else setCardInteractive(card, false);
+            break;
+
+        case 'DRAWN':
+            if (card.id === 'stack-field-2') setCardInteractive(card, true, 'grab');
+            else setCardInteractive(card, false);
+            break;
+
+        case 'INIT':
+        case 'WAIT':
+        case 'DECIDE':
+        default:
+            setCardInteractive(card, false);
+    }
+}
+
+/**
+ * Setzt Klickbarkeit und Cursor für alle Karten im Spiel.
+ */
+function updateClickableCards() {
+    document.querySelectorAll('.card, .card-field').forEach(card => {
+        const wrapper = card.closest('.grid-wrapper');
+        if (wrapper) updatePlayerCard(card, wrapper);
+        else updateStackCard(card);
+    });
+}
 
 
 /**
@@ -200,8 +280,9 @@ function showPopup(player) {
                 rotatePlayers(currentStep);
             }
             revealDiscardCard();
-            turnState = 'START';
-            console.log('1. Spielzug ', turnState)
+            setTurnState('START');
+            updateClickableCards();
+            console.log('Spielzug beginnt ', turnState)
         }, 800);
     }, 2000);
 }
@@ -292,6 +373,7 @@ function finalizeCard(card, toEl, currentCard, imgSrc) {
         toEl.style.border = '1px solid black';
         toEl.style.boxShadow = '4px 4px 8px rgba(0, 0, 0, 0.35)';
         toEl.dataset.value = currentCard.value;
+        toEl.alt = currentCard.value ? `Card ${currentCard.value}` : 'Card';
         toEl.src = imgSrc;
         firstGameMove();
     }, { once: true });
@@ -305,12 +387,11 @@ function firstGameMove() {
 }
 
 function enableStack1Click() {
-    stack1.style.cursor = 'pointer';
-
     const handleClick = () => {
         if (turnState !== 'START') return;
         revealDiscardCard();
-        turnState = 'DECIDE';
+        setTurnState('DRAWN'); 
+        updateClickableCards();
         console.log('Karte wurde gezogen', turnState)
         stack1.removeEventListener('click', handleClick);
     };
@@ -318,34 +399,19 @@ function enableStack1Click() {
 }
 
 function enableStack2Drag() {
-    stack2.style.cursor = 'grab';
-
-    stack2.addEventListener('mousedown', e => {
-        if (turnState !== 'START') return;
+    stack2.onmousedown = e => {
+        if (turnState !== 'START' && turnState !== 'DRAWN') return;
         e.preventDefault();
+
         const rect = stack2.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        const offsetY = e.clientY - rect.top;
-
-        handleCardDrag(stack2, offsetX, offsetY);
-    });
+        handleCardDrag(
+            stack2,
+            e.clientX - rect.left,
+            e.clientY - rect.top
+        );
+    };
 }
 
-
-function createClone(element, offsetLeft = 15, offsetTop = 9) {
-    const rect = element.getBoundingClientRect();
-    const clone = element.cloneNode(true);
-
-    clone.style.position = 'absolute';
-    clone.style.left = `${rect.left + offsetLeft}px`;
-    clone.style.top = `${rect.top + offsetTop}px`;
-    clone.style.pointerEvents = 'none';
-    clone.style.transition = 'transform 0.5s ease';
-    clone.style.transform = window.getComputedStyle(element).transform;
-
-    document.body.appendChild(clone);
-    return clone;
-}
 
 function handleCardDrag(original, offsetX, offsetY) {
     let clone = null;
@@ -368,9 +434,12 @@ function handleCardDrag(original, offsetX, offsetY) {
         }
         clone.style.left = `${event.clientX - offsetX}px`;
         clone.style.top = `${event.clientY - offsetY}px`;
+
+        highlightDropzone(event.clientX, event.clientY, playerCards);
     }
 
     function stopDrag(event) {
+        playerCards.forEach(c => c.classList.remove('drop-hover'));
         document.removeEventListener('mousemove', startDrag);
         document.removeEventListener('mouseup', stopDrag);
 
@@ -393,34 +462,40 @@ function handleCardDrag(original, offsetX, offsetY) {
             }
         }
 
-        if (targetCard && turnState === 'START') {
+        if (targetCard && (turnState === 'START' || turnState === 'DRAWN')) {
             const targetImg = targetCard.querySelector('img');
-            const originalImg = original.tagName === 'IMG' ? original : original.querySelector('img'); 
-            const oldCard = { img: targetImg.src, value: targetImg.dataset.value };
+            const newDiscardCard = original.tagName === 'IMG' ? original : original.querySelector('img'); 
+            const dragCard = { img: targetImg.src, value: targetCard.dataset.value, alt: targetImg.alt  };
 
             targetImg.src = original.src;
-            targetImg.dataset.value = original.dataset.value;
+            targetCard.dataset.value = original.dataset.value; 
+            targetImg.alt = original.dataset.value ? `Card ${original.dataset.value}` : newDiscardCard.alt;
 
-            if (targetCard.dataset.flipped !== 'true') {
+            if (targetCard.dataset.flipped === 'false') {
                 const inner = targetCard.querySelector('div');
-                if (inner) {
-                    flipCard(targetCard, inner, true);
-                }
+                if (inner) flipCard(targetCard, inner, true);
             }
 
-            originalImg.src = oldCard.img;
-            originalImg.dataset.value = oldCard.value;
+            const wrapper = targetCard.closest('.grid-wrapper');
+            refreshPoints(wrapper);
+            
+            newDiscardCard.src = dragCard.img;
+            original.dataset.value = dragCard.value;
+            newDiscardCard.alt = dragCard.alt;
+            playSound(flipCardSound);
 
-            turnState = 'DECIDE';
-            console.log('Karte wurde gedropt', turnState)
+            setTurnState('DECIDE');
+            updateClickableCards();
+            console.log('Karte wurde gedroppt, Spielzug beendet ', turnState);
 
             clone.style.transition = 'transform 0.3s ease';
-                setTimeout(() => {
+            setTimeout(() => {
                 clone.remove();
                 original.style.opacity = '1';
             }, 50);
             return;
-        }
+        }       
+
 
 
         const originalRect = original.getBoundingClientRect(); 
@@ -438,6 +513,60 @@ function handleCardDrag(original, offsetX, offsetY) {
     document.addEventListener('mousemove', startDrag);
     document.addEventListener('mouseup', stopDrag);
 }
+
+function refreshPoints(wrapper) {
+    const playerData = getOrCreatePlayerData(wrapper);
+
+    let total = 0;
+    let count = 0;
+
+    wrapper.querySelectorAll('.card[data-flipped="true"]').forEach(card => {
+        total += Number(card.dataset.value);
+        count++;
+    });
+
+    playerData.total = total;
+    playerData.count = count;
+    updatePointInfo(playerData);
+}
+
+
+function createClone(element, offsetLeft = 15, offsetTop = 9) {
+    const rect = element.getBoundingClientRect();
+    const clone = element.cloneNode(true);
+
+    Object.assign(clone.style, {
+        position: 'fixed',
+        left: `${rect.left + offsetLeft}px`,
+        top: `${rect.top + offsetTop}px`,
+        pointerEvents: 'none',
+        transform: window.getComputedStyle(element).transform,
+        transition: 'transform 0.3s ease',
+        zIndex: 9999
+    });
+
+    document.body.appendChild(clone);
+    return clone;
+}
+
+function highlightDropzone(x, y, playerCards) {
+    let active = null;
+
+    for (const card of playerCards) {
+        const rect = card.getBoundingClientRect();
+        const isOver =
+            x >= rect.left &&
+            x <= rect.right &&
+            y >= rect.top &&
+            y <= rect.bottom;
+
+        card.classList.toggle('drop-hover', isOver);
+        if (isOver) active = card;
+    }
+
+    return active;
+}
+
 
 
 
@@ -458,12 +587,12 @@ function updatePointInfo(playerData) {
 export function resetCards() {
     for (const key in flippedCards) delete flippedCards[key];
     firstPlayerRotated = false;
-    turnState = 'WAIT';
+    setTurnState('INIT');
+    updateClickableCards();
 
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';
         const inner = cardEl.querySelector('div');
         if (inner) inner.style.transform = '';
-        cardEl.style.pointerEvents = 'auto';
     });
 }

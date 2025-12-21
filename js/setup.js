@@ -11,6 +11,7 @@ const cardSound = new Audio('/assets/sounds/deal-cards.mp3');
 let dealTimeouts = []; 
 let isDealing = false; 
 export let currentStep = 0;
+export let turnState = 'INIT';
 
 
 /**
@@ -409,6 +410,7 @@ function animateDeal(players) {
         dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer);
     });
     afterDeal(dealDurationMs);
+    console.log(turnState)
 }
 
 
@@ -425,8 +427,27 @@ function afterDeal(delayMs) {
 }
 
 
+/**
+ * Erhöht `currentStep` um 1 und fährt mit dem nächsten Spieler fort.
+ */
 export function incrementStep() {
     currentStep++;
+}
+
+
+/**
+/**
+ * Setzt den aktuellen Spielzustand.
+ * Mögliche States:
+ * - 'INIT'   : Spielstart, alle Karten deaktiviert
+ * - 'WAIT'   : Auswahl der Spieler-Karten möglich
+ * - 'START'  : Stapelkarten aktiv, Spieler-Karten deaktiviert
+ * - 'DRAWN'  : gezogene Karte + Spielfeldkarten aktiv
+ * - 'DECIDE' : 1. Spielzug fertig, alle Karten deaktiviert
+ * @param {'INIT'|'WAIT'|'START'|'DECIDE'} state - Neuer Spielzustand
+ */
+export function setTurnState(state) {
+    turnState = state;
 }
 
 
