@@ -1,5 +1,7 @@
 import { generateCardImage } from "./setup.js";
 import { rotatePlayers, currentStep, incrementStep, setTurnState, turnState } from "./setup.js";
+import { resetGame } from "./setup.js";
+import { showGameScreen } from "./setup.js";
 
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
@@ -9,41 +11,31 @@ const stack2 = document.getElementById('stack-field-2');
 
 export const flippedCards = {};
 export let firstPlayerRotated = false;
+let lastTurnActive = false;
+let remainingLastTurns = 0;
 
 
 /**
- * Startet das Spiel und setzt Klickevent auf die Karten
+ * Initialisiert den Spielstart.
  */
 export function startGame() {
-    setTurnState('WAIT'); 
-    console.log('Wer fängt an? ', turnState)
+    setTurnState('SELECT'); 
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';
         const inner = cardEl.querySelector('div');
         cardEl.addEventListener('click', () => flipCard(cardEl, inner));
     });
     updateClickableCards();
-    firstGameMove(); 
+    gameMove(); 
 }
 
 
 /**
- * Prüft, ob die Karte eines Spielers umgedreht werden darf.
- * @param {HTMLElement} wrapper - Wrapper-Element der Karte
- * @param {HTMLElement} cardEl - Kartenelement
- * @param {Object} playerData - Spielerinformationen aus flippedCards
- * @returns {boolean} true, wenn die Karte aufgedeckt werden darf
- */
-function canFlipCard(wrapper, cardEl, playerData) {
-    return isPlayerBottom(wrapper) &&
-           cardEl.dataset.flipped == 'false' &&
-           playerData.count < 2;
-}
-
-/**
- * Karte wird gedreht bei Klick
+ * Dreht eine Karte um und aktualisiert den Spielstand.
  * @param {HTMLElement} cardEl - Kartenelement (Wrapper)
  * @param {HTMLElement} inner - inneres Flip-Element
+ * @param {boolean} [changeCard=false] - true bei Kartentausch (ohne Flip-Regelprüfung)
+ * @returns 
  */
 function flipCard(cardEl, inner, changeCard = false) {
     const wrapper = cardEl.closest('.grid-wrapper');
@@ -62,6 +54,8 @@ function flipCard(cardEl, inner, changeCard = false) {
         playerData.count++;
         checkAllPlayersFlipped();
     }
+
+    if (isFieldComplete(wrapper)) startLastRound();
 }
 
 
@@ -88,16 +82,42 @@ function getOrCreatePlayerData(wrapper) {
 
 
 /**
- * gibt alle Spieler zurück, die bereits 2 Karten aufgedeckt haben.
- * @returns {Array<Object>} Array der Spieler-Daten
+ * Prüft, ob die Karte eines Spielers aufgedeckt werden darf.
+ * @param {HTMLElement} wrapper - Wrapper-Element der Karte
+ * @param {HTMLElement} cardEl - Kartenelement
+ * @param {Object} playerData - Spielerinformationen aus flippedCards
+ * @returns {boolean} true, wenn die Karte aufgedeckt werden darf
  */
-function getPlayersFlippedTwoCards() {
-    return Object.values(flippedCards).filter(p => p.count >= 2);
+function canFlipCard(wrapper, cardEl, playerData) {
+    return isPlayerBottom(wrapper) &&
+           cardEl.dataset.flipped == 'false' &&
+           playerData.count < 2;
+}
+
+/**
+ * Prüft, ob ein Karten-Wrapper ein Spieler-Bottom ist.
+ * @param {HTMLElement} element - Wrapper-Element
+ * @returns {boolean} true, wenn es player-bottom ist
+ */
+function isPlayerBottom (element) {
+    return element.classList.contains('player-bottom');
 }
 
 
 /**
- * Prüft, ob alle Spieler ihre Karten aufgedeckt haben
+ * Aktualisiert die Punkteanzeige eines Spielers
+ * @param {{id:string, total:number}} playerData - Spielerinformationen
+ */
+function updatePointInfo(playerData) {
+    const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
+    const pointsEl = wrapper?.querySelector('.point-info');
+    pointsEl && (pointsEl.innerHTML = `<span>${playerData.total}</span>`);
+}
+
+
+/**
+ * Prüft, ob alle Spieler ihre Karten aufgedeckt haben und startet ggf. 
+ * die Spielrotation bzw. zeigt den Startspieler an.
  */
 function checkAllPlayersFlipped() {
     const numOpponents = Number(localStorage.getItem('numOpponent') || 1);
@@ -121,145 +141,25 @@ function checkAllPlayersFlipped() {
         if (topPlayers.length > 1) {
             startingPlayer = topPlayers[Math.floor(Math.random() * topPlayers.length)];
         }
-        showPopup(startingPlayer);
+        showStartPopup(startingPlayer);
     }
 }
 
 
 /**
- * Setzt Pointer-Events und Cursor auf eine Karte.
- * @param {HTMLElement} card 
- * @param {boolean} clickable 
- * @param {string} cursor 
+ * gibt alle Spieler zurück, die bereits 2 Karten aufgedeckt haben.
+ * @returns {Array<Object>} Array der Spieler-Daten
  */
-function setCardInteractive(card, clickable, cursor = 'pointer') {
-    card.style.pointerEvents = clickable ? 'auto' : 'none';
-    card.style.cursor = clickable ? cursor : 'default';
-}
-
-/**
- * Aktualisiert Klickbarkeit und Event-Handler für Spielerkarten.
- * @param {HTMLElement} card 
- * @param {HTMLElement} wrapper 
- */
-function updatePlayerCard(card, wrapper) {
-    const bottom = isPlayerBottom(wrapper);
-
-    switch (turnState) {
-        case 'WAIT':
-            setCardInteractive(card, bottom, 'pointer');
-            break;
-
-        case 'DRAWN': {
-            const isFlipped = card.dataset.flipped !== 'false';
-
-            if (bottom && !isFlipped) {
-                setCardInteractive(card, true);
-
-                card.onclick = () => {
-                    if (turnState !== 'DRAWN') return;
-                    if (card.dataset.flipped !== 'false') return;
-
-                    const inner = card.querySelector('div');
-                    if (!inner) return;
-
-                    flipCard(card, inner, true);
-                    refreshPoints(wrapper);
-                    setTurnState('DECIDE');
-                    updateClickableCards();
-                    console.log('Karte im Grid wurde aufgedeckt, Spielzug beendet ', turnState)
-                };
-            } else {
-                setCardInteractive(card, false);
-                card.onclick = null;
-            }
-            break;
-        }
-
-        case 'INIT':
-        case 'START':
-        case 'DECIDE':
-        default:
-            setCardInteractive(card, false);
-    }
-}
-
-/**
- * Aktualisiert Klickbarkeit für Stapelkarten.
- * @param {HTMLElement} card 
- */
-function updateStackCard(card) {
-    switch (turnState) {
-        case 'START':
-            if (card.id === 'stack-field-1') setCardInteractive(card, true, 'pointer');
-            else if (card.id === 'stack-field-2') setCardInteractive(card, true, 'grab');
-            else setCardInteractive(card, false);
-            break;
-
-        case 'DRAWN':
-            if (card.id === 'stack-field-2') setCardInteractive(card, true, 'grab');
-            else setCardInteractive(card, false);
-            break;
-
-        case 'INIT':
-        case 'WAIT':
-        case 'DECIDE':
-        default:
-            setCardInteractive(card, false);
-    }
-}
-
-/**
- * Setzt Klickbarkeit und Cursor für alle Karten im Spiel.
- */
-function updateClickableCards() {
-    document.querySelectorAll('.card, .card-field').forEach(card => {
-        const wrapper = card.closest('.grid-wrapper');
-        if (wrapper) updatePlayerCard(card, wrapper);
-        else updateStackCard(card);
-    });
+function getPlayersFlippedTwoCards() {
+    return Object.values(flippedCards).filter(p => p.count >= 2);
 }
 
 
 /**
- * Prüft, ob ein Karten-Wrapper ein Spieler-Bottom ist.
- * @param {HTMLElement} element - Wrapper-Element
- * @returns {boolean} true, wenn es player-bottom ist
- */
-function isPlayerBottom (element) {
-    return element.classList.contains('player-bottom');
-}
-
-
-/**
- * Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.
- * @param {HTMLAudioElement} sound - Audio-Objekt
- * @param {number} [volume=1] - Lautstärke (0.0 - 1.0)
- * @param {number} [delay=0] - Verzögerung vor Abspielen in ms
- * @param {number} [playbackRate=1] - Geschwindigkeit des Sounds
- */
-function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
-    if (!sound) return;
-    if (localStorage.getItem('sound') !== 'on') return;
-
-    setTimeout(() => {
-        try {
-            sound.currentTime = 0;
-            sound.volume = volume;
-            sound.playbackRate = playbackRate;
-            sound.play();
-        } catch (e) {
-            console.warn('Sound konnte nicht abgespielt werden', e);
-        }
-    }, delay);
-}
-
-
-/**
- * Zeigt das Popup an, um den Startspieler zu präsentieren.
+ * Zeigt das Popup an mit dem Startspieler.
  * @param {Object} player - Spieler-Daten
  */
-function showPopup(player) {
+function showStartPopup(player) {
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
@@ -282,10 +182,22 @@ function showPopup(player) {
             revealDiscardCard();
             setTurnState('START');
             updateClickableCards();
-            console.log('Spielzug beginnt ', turnState)
         }, 800);
     }, 2000);
 }
+
+
+/**
+ * Setzt Klickbarkeit und Cursor für alle Karten im Spiel.
+ */
+function updateClickableCards() {
+    document.querySelectorAll('.card, .card-field').forEach(card => {
+        const wrapper = card.closest('.grid-wrapper');
+        if (wrapper) updatePlayerCard(card, wrapper);
+        else updateStackCard(card);
+    });
+}
+
 
 /**
  * Lässt die oberste Karte vom Ziehstapel in den Ablagestapel fliegen.
@@ -331,7 +243,6 @@ function createFlyingCard(imgSrc, fromRect) {
     return card;
 }
 
-
 /**
  * Berechnet die Richtung der Kartenanimation.
  * @param {DOMRect} fromRect - Startposition
@@ -375,32 +286,126 @@ function finalizeCard(card, toEl, currentCard, imgSrc) {
         toEl.dataset.value = currentCard.value;
         toEl.alt = currentCard.value ? `Card ${currentCard.value}` : 'Card';
         toEl.src = imgSrc;
-        firstGameMove();
+        gameMove();
     }, { once: true });
 }
 
 
-function firstGameMove() {
+/**
+ * Aktualisiert Klickbarkeit und Event-Handler für Spielerkarten.
+ * @param {HTMLElement} card - Karte, deren Klickbarkeit und Events angepasst werden.
+ * @param {HTMLElement} wrapper - Übergeordnetes Grid-Element zur Reihenprüfung.
+ */
+function updatePlayerCard(card, wrapper) {
+    const bottom = isPlayerBottom(wrapper);
+
+    switch (turnState) {
+        case 'SELECT':
+            setCardInteractive(card, bottom, 'pointer');
+            break;
+
+        case 'DECIDE': {
+            const isFlipped = card.dataset.flipped !== 'false';
+
+            if (bottom && !isFlipped) {
+                setCardInteractive(card, true);
+
+                card.onclick = () => {
+                    if (turnState !== 'DECIDE') return;
+                    if (isFlipped) return;
+
+                    const inner = card.querySelector('div');
+                    if (!inner) return;
+
+                    flipCard(card, inner, true);
+                    refreshPoints(wrapper);
+                    setTurnState('FINISH');
+                    handleFinishState();
+                };
+            } else {
+                setCardInteractive(card, false);
+                card.onclick = null;
+            }
+            break;
+        }
+        
+        case 'INIT':
+        case 'START':
+        case 'FINISH':
+        default:
+            setCardInteractive(card, false);
+    }
+}
+
+/**
+ * Passt Klickbarkeit und Cursor für Stapelkarten an, je nach Spielphase.
+ * @param {HTMLElement} card - Karte, deren Interaktion gesetzt wird.
+ */
+function updateStackCard(card) {
+    switch (turnState) {
+        case 'START':
+            if (card.id === 'stack-field-1') setCardInteractive(card, true, 'pointer');
+            else if (card.id === 'stack-field-2') setCardInteractive(card, true, 'grab');
+            else setCardInteractive(card, false);
+            break;
+
+        case 'DECIDE':
+            if (card.id === 'stack-field-2') setCardInteractive(card, true, 'grab');
+            else setCardInteractive(card, false);
+            break;
+
+        case 'INIT':
+        case 'SELECT':
+        case 'FINISH':
+        default:
+            setCardInteractive(card, false);
+    }
+}
+
+
+/**
+ * Aktiviert oder deaktiviert Klickbarkeit und Cursor einer Karte.
+ * @param {HTMLElement} card - Die Karte, deren Interaktion angepasst wird.
+ * @param {boolean} clickable - Ob die Karte anklickbar sein soll.
+ * @param {string} [cursor='pointer'] - Angezeigter Cursor bei Klickbarkeit.
+ */
+function setCardInteractive(card, clickable, cursor = 'pointer') {
+    card.style.pointerEvents = clickable ? 'auto' : 'none';
+    card.style.cursor = clickable ? cursor : 'default';
+}
+
+
+/**
+ * Startet den ersten Spielzug, aktiviert Klick- und Drag-Events für Stapel.
+ */
+function gameMove() {
     if (turnState !== 'START') return;
     enableStack1Click();
     enableStack2Drag();
 }
 
+
+/**
+ * Aktiviert den Klick auf dem Ziehstapel, um die oberste Karte zu ziehen.
+ */
 function enableStack1Click() {
     const handleClick = () => {
         if (turnState !== 'START') return;
         revealDiscardCard();
-        setTurnState('DRAWN'); 
+        setTurnState('DECIDE'); 
         updateClickableCards();
-        console.log('Karte wurde gezogen', turnState)
         stack1.removeEventListener('click', handleClick);
     };
     stack1.addEventListener('click', handleClick);
 }
 
+
+/**
+ * Aktiviert Drag-and-Drop für den Ablagestapel.
+ */
 function enableStack2Drag() {
     stack2.onmousedown = e => {
-        if (turnState !== 'START' && turnState !== 'DRAWN') return;
+        if (turnState !== 'START' && turnState !== 'DECIDE') return;
         e.preventDefault();
 
         const rect = stack2.getBoundingClientRect();
@@ -413,31 +418,41 @@ function enableStack2Drag() {
 }
 
 
+/**
+ * Aktiviert Drag & Drop für eine Karte.
+ * @param {HTMLElement} original - Die gezogene Karte
+ * @param {number} offsetX - Maus-Offset X
+ * @param {number} offsetY - Maus-Offset Y
+ */
 function handleCardDrag(original, offsetX, offsetY) {
+    const playerCards = Array.from(document.querySelectorAll('.player-bottom .card'));
     let clone = null;
     let isDragging = false;
 
-    const playerCards = Array.from(document.querySelectorAll('.player-bottom .card'));
-
+    /**
+    * Bewegt die Klonkarte mit der Maus und hebt mögliche Drop-Zonen hervor.
+    * @param {MouseEvent} event - Mausbewegungs-Ereignis
+    */
     function startDrag(event) {
         if (!isDragging) {
             clone = createClone(original);
             original.style.opacity = '0.01';
             clone.style.transform = window.getComputedStyle(original).transform;
-
             requestAnimationFrame(() => {
                 clone.style.transition = 'transform 0.3s ease';
                 clone.style.transform = 'rotate(0deg)';
             });
-            
             isDragging = true;
         }
         clone.style.left = `${event.clientX - offsetX}px`;
         clone.style.top = `${event.clientY - offsetY}px`;
-
         highlightDropzone(event.clientX, event.clientY, playerCards);
     }
 
+    /**
+    * Beendet den Drag-Vorgang, führt Swap durch oder setzt Klon zurück.
+    * @param {MouseEvent} event - Mausfreigabe-Ereignis
+    */
     function stopDrag(event) {
         playerCards.forEach(c => c.classList.remove('drop-hover'));
         document.removeEventListener('mousemove', startDrag);
@@ -445,48 +460,16 @@ function handleCardDrag(original, offsetX, offsetY) {
 
         if (!isDragging) return;
 
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
-
-        let targetCard = null;
-        for (const card of playerCards) {
+        const targetCard = playerCards.find(card => {
             const rect = card.getBoundingClientRect();
-            if (
-                mouseX >= rect.left &&
-                mouseX <= rect.right &&
-                mouseY >= rect.top &&
-                mouseY <= rect.bottom
-            ) {
-                targetCard = card;
-                break;
-            }
-        }
+            return event.clientX >= rect.left &&
+                   event.clientX <= rect.right &&
+                   event.clientY >= rect.top &&
+                   event.clientY <= rect.bottom;
+        });
 
-        if (targetCard && (turnState === 'START' || turnState === 'DRAWN')) {
-            const targetImg = targetCard.querySelector('img');
-            const newDiscardCard = original.tagName === 'IMG' ? original : original.querySelector('img'); 
-            const dragCard = { img: targetImg.src, value: targetCard.dataset.value, alt: targetImg.alt  };
-
-            targetImg.src = original.src;
-            targetCard.dataset.value = original.dataset.value; 
-            targetImg.alt = original.dataset.value ? `Card ${original.dataset.value}` : newDiscardCard.alt;
-
-            if (targetCard.dataset.flipped === 'false') {
-                const inner = targetCard.querySelector('div');
-                if (inner) flipCard(targetCard, inner, true);
-            }
-
-            const wrapper = targetCard.closest('.grid-wrapper');
-            refreshPoints(wrapper);
-            
-            newDiscardCard.src = dragCard.img;
-            original.dataset.value = dragCard.value;
-            newDiscardCard.alt = dragCard.alt;
-            playSound(flipCardSound);
-
-            setTurnState('DECIDE');
-            updateClickableCards();
-            console.log('Karte wurde gedroppt, Spielzug beendet ', turnState);
+        if (targetCard && (turnState === 'START' || turnState === 'DECIDE')) {
+            swapCards(original, targetCard);
 
             clone.style.transition = 'transform 0.3s ease';
             setTimeout(() => {
@@ -495,25 +478,116 @@ function handleCardDrag(original, offsetX, offsetY) {
             }, 50);
             return;
         }       
-
-
-
-        const originalRect = original.getBoundingClientRect(); 
-        clone.style.transition = 'left 0.5s ease, top 0.5s ease, transform 0.3s ease';       
-        clone.style.left = `${originalRect.left + 15}px`;
-        clone.style.top = `${originalRect.top + 9}px`;
-        clone.style.transform = window.getComputedStyle(original).transform;
-        clone.addEventListener('transitionend', () => {
-            clone.remove();
-            original.style.opacity = '1';
-        }, { once: true });
-
-        
+        resetClone(clone, original);
     }
     document.addEventListener('mousemove', startDrag);
     document.addEventListener('mouseup', stopDrag);
 }
 
+
+/**
+ * Erstellt eine optische Kopie (Clone) einer Karte für Drag-Effekt.
+ * @param {HTMLElement} element - Karte zum Klonen
+ * @param {number} [offsetLeft=15] - Linksoffset
+ * @param {number} [offsetTop=9] - Obenoffset
+ * @returns {HTMLElement} Clone-Element
+ */
+function createClone(element, offsetLeft = 15, offsetTop = 9) {
+    const rect = element.getBoundingClientRect();
+    const clone = element.cloneNode(true);
+
+    Object.assign(clone.style, {
+        position: 'fixed',
+        left: `${rect.left + offsetLeft}px`,
+        top: `${rect.top + offsetTop}px`,
+        pointerEvents: 'none',
+        transform: window.getComputedStyle(element).transform,
+        transition: 'transform 0.3s ease',
+        zIndex: 9999
+    });
+    document.body.appendChild(clone);
+    return clone;
+}
+
+
+/**
+ * Hebt Drop-Zonen hervor, über denen die Maus ist.
+ * @param {number} x - Maus X
+ * @param {number} y - Maus Y
+ * @param {HTMLElement[]} playerCards - Zielkarten
+ * @returns {HTMLElement|null} Aktive Dropzone
+ */
+function highlightDropzone(x, y, playerCards) {
+    let active = null;
+
+    for (const card of playerCards) {
+        const rect = card.getBoundingClientRect();
+        const isOver =
+            x >= rect.left &&
+            x <= rect.right &&
+            y >= rect.top &&
+            y <= rect.bottom;
+
+        card.classList.toggle('drop-hover', isOver);
+        if (isOver) active = card;
+    }
+    return active;
+}
+
+
+/**
+ * Tauscht die Inhalte der gezogenen Karte und Zielkarte.
+ * @param {HTMLElement} original - Gezogene Karte
+ * @param {HTMLElement} targetCard - Zielkarte im Grid
+ */
+function swapCards(original, targetCard) {
+    const targetImg = targetCard.querySelector('img');
+    const originalImg = original.tagName === 'IMG' ? original : original.querySelector('img');
+    const dragCard = { img: targetImg.src, value: targetCard.dataset.value, alt: targetImg.alt };
+
+    targetImg.src = originalImg.src;
+    targetCard.dataset.value = original.dataset.value;
+    targetImg.alt = original.dataset.value ? `Card ${original.dataset.value}` : originalImg.alt;
+
+    if (targetCard.dataset.flipped === 'false') {
+        const inner = targetCard.querySelector('div');
+        if (inner) flipCard(targetCard, inner, true);
+    }
+
+    const wrapper = targetCard.closest('.grid-wrapper');
+    refreshPoints(wrapper);
+
+    originalImg.src = dragCard.img;
+    original.dataset.value = dragCard.value;
+    originalImg.alt = dragCard.alt;
+    playSound(flipCardSound);
+    setTurnState('FINISH');
+    handleFinishState();
+}
+
+
+/**
+ * Setzt die Klonkarte zurück, wenn kein Drop erfolgt.
+ * @param {HTMLElement} clone - Clone der Karte
+ * @param {HTMLElement} original - Originalkarte
+ */
+function resetClone(clone, original) {
+    const rect = original.getBoundingClientRect();
+    clone.style.transition = 'left 0.5s ease, top 0.5s ease, transform 0.3s ease';
+    clone.style.left = `${rect.left + 15}px`;
+    clone.style.top = `${rect.top + 9}px`;
+    clone.style.transform = window.getComputedStyle(original).transform;
+    clone.addEventListener('transitionend', () => {
+        clone.remove();
+        original.style.opacity = '1';
+    }, { once: true });
+}
+
+
+/**
+ * Aktualisiert Punkte und gezählte Karten eines Spielers.
+ * @param {HTMLElement} wrapper - Grid-Wrapper des Spielers
+ */
 function refreshPoints(wrapper) {
     const playerData = getOrCreatePlayerData(wrapper);
 
@@ -531,53 +605,151 @@ function refreshPoints(wrapper) {
 }
 
 
-function createClone(element, offsetLeft = 15, offsetTop = 9) {
-    const rect = element.getBoundingClientRect();
-    const clone = element.cloneNode(true);
+/**
+ * wenn ein Spielzug beendet wird, rotiert das Spielfeld, nächster Spieler beginnt.
+ */
+function handleFinishState() {
+    if (turnState !== 'FINISH') return;
 
-    Object.assign(clone.style, {
-        position: 'fixed',
-        left: `${rect.left + offsetLeft}px`,
-        top: `${rect.top + offsetTop}px`,
-        pointerEvents: 'none',
-        transform: window.getComputedStyle(element).transform,
-        transition: 'transform 0.3s ease',
-        zIndex: 9999
-    });
+    if (lastTurnActive) {
+        remainingLastTurns--;
+        console.log('Verbleibende Züge in der letzten Runde:', remainingLastTurns);
 
-    document.body.appendChild(clone);
-    return clone;
-}
-
-function highlightDropzone(x, y, playerCards) {
-    let active = null;
-
-    for (const card of playerCards) {
-        const rect = card.getBoundingClientRect();
-        const isOver =
-            x >= rect.left &&
-            x <= rect.right &&
-            y >= rect.top &&
-            y <= rect.bottom;
-
-        card.classList.toggle('drop-hover', isOver);
-        if (isOver) active = card;
+        if (remainingLastTurns > 0) {
+            incrementStep();
+            rotatePlayers(currentStep);
+            setTurnState('START'); 
+            updateClickableCards();
+            enableStack1Click();
+        } else {
+            setTimeout(() => {
+                lastTurnActive = false;
+                updateClickableCards();
+                revealRemainingCards();
+            }, 500);
+        }
+    } else {
+        setTimeout(() => {
+            incrementStep();
+            rotatePlayers(currentStep);
+            setTurnState('START'); 
+            updateClickableCards();
+            enableStack1Click();
+        }, 500);
     }
-
-    return active;
+     
 }
-
-
 
 
 /**
- * Aktualisiert die Punkteanzeige eines Spielers
- * @param {{id:string, total:number}} playerData
+ * Prüft, ob alle Karten in einem Spielerfeld aufgedeckt sind.
+ * @param {HTMLElement} wrapper - Das Wrapper-Element des Spielerfeldes.
+ * @returns {boolean} True, wenn alle Karten aufgedeckt sind, sonst false.
  */
-function updatePointInfo(playerData) {
-    const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
-    const pointsEl = wrapper?.querySelector('.point-info');
-    pointsEl && (pointsEl.innerHTML = `<span>${playerData.total}</span>`);
+function isFieldComplete(wrapper) {
+    return Array.from(wrapper.querySelectorAll('.card'))
+        .every(card => card.dataset.flipped === 'true');
+}
+
+
+/**
+ * Startet die letzte Runde des Spiels.
+ * @returns {void}
+ */
+function startLastRound() {
+    if (lastTurnActive) return;
+    
+    lastTurnActive = true;
+    const allPlayers = document.querySelectorAll('.grid-wrapper');
+    remainingLastTurns = allPlayers.length;
+}
+
+
+/**
+ * Deckt alle noch nicht aufgedeckten Karten aller Spieler auf, 
+ * aktualisiert die Punktestände und bestimmt den Gewinner des Spiels.
+ * @returns {void}
+ */
+function revealRemainingCards() {
+    document.querySelectorAll('.grid-wrapper').forEach(wrapper => {
+        const playerData = getOrCreatePlayerData(wrapper);
+
+        wrapper.querySelectorAll('.card').forEach(card => {
+            if (card.dataset.flipped !== 'true') {
+                const inner = card.querySelector('div');
+                if (inner) inner.style.transform = 'rotateY(0deg)';
+                playSound(flipCardSound);
+                card.dataset.flipped = 'true';
+                playerData.total += Number(card.dataset.value);
+            }
+        });
+        updatePointInfo(playerData);
+    });
+
+    const allPlayers = Object.values(flippedCards);
+    const min = Math.min(...allPlayers.map(p => p.total));
+    const winner = allPlayers.filter(p => p.total === min);
+
+    showWinPopup(winner);
+    setTurnState('FINISH');
+}
+
+
+/**
+ * Zeigt das Gewinn-Popup an.
+ * @param {Array<Object>} winners - Gewinner
+ */
+function showWinPopup(winner) {
+    const popupWrapper = document.getElementById('popup');
+    const popupContent = document.getElementById('popupContent');
+
+    popupContent.innerHTML = /*html*/`
+        <div>Spiel beendet! Gewinner: ${winner.map(w => w.name).join(', ')}</div>
+        <div class="" >
+            <button id="restartBtn">Neues Spiel</button>
+            <button id="closeBtn">Schließen</button>
+        </div>`;
+
+    popupWrapper.classList.add('show');
+
+    playSound(playerStartSound); // sound suchen
+
+    popupContent.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            popupWrapper.classList.remove('show');
+            const action = btn.dataset.action;
+            if (action === 'restart') /* showGameScreen(); */ //noch anpassen, da nicht alles gebraucht wird
+            if (action === 'close') {
+                gameScreen.style.display = 'none';
+                startScreen.style.display = 'flex';
+                resetGame();
+            }
+        }, { once: true }); 
+    });
+}
+
+
+/**
+ * Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.
+ * @param {HTMLAudioElement} sound - Audio-Objekt
+ * @param {number} [volume=1] - Lautstärke (0.0 - 1.0)
+ * @param {number} [delay=0] - Verzögerung vor Abspielen in ms
+ * @param {number} [playbackRate=1] - Geschwindigkeit des Sounds
+ */
+function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
+    if (!sound) return;
+    if (localStorage.getItem('sound') !== 'on') return;
+
+    setTimeout(() => {
+        try {
+            sound.currentTime = 0;
+            sound.volume = volume;
+            sound.playbackRate = playbackRate;
+            sound.play();
+        } catch (e) {
+            console.warn('Sound konnte nicht abgespielt werden', e);
+        }
+    }, delay);
 }
 
 
@@ -587,6 +759,8 @@ function updatePointInfo(playerData) {
 export function resetCards() {
     for (const key in flippedCards) delete flippedCards[key];
     firstPlayerRotated = false;
+    lastTurnActive = false;
+    remainingLastTurns = 0;
     setTurnState('INIT');
     updateClickableCards();
 
