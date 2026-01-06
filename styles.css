@@ -979,6 +979,7 @@ input:checked + .settings-slider:before {
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     border: 2px solid white;
 }
+
 .score-pill {
     display: flex;
     justify-content: space-between;
@@ -993,3 +994,9 @@ input:checked + .settings-slider:before {
     border-radius: 20px;
     border: 2px solid #2e7d32;
 }
+
+.points-container {
+    display: flex;
+    gap: 20px;
+}
+

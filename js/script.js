@@ -105,7 +105,7 @@ function bindSubmitPlayer() {
                     name = input.value || `Gegner ${i}`;
                 }
             }
-            localStorage.setItem(key, JSON.stringify({ name, points: 0 }));
+            localStorage.setItem(key, JSON.stringify({ name, points: 0, totalPoints: 0 }));
         });
         localStorage.setItem('numOpponent', numOpponent);
         closePaperRoll();
@@ -271,8 +271,8 @@ let musicStarted = false;
  */
 startButton.addEventListener("click", async () => {
     if (!localStorage.getItem('numOpponent')) {
-        localStorage.setItem('player', JSON.stringify({ name: 'Spieler', points: 0 }));
-        localStorage.setItem('opponent1', JSON.stringify({ name: 'Gegner', points: 0 }));
+        localStorage.setItem('player', JSON.stringify({ name: 'Spieler', points: 0, totalPoints: 0  }));
+        localStorage.setItem('opponent1', JSON.stringify({ name: 'Gegner', points: 0, totalPoints: 0  }));
         localStorage.setItem('numOpponent', 1);
     }
 

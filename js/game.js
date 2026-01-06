@@ -54,7 +54,6 @@ function flipCard(cardEl, inner, changeCard = false) {
         playerData.count++;
         checkAllPlayersFlipped();
     }
-
     if (isFieldComplete(wrapper)) startLastRound();
 }
 
@@ -115,7 +114,7 @@ function updatePointInfo(playerData) {
 
     const parts = playerData.id.split('-');
     const key = parts[0] === 'player' ? 'player' : `opponent${parts[1]}`;
-    const stored = JSON.parse(localStorage.getItem(key)) || { name: playerData.name, points: 0 };
+    const stored = JSON.parse(localStorage.getItem(key)) || { name: playerData.name, points: 0, totalPoints: 0  };
     stored.points = playerData.total;
     localStorage.setItem(key, JSON.stringify(stored));
 }
@@ -183,7 +182,6 @@ function showPopUp(content, sound, className, onShow, soundOptions = {}) {
         const { volume, delay } = soundOptions;
         playSound(sound, volume, delay);
     }
-
     onShow?.(popupContent, popupWrapper);
 }
 
@@ -361,7 +359,6 @@ function updatePlayerCard(card, wrapper) {
             }
             break;
         }
-        
         case 'INIT':
         case 'START':
         case 'FINISH':
@@ -733,8 +730,10 @@ function showWinPopup() {
     const players = [{ key: 'player' }, { key: 'opponent1' }, { key: 'opponent2' }]
         .slice(0, numOpponent + 1)
         .map(p => {
-            const data = JSON.parse(localStorage.getItem(p.key)) || { name: p.key, points: 0 };
-            return { name: data.name, points: data.points };
+            const data = JSON.parse(localStorage.getItem(p.key)) || { name: p.key, points: 0, totalPoints: 0 };
+            data.totalPoints += data.points;
+            localStorage.setItem(p.key, JSON.stringify(data));
+            return { name: data.name, points: data.points, totalPoints: data.totalPoints, key: p.key };
         });
 
     players.sort((a, b) => a.points - b.points);
@@ -750,11 +749,17 @@ function showWinPopup() {
                     popupWrapper.style.transition = '';
                 });
                 const action = btn.id;
+
                 if (action === 'restartBtn') {
-                        resetGame(true);
-                        showGameScreen(true);
-                        setTurnState('INIT');
-                        startGame();
+                     players.forEach(p => {
+                        const stored = JSON.parse(localStorage.getItem(p.key)) || { name: p.name, points: 0, totalPoints: 0 };
+                        stored.points = 0;
+                        localStorage.setItem(p.key, JSON.stringify(stored));
+                    });
+                    resetGame(true);
+                    showGameScreen(true);
+                    setTurnState('INIT');
+                    startGame();
                 }
                 if (action === 'closeBtn') {
                     gameScreen.style.display = 'none';
@@ -781,7 +786,11 @@ function generateHighscoreHTML(players) {
             <img src="assets/img/profile_image_default.png" class="avatar">
             <div class="score-pill">
                 <span class="name">${p.name}</span>
-                <span class="player-score">${p.points}</span>
+                <div class="points-container">
+                    <span class="player-points">${p.points}</span>
+                    <span class="player-total">${p.totalPoints}</span>
+                </div>
+                
             </div>
         </div>`
     ).join('');

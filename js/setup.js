@@ -132,9 +132,9 @@ function createPlayers() {
 function createContainer(type, index = 0) {
     let stored;
     if (type === 'player') {
-        stored = JSON.parse(localStorage.getItem('player')) || { name: 'Spieler', points: 0 };
+        stored = JSON.parse(localStorage.getItem('player')) || { name: 'Spieler', points: 0, totalPoints: 0  };
     } else {
-        stored = JSON.parse(localStorage.getItem(`opponent${index + 1}`)) || { name: `Gegner ${index + 1}`, points: 0 };
+        stored = JSON.parse(localStorage.getItem(`opponent${index + 1}`)) || { name: `Gegner ${index + 1}`, points: 0, totalPoints: 0  };
     }
 
     const id = type === 'player'
