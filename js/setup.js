@@ -441,7 +441,6 @@ export function incrementStep() {
 
 
 /**
-/**
  * Setzt den aktuellen Spielzustand.
  * Mögliche States:
  * - 'INIT'   : Spiel wird aufgbaut, alle Karten deaktiviert

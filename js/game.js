@@ -367,6 +367,7 @@ function updatePlayerCard(card, wrapper) {
     }
 }
 
+
 /**
  * Passt Klickbarkeit und Cursor für Stapelkarten an, je nach Spielphase.
  * @param {HTMLElement} card - Karte, deren Interaktion gesetzt wird.
@@ -643,7 +644,6 @@ function handleFinishState() {
 
     if (lastTurnActive) {
         remainingLastTurns--;
-        console.log('Verbleibende Züge in der letzten Runde:', remainingLastTurns);
 
         if (remainingLastTurns > 0) {
             incrementStep();
@@ -748,9 +748,8 @@ function showWinPopup() {
                 requestAnimationFrame(() => {
                     popupWrapper.style.transition = '';
                 });
-                const action = btn.id;
 
-                if (action === 'restartBtn') {
+                if (btn.id === 'restartBtn') {
                      players.forEach(p => {
                         const stored = JSON.parse(localStorage.getItem(p.key)) || { name: p.name, points: 0, totalPoints: 0 };
                         stored.points = 0;
@@ -761,7 +760,7 @@ function showWinPopup() {
                     setTurnState('INIT');
                     startGame();
                 }
-                if (action === 'closeBtn') {
+                if (btn.id === 'closeBtn') {
                     gameScreen.style.display = 'none';
                     startScreen.style.display = 'flex';
                     resetGame();
@@ -798,6 +797,12 @@ function generateHighscoreHTML(players) {
     return /*html*/`
         <div class="highscore-title">HighScore</div>
         <div class="highscore-list">
+            <div class="list-header">
+                <div class="points-container">
+                    <span>Jetzt</span>
+                    <span>Total</span>
+                </div>
+            </div>
             ${entriesHTML}
         </div>
         <div class="btn-wrapper">

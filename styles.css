@@ -235,11 +235,6 @@ h1 {
     filter: brightness(0.95);
 }
 
-.btn-wrapper {
-    display: flex;
-    width: 80%;
-    gap: clamp(0.625rem, 0.3571rem + 1.3393vw, 2.5rem);
-}
 
 .start-btn {
     font-family: 'biscuit', sans-serif;
@@ -814,10 +809,12 @@ input:checked + .settings-slider:before {
     font-family: 'biscuit', sans-serif;
     letter-spacing: 2px;
     color: #5a3b1e;
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.4);
     text-align: center;
     font-size: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
     width:  clamp(15.625rem, 13.3929rem + 11.1607vw, 31.25rem);
     height: clamp(9.375rem, 8.0357rem + 6.6964vw, 18.75rem);
+    border-radius: 30px;
 }
 
 /* Tablets */
@@ -936,8 +933,12 @@ input:checked + .settings-slider:before {
   transform: rotateY(180deg);
 }
 
+
+
+
+
 .highscore-container {
-    justify-content: space-between;
+    justify-content: center; 
     padding: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem) 0px;
     width: clamp(19.375rem, 15rem + 21.875vw, 50rem);
     height: clamp(16.875rem, 14.375rem + 12.5vw, 34.375rem);
@@ -947,11 +948,12 @@ input:checked + .settings-slider:before {
     font-family: 'biscuit', sans-serif;
     letter-spacing: 2px;
     color: #5a3b1e;
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.4);
     text-align: center;
     font-size: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
 }
 
-.highscore-list {
+.highscore-list{
     width: 90%;
     gap: 10px;
     display: flex;
@@ -964,9 +966,9 @@ input:checked + .settings-slider:before {
     display: flex;
     align-items: center;
     width: 100%;
-    justify-content: space-between;
-    
+    justify-content: space-between;  
 }
+
 .rank {
     width: clamp(1.25rem, 1.0268rem + 1.1161vw, 2.8125rem);
     object-fit: contain;
@@ -997,6 +999,28 @@ input:checked + .settings-slider:before {
 
 .points-container {
     display: flex;
-    gap: 20px;
+    gap: clamp(0.625rem, 0.5357rem + 0.4464vw, 1.25rem);
+    width: 40%;
+    justify-content: space-between;
+}
+
+.list-header {
+    width: 75%;  
+    margin-left: auto;
+    padding: 0 clamp(0.4375rem, 0.3214rem + 0.5804vw, 1.25rem);
+    font-family: 'biscuit', sans-serif;
+    font-size: clamp(0.8125rem, 0.7054rem + 0.5357vw, 1.5625rem);
+    letter-spacing: 1px;
+    color: #5a3b1e;
+    display: flex;
+    justify-content: flex-end;
+    text-shadow: 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+
+.btn-wrapper {
+    display: flex;
+    width: 80%;
+    gap: clamp(0.625rem, 0.3571rem + 1.3393vw, 2.5rem);
 }
 
