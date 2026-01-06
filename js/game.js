@@ -23,7 +23,11 @@ export function startGame() {
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';
         const inner = cardEl.querySelector('div');
-        cardEl.addEventListener('click', () => flipCard(cardEl, inner));
+
+        if (!cardEl.dataset.listener) {
+            cardEl.addEventListener('click', () => flipCard(cardEl, inner));
+            cardEl.dataset.listener = 'true';
+        }
     });
     updateClickableCards();
     gameMove(); 

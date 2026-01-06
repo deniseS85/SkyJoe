@@ -74,6 +74,7 @@ function resetLocalStorage() {
         localStorage.removeItem(`opponent${i}`);
     }
     localStorage.removeItem('numOpponent');
+    localStorage.removeItem('roundNumber');
 }
 
 
@@ -86,7 +87,8 @@ export function showGameScreen(isRestart = false) {
         startScreen.style.display = 'none';
         gameScreen.style.display = 'flex';
     }
-   
+
+    updateRound(isRestart);
     createPlayers();
     positionPlayersInRotationWrapper();
     const deck = createDeck();
@@ -101,6 +103,26 @@ export function showGameScreen(isRestart = false) {
     });
 }
 
+
+/**
+ * Zeigt die Rundenanzahl an
+ * @param {boolean} increase - true bei Restart
+ * @returns {number} - die aktuelle Runde
+ */
+export function updateRound(increase = false) {
+    let round = Number(localStorage.getItem('roundNumber')) || 1;
+
+    if (increase) {
+        round++;
+        localStorage.setItem('roundNumber', round);
+    } else {
+        localStorage.setItem('roundNumber', round);
+    }
+
+    document.getElementById('roundNumber').textContent = `Runde ${round}`;
+
+    return round;
+}
 
 /**
  * Setzt den Hintergrund abhängig von der Auswahl.
