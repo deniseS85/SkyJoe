@@ -1,7 +1,6 @@
 import { skyjoCards } from "./skyjoCardsObj.js";
 import { startGame, resetCards } from './game.js'; 
 
-
 const gameScreen = document.getElementById("gameScreen");
 const backButton = document.getElementById("backBtn");
 const startScreen = document.getElementById("startScreen");
@@ -17,12 +16,15 @@ export let turnState = 'INIT';
 /**
  * Setzt das Spiel vollständig zurück.
  */
-export function resetGame() {
-    stopDealSound();
+export function resetGame(isRestart = false) {
+    if (!isRestart) {
+        stopDealSound();
+        resetLocalStorage();
+    }
+   
     clearAllTimeouts();
     clearGameDOM();
     resetRotationWrapper();
-    resetLocalStorage();
     resetCards();
 }
 
@@ -30,7 +32,7 @@ export function resetGame() {
 /**
  * Stoppt alle laufenden Zeitouts und setzt Flags zurück.
  */
-function clearAllTimeouts() {
+export function clearAllTimeouts() {
     dealTimeouts.forEach(id => clearTimeout(id));
     dealTimeouts = [];
     isDealing = false;
@@ -52,7 +54,7 @@ function clearGameDOM() {
 /**
  * Setzt den Rotation-Wrapper zurück.
  */
-function resetRotationWrapper() {
+export function resetRotationWrapper() {
     rotationWrapper.innerHTML = '';
     rotationWrapper.style.transition = 'none';
     rotationWrapper.style.transform = `rotate(0deg)`;
@@ -78,10 +80,13 @@ function resetLocalStorage() {
 /**
  * Zeigt den Spielbildschirm und initialisiert Spieler und Deck.
  */
-export function showGameScreen() {
-    setBackground();
-    startScreen.style.display = 'none';
-    gameScreen.style.display = 'flex';
+export function showGameScreen(isRestart = false) { 
+    if (!isRestart) {
+        setBackground();
+        startScreen.style.display = 'none';
+        gameScreen.style.display = 'flex';
+    }
+   
     createPlayers();
     positionPlayersInRotationWrapper();
     const deck = createDeck();
@@ -125,22 +130,23 @@ function createPlayers() {
  * @returns {HTMLElement} Container mit Raster und Spielerinformationen
  */
 function createContainer(type, index = 0) {
-    const config = {
-        player: {
-            id: `player-1-${localStorage.getItem('player') || 'Spieler'}`,
-            name: localStorage.getItem('player') || 'Spieler',
-            className: 'player-grid',
-        },
-        opponent: {
-            id: `opponent-${index + 1}-${localStorage.getItem(`opponent${index + 1}`) || 'Gegner'}`,
-            name: localStorage.getItem(`opponent${index + 1}`) || 'Gegner',
-            className: 'opponent-grid'
-        }
-    };
-    const { id, name, className } = config[type];
-    const container = createPlayerGridWrapper(name, id);
+    let stored;
+    if (type === 'player') {
+        stored = JSON.parse(localStorage.getItem('player')) || { name: 'Spieler', points: 0 };
+    } else {
+        stored = JSON.parse(localStorage.getItem(`opponent${index + 1}`)) || { name: `Gegner ${index + 1}`, points: 0 };
+    }
+
+    const id = type === 'player'
+        ? `player-1-${stored.name}`
+        : `opponent-${index + 1}-${stored.name}`;
+
+    const className = type === 'player' ? 'player-grid' : 'opponent-grid';
+
+    const container = createPlayerGridWrapper(stored.name, id);
     const grid = createGrid(id, className);
     container.appendChild(grid);
+
     return container;
 }
 
