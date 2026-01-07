@@ -1,7 +1,4 @@
-import { generateCardImage } from "./setup.js";
-import { rotatePlayers, currentStep, incrementStep, setTurnState, turnState } from "./setup.js";
-import { resetGame } from "./setup.js";
-import { showGameScreen } from "./setup.js";
+import { generateCardImage, rotatePlayers, currentStep, incrementStep, setTurnState, turnState, resetGame, showGameScreen, shuffle  } from "./setup.js";
 
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
@@ -15,6 +12,7 @@ export let firstPlayerRotated = false;
 let dragEnabled = true;
 let lastTurnActive = false;
 let remainingLastTurns = 0;
+let discardedCards = [];
 
 
 /**
@@ -232,20 +230,20 @@ function updateClickableCards() {
  * Lässt die oberste Karte vom Ziehstapel in den Ablagestapel fliegen.
  */
 function revealDiscardCard() {
+    if (!window.stacks.stack1.length && discardedCards.length) {
+        shuffle(discardedCards);
+        window.stacks.stack1 = [...discardedCards];
+        discardedCards.length = 0;
+    }
     const drawDeck = window.stacks.stack1;
-    if (!drawDeck?.length) return stack1.style.visibility = 'hidden';
-
     dragEnabled = false;
-
     const currentCard = drawDeck.shift();
     const width = stack1.offsetWidth;
     const imgSrc = currentCard.img || generateCardImage(currentCard, width, width * 3 / 2);
     const fromRect = stack1.getBoundingClientRect();
     const toRect = stack2.getBoundingClientRect();
-
     const flyingCard = createFlyingCard(imgSrc, fromRect)
     document.body.appendChild(flyingCard);
-
     const delta = animationDirection(fromRect, toRect);
     playSound(cardDropSound, 1, 0, 0.7);
     animateFlyingCard(flyingCard, delta);
@@ -310,15 +308,29 @@ function animateFlyingCard(card, delta) {
  */
 function finalizeCard(card, toEl, currentCard, imgSrc) {
     card.addEventListener('transitionend', () => {
-        card.remove();
+        const oldValue = toEl.dataset.value;
+        const oldImg = toEl.src;
+        const oldAlt = toEl.alt;
+
+        if (oldValue) {
+            discardedCards.push({
+                img: oldImg,
+                value: oldValue,
+                alt: oldAlt
+            });
+        }
+
         toEl.style.visibility = 'visible';
         toEl.style.border = '1px solid black';
         toEl.style.boxShadow = '4px 4px 8px rgba(0, 0, 0, 0.35)';
         toEl.dataset.value = currentCard.value;
         toEl.alt = currentCard.value ? `Card ${currentCard.value}` : 'Card';
         toEl.src = imgSrc;
+        card.remove();
         gameMove();
         setTimeout(() => dragEnabled = true, 0);
+
+        console.log(discardedCards);
     }, { once: true });
 }
 
@@ -578,7 +590,6 @@ function swapCards(original, targetCard) {
     const targetImg = targetCard.querySelector('img');
     const originalImg = original.tagName === 'IMG' ? original : original.querySelector('img');
     const dragCard = { img: targetImg.src, value: targetCard.dataset.value, alt: targetImg.alt };
-
     targetImg.src = originalImg.src;
     targetCard.dataset.value = original.dataset.value;
     targetImg.alt = original.dataset.value ? `Card ${original.dataset.value}` : originalImg.alt;
@@ -847,6 +858,7 @@ export function resetCards() {
     firstPlayerRotated = false;
     lastTurnActive = false;
     remainingLastTurns = 0;
+    discardedCards.length = 0;
     setTurnState('INIT');
     updateClickableCards();
 

@@ -47,7 +47,11 @@ function clearGameDOM() {
     document.querySelectorAll('.card-field').forEach(field => field.innerHTML = '');
     document.querySelectorAll('.card').forEach(card => card.remove());
     document.getElementById('stack-field-2').style.visibility = 'hidden';
-    document.getElementById('stack-field-1').style.visibility = 'visible';
+    const stack2 = document.getElementById('stack-field-2');
+    stack2.style.visibility = 'hidden';
+    stack2.dataset.value = '';
+    stack2.src = '';
+    stack2.alt = '';
 }
 
 
@@ -270,7 +274,7 @@ function createDeck() {
  * Mischt die Karten durch
  * @param {Array} array - Karten
  */
-function shuffle(array) {
+export function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
