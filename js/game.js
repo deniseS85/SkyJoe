@@ -6,6 +6,7 @@ import { showGameScreen } from "./setup.js";
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
 const cardDropSound = new Audio('/assets/sounds/card-drop.mp3');
+const winnerSound = new Audio('/assets/sounds/winner-sound.mp3');
 const stack1 = document.getElementById('stack-field-1');
 const stack2 = document.getElementById('stack-field-2');
 
@@ -174,7 +175,7 @@ function getPlayersFlippedTwoCards() {
  *      @property {number} [volume] - Lautstärke des Sounds (0–1)
  *      @property {number} [delay] - Verzögerung vor dem Abspielen des Sounds in ms
  */
-function showPopUp(content, sound, className, onShow, soundOptions = {}) {
+function showPopUp(content, sound, className, onShow) {
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
@@ -182,10 +183,7 @@ function showPopUp(content, sound, className, onShow, soundOptions = {}) {
     popupContent.innerHTML = content;
     popupWrapper.classList.add('show');
 
-    if (sound) {
-        const { volume, delay } = soundOptions;
-        playSound(sound, volume, delay);
-    }
+    if (sound) playSound(sound, 0.3, 500);
     onShow?.(popupContent, popupWrapper);
 }
 
@@ -195,30 +193,24 @@ function showPopUp(content, sound, className, onShow, soundOptions = {}) {
  * @param {Object} player - Spieler-Daten
  */
 function showStartPopup(player) {
-    showPopUp(
-        `${player.name} beginnt das Spiel!`,
-        playerStartSound, 
-        'start-player-container',
-        (_, popupWrapper) => {
-            setTimeout(() => {
-                popupWrapper.classList.remove('show');
+    showPopUp(`${player.name} beginnt das Spiel!`,playerStartSound, 'start-player-container', (_, popupWrapper) => {
+        setTimeout(() => {
+            popupWrapper.classList.remove('show');
                 
-                setTimeout(() => {
-                    const allPlayers = document.querySelectorAll('.grid-wrapper');
-                    const winningPlayerEl = Array.from(allPlayers).find(p => p.dataset.playerId === player.id);
-                    
-                    if (!isPlayerBottom(winningPlayerEl)) {
-                        incrementStep();
-                        rotatePlayers(currentStep);
-                    }
-                    revealDiscardCard();
-                    setTurnState('START');
-                    updateClickableCards();
-                }, 800);
-            }, 2000);
-        },
-        { volume: 0.3, delay: 500 }
-    );
+            setTimeout(() => {
+                const allPlayers = document.querySelectorAll('.grid-wrapper');
+                const winningPlayerEl = Array.from(allPlayers).find(p => p.dataset.playerId === player.id);
+                
+                if (!isPlayerBottom(winningPlayerEl)) {
+                    incrementStep();
+                    rotatePlayers(currentStep);
+                }
+                revealDiscardCard();
+                setTurnState('START');
+                updateClickableCards();
+            }, 800);
+        }, 2000);
+    });
 }
 
 
@@ -744,7 +736,7 @@ function showWinPopup() {
 
     const popupHTML = generateHighscoreHTML(players);
 
-    showPopUp(popupHTML, playerStartSound, 'highscore-container', (popupContent, popupWrapper) => {
+    showPopUp(popupHTML, winnerSound, 'highscore-container', (popupContent, popupWrapper) => {
         popupContent.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 popupWrapper.style.transition = 'none';
