@@ -78,20 +78,21 @@ menuButtons.forEach(btn => {
  */
 function bindSubmitPlayer() {
     const submitPlayerButton = document.querySelector('.submit-player-btn');
-    if (!submitPlayerButton || submitPlayerButton.dataset.bound) return;
+    const playerForm = document.querySelector('.player-form');
+    const playerInputs = playerForm.querySelectorAll('input');
 
+    if (!submitPlayerButton || submitPlayerButton.dataset.bound) return;
     submitPlayerButton.dataset.bound = "true"; // verhindert, dass der Klick-EventListener mehrfach hinzugefügt wird
+
+    playerInputs.forEach(input =>
+        input.addEventListener('input', () => input.value = input.value.replace(/[^A-Za-zÄÖÜäöüß ]/g, ''))
+    );
+
     submitPlayerButton.addEventListener('click', () => {
-        const currentForm = submitPlayerButton.closest('.player-form');
-        const playerInputs = currentForm.querySelectorAll('input');
         const numOpponent = playerInputs.length - 1;
 
-        // alte Gegnernamen löschen
-        for (let i = 1; i <= 3; i++) {
-            localStorage.removeItem(`opponent${i}`);
-        }
-
-        // Spieler & Gegner speichern
+        for (let i = 1; i <= 3; i++) localStorage.removeItem(`opponent${i}`);
+        
         playerInputs.forEach((input, i) => {
             const key = i === 0 ? 'player' : `opponent${i}`;
             let name;

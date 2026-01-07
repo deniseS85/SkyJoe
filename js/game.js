@@ -12,6 +12,7 @@ const stack2 = document.getElementById('stack-field-2');
 
 export const flippedCards = {};
 export let firstPlayerRotated = false;
+let dragEnabled = true;
 let lastTurnActive = false;
 let remainingLastTurns = 0;
 
@@ -233,6 +234,8 @@ function revealDiscardCard() {
     const drawDeck = window.stacks.stack1;
     if (!drawDeck?.length) return stack1.style.visibility = 'hidden';
 
+    dragEnabled = false;
+
     const currentCard = drawDeck.shift();
     const width = stack1.offsetWidth;
     const imgSrc = currentCard.img || generateCardImage(currentCard, width, width * 3 / 2);
@@ -314,6 +317,7 @@ function finalizeCard(card, toEl, currentCard, imgSrc) {
         toEl.alt = currentCard.value ? `Card ${currentCard.value}` : 'Card';
         toEl.src = imgSrc;
         gameMove();
+        setTimeout(() => dragEnabled = true, 0);
     }, { once: true });
 }
 
@@ -461,6 +465,8 @@ function handleCardDrag(original, offsetX, offsetY) {
     * @param {MouseEvent} event - Mausbewegungs-Ereignis
     */
     function startDrag(event) {
+        if (!dragEnabled) return;
+
         if (!isDragging) {
             clone = createClone(original);
             original.style.opacity = '0.01';
@@ -778,8 +784,8 @@ function generateHighscoreHTML(players) {
     const entriesHTML = players.map((p, i) => /*html*/`
         <div class="highscore-entry">
             <img class="rank" src="/assets/img/medaille-${medals[i]}.png" alt="Medaille ${medals[i]}">
-            <img src="assets/img/profile_image_default.png" class="avatar">
-            <div class="score-pill">
+            <img src="assets/img/profile_image_default.png" alt="Player-Image" class="avatar">
+            <div class="score-pill ${i === 0 ? 'winner' : ''}">
                 <span class="name">${p.name}</span>
                 <div class="points-container">
                     <span class="player-points">${p.points}</span>

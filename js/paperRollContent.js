@@ -59,13 +59,14 @@ export const paperRollContent = {
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME:</label>
                         <input type="text" id="player1-name" name="player1" autocomplete="off">
+                        <img class="upload-image" src="/assets/img/upload-image.png" alt="Upload></img>
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME:</label>
                         <input type="text" id="player2-name" name="player2" autocomplete="off">
-                  </div>
-                  <button class="submit-player-btn">SPEICHERN</button>
-            </div>`,
+                  </div>    
+            </div>
+            <button class="submit-player-btn">SPEICHERN</button>`,
       "3 SPIELER": /*html*/`
             <div class="player-form">
                   <div class="player-field">
@@ -80,6 +81,6 @@ export const paperRollContent = {
                         <label for="player3-name">SPIELER 3 – NAME:</label>
                         <input type="text" id="player3-name" name="player3" autocomplete="off">
                   </div> 
-                  <button class="submit-player-btn">SPEICHERN</button>
+                  <button class="submit-player-btn submit-btn-3">SPEICHERN</button>
             </div>`
 };
