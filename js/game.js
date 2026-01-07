@@ -115,8 +115,9 @@ function isPlayerBottom (element) {
  */
 function updatePointInfo(playerData) {
     const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
-    const pointsEl = wrapper?.querySelector('.point-info');
-    pointsEl && (pointsEl.innerHTML = `<span>${playerData.total}</span>`);
+    const span = wrapper?.querySelector('.point-info span');
+    if (span) span.textContent = playerData.total;
+    span.style.fontSize = playerData.total >= 100 ? 'clamp(0.75rem, 0.6964rem + 0.2679vw, 1.125rem)' : '';
 
     const parts = playerData.id.split('-');
     const key = parts[0] === 'player' ? 'player' : `opponent${parts[1]}`;
@@ -800,7 +801,7 @@ function generateHighscoreHTML(players) {
         <div class="highscore-title">HighScore</div>
         <div class="highscore-list">
             <div class="list-header">
-                <div class="points-container">
+                <div class="points-container" style="width: 43%">
                     <span>Jetzt</span>
                     <span>Total</span>
                 </div>

@@ -222,7 +222,9 @@ function createUserName(container, name) {
 function createPointsInfo(container) {
     const pointsContainer = document.createElement('div');
     pointsContainer.className = 'point-info';
-    pointsContainer.textContent = '';
+    const span = document.createElement('span');
+    span.textContent = '0';
+    pointsContainer.appendChild(span);
     container.appendChild(pointsContainer);
 }
 
