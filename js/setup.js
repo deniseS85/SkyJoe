@@ -123,9 +123,9 @@ export function updateRound(increase = false) {
     }
 
     document.getElementById('roundNumber').textContent = `Runde ${round}`;
-
     return round;
 }
+
 
 /**
  * Setzt den Hintergrund abhängig von der Auswahl.
@@ -176,6 +176,7 @@ function createContainer(type, index = 0) {
     return container;
 }
 
+
 /**
  * Erstellt die Spielerinfo mit Bild, Name und Punkteanzeige.
  * @param {string} name - Name des Spielers
@@ -218,6 +219,7 @@ function createUserName(container, name) {
     title.textContent = name;
     container.appendChild(title);
 }
+
 
 /**
  * Fügt ein Punktefeld in den Container ein.
@@ -280,6 +282,7 @@ export function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
+
 
 /**
  * Teilt das Deck in drei Stacks: Hauptstapel (stack1) und aktuelle Karte (stack2)
@@ -397,6 +400,7 @@ function createCardFace(src, alt, borderRadius, extraStyles = {}) {
     });
     return img;
 }
+
 
 /**
  * Erzeugt ein dynamisches Bild für eine Karte über ein Canvas.
@@ -650,6 +654,7 @@ function calculatePositionOnEllipse(angle, radiusX, radiusY, center) {
         y: center.y + Math.sin(rad) * radiusY
     };
 }
+
 
 /**
  * Berechnet die Winkel für jeden Spieler abhängig von der Spielerzahl.

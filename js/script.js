@@ -233,10 +233,10 @@ function restorePlayerForm(form, prevContent, inputValues, submitBtn, threePlaye
     form.innerHTML = prevContent;
 
     const restoredInputs = form.querySelectorAll('input');
-    restoredInputs.forEach((input, i) => {
-        input.value = inputValues[i] || '';
-    });
 
+    restoredInputs.forEach((input, i) => input.value = inputValues[i] || '');
+
+    showSelectedAvatarInPlayerForm(form);
     validateInputs(restoredInputs);
 
     if (submitBtn) submitBtn.style.display = '';
@@ -318,7 +318,7 @@ function validateInputs(inputElements) {
  * Stellt gespeicherte Spieler- und Gegnerdaten im Formular wieder her. Inputs leeren, wenn Standardwerte.
  */
 function restorePlayerFormData() {
-     const playerForm = paperContent.querySelector(".player-form");
+    const playerForm = paperContent.querySelector(".player-form");
     if (!playerForm) return;
 
     const numOpponent = Number(localStorage.getItem("numOpponent")) || 1;
@@ -335,6 +335,8 @@ function restorePlayerFormData() {
 
         if (data.avatar) markSelectedAvatar(avatarImgs, data.avatar);
     }
+
+    showSelectedAvatarInPlayerForm(playerForm);
 }
 
 
@@ -357,6 +359,30 @@ function markSelectedAvatar(avatarImgs, selectedSrc) {
     avatars.forEach(img => img.classList.remove("selected", "dimmed"));
     selectedImg.classList.add("selected");
     avatars.filter(img => img !== selectedImg).forEach(img => img.classList.add("dimmed"));
+}
+
+
+/**
+ * Setzt das gewählte Avatar-Bild in Formular, bei Deselektierung Default-Image (upload-image.png).
+ * @param {HTMLElement} form - Das jeweilige Player-Formular
+ */
+function showSelectedAvatarInPlayerForm(form) {
+    const playerFields = form.querySelectorAll('.player-field');
+    playerFields.forEach((field, i) => {
+        const avatarImg = field.querySelector('.avatar-image');
+        const key = i === 0 ? 'player' : `opponent${i}`;
+        const data = JSON.parse(localStorage.getItem(key)) || {};
+
+        if (avatarImg) {
+            if (data.avatar && !data.avatar.includes('profile_image_default.png')) {
+                avatarImg.src = data.avatar;
+                avatarImg.classList.add('has-avatar');
+            } else {
+                avatarImg.src = '/assets/img/avatar-image.png';
+                avatarImg.classList.remove('has-avatar');
+            }
+        }
+    });
 }
 
 
@@ -498,7 +524,6 @@ function rotateCarousel(carousel, images, selectedIndex, theta, radius, rotateFn
 window.addEventListener('resize', () => {
     if (window.updateCarouselDimensions) window.updateCarouselDimensions();
 });
-
 
 
 /**

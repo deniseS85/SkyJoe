@@ -480,6 +480,15 @@ input:checked + .settings-slider:before {
     filter: drop-shadow(1px 1px 2px #c28a54);
 }
 
+.has-avatar {
+    width: clamp(1.875rem, 1.6071rem + 1.3393vw, 3.75rem);
+    top: clamp(-1.3125rem, -0.3125rem - 0.625vw, -0.4375rem);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    border: 2px solid white;
+    background-color: #FCE0A7;
+}
+
 .avatar-title {
     color: #5a3b1e;
     text-shadow: 1px 1px rgba(255, 255, 255, 0.4);
@@ -501,11 +510,14 @@ input:checked + .settings-slider:before {
     cursor: pointer;
     transform: translate(-50%, -50%);
     transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    border: 2px solid white;
+    background-color: #FCE0A7;
 }
 
 .avatar-circle img.selected {
     transform: translate(-50%, -50%) scale(1.15);
-    filter: drop-shadow(0 0 10px gold) drop-shadow(0 0 20px gold);
+    filter: drop-shadow(0 0 5px gold) drop-shadow(0 0 10px gold);
 }
 
 .avatar-circle img.dimmed {
@@ -755,6 +767,7 @@ input:checked + .settings-slider:before {
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     border: 2px solid white;
     transform: translateY(-50%);
+    background-color: #FCE0A7;
 }
 
 .player-name {

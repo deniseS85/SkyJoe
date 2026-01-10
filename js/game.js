@@ -97,6 +97,7 @@ function canFlipCard(wrapper, cardEl, playerData) {
            playerData.count < 2;
 }
 
+
 /**
  * Prüft, ob ein Karten-Wrapper ein Spieler-Bottom ist.
  * @param {HTMLElement} element - Wrapper-Element
@@ -271,6 +272,7 @@ function createFlyingCard(imgSrc, fromRect) {
     })
     return card;
 }
+
 
 /**
  * Berechnet die Richtung der Kartenanimation.
