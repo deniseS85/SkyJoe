@@ -192,7 +192,7 @@ h1 {
     font-weight: bold;
 }
 
-.menu-box, .start-player-container, .highscore-container {
+.menu-box, .start-player-container, .highscore-container, .game-rules-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -744,7 +744,6 @@ input:checked + .settings-slider:before {
     transform: scale(1.1);
 }
 
-
 .stack-area {
     position: relative;
     display: flex;
@@ -900,7 +899,7 @@ input:checked + .settings-slider:before {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 100;
+    z-index: 20;
     transition: transform 0.15s ease;
     will-change: transform, box-shadow;
 }
@@ -970,134 +969,74 @@ input:checked + .settings-slider:before {
     border-radius: 30px;
 }
 
-/* Tablets */
-@media (max-width: 768px) {
-    body {
-        touch-action: manipulation;
-    }
-
-    .player-form input:focus  {
-        transform: none;
-    }
-
-    .game-board {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .stack-area {
-        position: absolute;
-        top: 45%;
-        left: 0;
-        right: 0;
-        flex: unset;
-        justify-content: center;
-        flex-direction: row;
-        gap: 50px;
-        z-index: 10;
-    }
-
-    .stack-area > :nth-child(2) {
-        transform: none;
-    }
-
-    .rotation-wrapper {
-        height: min(60vh, 40rem);
-    }
-}
-
-
-/* mittelgroße Handys */
-@media (max-width: 510px) {
-    .grid-wrapper, .card-field, .player-grid, .opponent-grid, #stack-field-1::before, #stack-field-1::after {
-        border-radius: 4px;
-    }
-}
-
-
-/* kleine Handys */
-@media (max-height: 799px) {
-    .card-field,
-    .grid-wrapper.player-bottom .card-field,
-    .grid-wrapper.player-top .card-field {
-        width: 40px;      
-        aspect-ratio: 2/3;
-        border-radius: 4px;
-    }
-
-    #stack-field-1::before, #stack-field-1::after {
-        border-radius: 4px;
-    }
-
-    .player-grid {
-        gap: 2px;
-    }
-
-    .player-name {
-       font-size: 20px;
-    }
-
-}
-
-@media (max-height: 641px) {
-    .back-btn {
-        height: 25px;
-        font-size: 12px;
-    }
-
-    .card-field, #stack-field-1,
-    .grid-wrapper.player-bottom .card-field,
-    .grid-wrapper.player-top .card-field {
-        width: 25px;      
-        aspect-ratio: 2/3;
-    }
-
-    .player-name {
-       font-size: 12px;
-       margin-right: 7px;
-    }
-}
 
 
 .flip-card {
-  background-color: transparent;
-  width: 300px;
-  height: 300px;
-  perspective: 1000px;
+    background-color: transparent;
+    width: 300px;
+    height: 300px;
+    perspective: 1000px;
 }
 
 .flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 .flip-card:hover .flip-card-inner {
-  transform: rotateY(180deg);
+    transform: rotateY(180deg);
 }
 
 .flip-card-front, .flip-card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .flip-card-front {
-  background-color: #bbb;
-  color: black;
+    background-color: #bbb;
+    color: black;
 }
 
 .flip-card-back {
-  background-color: #2980b9;
-  color: white;
-  transform: rotateY(180deg);
+    background-color: #2980b9;
+    color: white;
+    transform: rotateY(180deg);
 }
+
+.game-rules-container {
+    font-family: "Comic Sans MS", "Fredoka", "Poppins", sans-serif;
+    width: clamp(13.125rem, 7.8571rem + 26.3393vw, 50rem);
+    overflow: auto;
+    padding: clamp(0.625rem, 0.5357rem + 0.4464vw, 1.25rem);
+    border-radius: 12px;
+    pointer-events: auto;
+    height: clamp(18.75rem, 16.0714rem + 13.3929vw, 37.5rem);
+    font-size: clamp(0.625rem, 0.5714rem + 0.2679vw, 1rem);
+    display: flex;
+    gap: 0;
+}
+
+.game-rules-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.game-rules-container::-webkit-scrollbar-track {
+    margin: 5px 0;
+}
+
+.game-rules-container::-webkit-scrollbar-thumb {
+    background: #2e7d32;
+    border-radius: 5px;
+}
+
 
 .highscore-container {
     justify-content: center; 
@@ -1196,3 +1135,89 @@ input:checked + .settings-slider:before {
     gap: clamp(0.625rem, 0.3571rem + 1.3393vw, 2.5rem);
 }
 
+
+/* Tablets */
+@media (max-width: 768px) {
+    body {
+        touch-action: manipulation;
+    }
+
+    .player-form input:focus  {
+        transform: none;
+    }
+
+    .game-board {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stack-area {
+        position: absolute;
+        top: 45%;
+        left: 0;
+        right: 0;
+        flex: unset;
+        justify-content: center;
+        flex-direction: row;
+        gap: 50px;
+        z-index: 10;
+    }
+
+    .stack-area > :nth-child(2) {
+        transform: none;
+    }
+
+    .rotation-wrapper {
+        height: min(60vh, 40rem);
+    }
+}
+
+/* mittelgroße Handys */
+@media (max-width: 510px) {
+    .grid-wrapper, .card-field, .player-grid, .opponent-grid, #stack-field-1::before, #stack-field-1::after {
+        border-radius: 4px;
+    }
+}
+
+/* kleine Handys */
+@media (max-height: 799px) {
+    .card-field,
+    .grid-wrapper.player-bottom .card-field,
+    .grid-wrapper.player-top .card-field {
+        width: 40px;      
+        aspect-ratio: 2/3;
+        border-radius: 4px;
+    }
+
+    #stack-field-1::before, #stack-field-1::after {
+        border-radius: 4px;
+    }
+
+    .player-grid {
+        gap: 2px;
+    }
+
+    .player-name {
+       font-size: 20px;
+    }
+
+}
+
+@media (max-height: 641px) {
+    .back-btn {
+        height: 25px;
+        font-size: 12px;
+    }
+
+    .card-field, #stack-field-1,
+    .grid-wrapper.player-bottom .card-field,
+    .grid-wrapper.player-top .card-field {
+        width: 25px;      
+        aspect-ratio: 2/3;
+    }
+
+    .player-name {
+       font-size: 12px;
+       margin-right: 7px;
+    }
+}

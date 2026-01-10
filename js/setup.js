@@ -797,3 +797,4 @@ window.addEventListener('resize', () => {
         rotatePlayers(currentStep);
     });
 });
+

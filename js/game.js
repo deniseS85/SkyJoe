@@ -13,6 +13,7 @@ import {
     stopDealSound
   } from "./setup.js";
 import { playMusic, stopMusic } from "./script.js";
+import { paperRollContent } from "./paperRollContent.js";
 
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
@@ -27,7 +28,7 @@ let dragEnabled = true;
 let lastTurnActive = false;
 let remainingLastTurns = 0;
 let discardedCards = [];
-
+setupGameSettings();
 
 /**
  * Initialisiert den Spielstart.
@@ -46,7 +47,6 @@ export function startGame() {
     updateClickableCards();
     gameMove(); 
 }
-
 
 /**
  * Dreht eine Karte um und aktualisiert den Spielstand.
@@ -864,48 +864,85 @@ function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
 }
 
 
-const toggles = [
-    { 
-        id: 'soundIcon', 
-        key: 'sound', 
-        onEnable: () => {
-            if (isDealing) playDealSound();
+/**
+ * Initialisiert die Toggle-Icons für Sound und Musik.
+ * Speichert den Status in localStorage und spielt/stoppt Sounds.
+ */
+function setupGameSettings() {
+    setupToggles();
+    setupGameRulesPopup();
+}
+
+function setupToggles() {
+    const toggles = [
+        { 
+            id: 'soundIcon', 
+            key: 'sound', 
+            onEnable: () => { if (isDealing) playDealSound(); },
+            onDisable: () => {
+                [flipCardSound, playerStartSound, cardDropSound, winnerSound].forEach(s => {
+                    s.pause();
+                    s.currentTime = 0;
+                });
+                stopDealSound();   
+            }
         },
-        onDisable: () => {
-            [flipCardSound, playerStartSound, cardDropSound, winnerSound].forEach(s => {
-                s.pause();
-                s.currentTime = 0;
-            });
-            stopDealSound(); 
-            
+        { 
+            id: 'musicIcon', 
+            key: 'music', 
+            onEnable: playMusic, 
+            onDisable: stopMusic 
         }
-    },
-    { 
-        id: 'musicIcon', 
-        key: 'music', 
-        onEnable: playMusic, 
-        onDisable: stopMusic 
-    }
-];
+    ];
 
-toggles.forEach(({ id, key, onEnable, onDisable }) => {
-    const icon = document.getElementById(id);
-    if (!icon) return;
+    toggles.forEach(({ id, key, onEnable, onDisable }) => {
+        const icon = document.getElementById(id);
 
-    const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
-    icon.src = `/assets/img/${key}_${status}.png`;
+        const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
+        icon.src = `/assets/img/${key}_${status}.png`;
 
-    icon.addEventListener('click', () => {
-        const currentlyOn = localStorage.getItem(key) === 'on';
-        const newStatus = currentlyOn ? 'off' : 'on';
-        localStorage.setItem(key, newStatus);
-        icon.src = `/assets/img/${key}_${newStatus}.png`;
-
-        if (newStatus === 'on') onEnable?.();
-        else onDisable?.();
-
+        icon.addEventListener('click', () => {
+            const currentlyOn = localStorage.getItem(key) === 'on';
+            const newStatus = currentlyOn ? 'off' : 'on';
+            localStorage.setItem(key, newStatus);
+            icon.src = `/assets/img/${key}_${newStatus}.png`;
+            if (newStatus === 'on') onEnable?.();
+            else onDisable?.();
+        });
     });
-});
+}
+
+
+/**
+ * Initialisiert das Popup für die Spielregeln.
+ */
+function setupGameRulesPopup() {
+    const gameRulesIcon = document.getElementById('gameRules');
+    const popupWrapper = document.getElementById('popup');
+
+    gameRulesIcon.addEventListener('click', () => {
+        if (popupWrapper.classList.contains('show')) {
+            popupWrapper.classList.remove('show');
+        } else {
+            const content = paperRollContent["SPIELREGELN"]; 
+            showPopUp(
+                content,
+                null,
+                'game-rules-container',
+                (_, popupWrapper) => {
+                    popupWrapper.style.transition = 'opacity 0.2s ease, visibility 0.2s ease';
+                }
+            );
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const popupContent = document.getElementById('popupContent');
+            if (!popupContent.contains(e.target) && e.target !== gameRulesIcon) {
+            popupWrapper.classList.remove('show');
+        }
+    });
+}
 
 
 /**
