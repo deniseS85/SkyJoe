@@ -5,10 +5,11 @@ const gameScreen = document.getElementById("gameScreen");
 const backButton = document.getElementById("backBtn");
 const startScreen = document.getElementById("startScreen");
 const rotationWrapper = document.querySelector(".rotation-wrapper");
-const cardSound = new Audio('/assets/sounds/deal-cards.mp3');
+export const cardSound = new Audio('/assets/sounds/deal-cards.mp3');
 
 let dealTimeouts = []; 
-let isDealing = false; 
+export let isDealing = false; 
+let afterDealTimeoutId = null;
 export let currentStep = 0;
 export let turnState = 'INIT';
 
@@ -17,24 +18,23 @@ export let turnState = 'INIT';
  * Setzt das Spiel vollständig zurück.
  */
 export function resetGame(isRestart = false) {
+    isDealing = false;
+
+    dealTimeouts.forEach(id => clearTimeout(id));
+    dealTimeouts = [];
+    if (afterDealTimeoutId) {
+        clearTimeout(afterDealTimeoutId);
+        afterDealTimeoutId = null;
+    }
+
     if (!isRestart) {
         stopDealSound();
         resetLocalStorage();
     }
-    resetGameState();
+
     clearGameDOM();
     resetRotationWrapper();
     resetCards();
-}
-
-
-/**
- * Stoppt alle laufenden Zeitouts und setzt Flags zurück.
- */
-function resetGameState() {
-    dealTimeouts.forEach(id => clearTimeout(id));
-    dealTimeouts = [];
-    isDealing = false;
     currentStep = 0;
 }
 
@@ -87,8 +87,10 @@ function resetLocalStorage() {
 export function showGameScreen(isRestart = false) { 
     if (!isRestart) {
         setBackground();
+        setSoundMusicIcons();
         startScreen.style.display = 'none';
         gameScreen.style.display = 'flex';
+        
     }
 
     updateRound(isRestart);
@@ -134,6 +136,25 @@ function setBackground() {
     const selectedBg = localStorage.getItem('selectedBg');
     const background = selectedBg ? selectedBg : 0;
     gameScreen.style.background = `#fffbea url(/assets/img/bg${background}.png) no-repeat center/cover`;
+}
+
+
+/**
+ * Setzt die Icons für Sound und Musik anhand des LocalStorage-Status.
+ */
+function setSoundMusicIcons() {
+    const icons = [
+            { id: 'soundIcon', key: 'sound', default: 'off' },
+            { id: 'musicIcon', key: 'music', default: 'off' }
+        ];
+
+         icons.forEach(({ id, key, defaultStatus }) => {
+            const icon = document.getElementById(id);
+            if (!icon) return;
+
+            const status = localStorage.getItem(key) || defaultStatus;
+            icon.src = `/assets/img/${key}_${status}.png`;
+        });
 }
 
 
@@ -424,13 +445,13 @@ export function generateCardImage(card, width, height) {
     return canvas.toDataURL();
 }
 
-
 /**
  * Startet die Karten-Austeil-Animation für alle Spieler.
  * Spielt währenddessen einen Loop-Sound ab und stoppt diesen nach der letzten Karte.
  * @param {Array} players - Array aus Spieler- und Gegner-Rastern
  */
 function animateDeal(players) {
+    isDealing = true;
     const deckField = document.getElementById('stack-field-1');
     const deckRect = deckField.getBoundingClientRect();
     const cardsPerPlayer = 12;
@@ -441,12 +462,13 @@ function animateDeal(players) {
 
     deckField.dataset.count = stacks.stack1.length -  players.length * cardsPerPlayer;
 
-    if (localStorage.getItem('sound') === 'on') playDealSound();
+    playDealSound();
 
     players.forEach((player, pIndex) => {
         const fieldWidth = player.querySelector('.card-field').offsetWidth;
         dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer);
     });
+
     afterDeal(dealDurationMs);
 }
 
@@ -457,9 +479,14 @@ function animateDeal(players) {
  * @param {number} delayMs - Dauer in Millisekunden
  */
 function afterDeal(delayMs) {
-    setTimeout(() => {
+    if (afterDealTimeoutId) clearTimeout(afterDealTimeoutId);
+
+    afterDealTimeoutId = setTimeout(() => {
+        if (!isDealing) return;
         stopDealSound();
         startGame();
+        isDealing = false;
+        afterDealTimeoutId = null;
     }, delayMs);
 }
 
@@ -541,8 +568,6 @@ function positionCardAtDeck(cardEl, deckRect, index) {
  * @param {DOMRect} deckRect - Position des Decks
  */
 function animateSingleCard(cardEl, player, index, fieldWidth, deckRect) {
-    if (!isDealing) { cardEl.remove(); return; }
-
     const targetField = player.querySelector(`.card-field:nth-child(${index + 1})`);
     const rect = targetField.getBoundingClientRect();
     const dx = rect.left - deckRect.left;
@@ -553,7 +578,6 @@ function animateSingleCard(cardEl, player, index, fieldWidth, deckRect) {
     cardEl.style.transform = `translate(${dx}px, ${dy}px) scale(${scaleX}`;
 
     const timeoutId = setTimeout(() => {
-        if (!isDealing) { cardEl.remove(); return; }
         finalizeCardPlacement(cardEl, targetField, fieldWidth);
     }, 500);
 
@@ -564,7 +588,9 @@ function animateSingleCard(cardEl, player, index, fieldWidth, deckRect) {
 /**
  * Spielt den Sound des Kartenausteilens einmalig ab, solange er noch nicht läuft.
  */
-function playDealSound() {
+export function playDealSound() {
+    if (localStorage.getItem('sound') !== 'on') return;
+    cardSound.loop = true;
     cardSound.currentTime = 0;
     cardSound.play();
 }
@@ -573,7 +599,7 @@ function playDealSound() {
 /**
  * Stoppt den Deal-Sound, setzt Position zurück und deaktiviert Loop.
  */
-function stopDealSound() {
+export function stopDealSound() {
     cardSound.pause();
     cardSound.currentTime = 0;
 }

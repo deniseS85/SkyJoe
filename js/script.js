@@ -74,17 +74,19 @@ document.addEventListener("click", (e) => {
 menuButtons.forEach(btn => {
     btn.addEventListener("click", () => {
         const text = btn.textContent;
-        const newNum = text === '2 SPIELER' ? 1 : text === '3 SPIELER' ? 2 : null;
-        if (newNum === null) return;
-
-        resetPlayers(newNum);
-        initPlayers(newNum); 
-
         const content = paperRollContent[text];
+        if (!content) return;
+
         const isSettings = text === "EINSTELLUNGEN";
         const isPlayerForm = ["2 SPIELER", "3 SPIELER"].includes(text);
 
-        if (content) openPaperRoll(content, isSettings, isPlayerForm);
+        if (isPlayerForm) {
+            const newNum = text === '2 SPIELER' ? 1 : 2;
+            resetPlayers(newNum);
+            initPlayers(newNum); 
+        }
+
+        openPaperRoll(content, isSettings, isPlayerForm);
     });
 });
 
@@ -417,7 +419,7 @@ function initToggle(toggleId, storageKey, onEnable = () => {}, onDisable = () =>
 /**
  * Startet Hintergrundmusik, falls Element vorhanden.
  */
-function playMusic() {
+export function playMusic() {
     if (!music) return;
     music.volume = 0.4;
     music.play().catch(() => {
@@ -429,7 +431,7 @@ function playMusic() {
 /**
  * Stoppt Musik und setzt Zeit auf 0
  */
-function stopMusic() {
+export function stopMusic() {
     if (!music) return;
     music.pause();
     music.currentTime = 0;

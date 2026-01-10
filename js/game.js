@@ -1,4 +1,18 @@
-import { generateCardImage, rotatePlayers, currentStep, incrementStep, setTurnState, turnState, resetGame, showGameScreen, shuffle  } from "./setup.js";
+import { 
+    generateCardImage, 
+    rotatePlayers, 
+    currentStep, 
+    incrementStep, 
+    setTurnState, 
+    turnState, 
+    resetGame, 
+    showGameScreen, 
+    shuffle,
+    isDealing,
+    playDealSound,
+    stopDealSound
+  } from "./setup.js";
+import { playMusic, stopMusic } from "./script.js";
 
 const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
@@ -848,6 +862,50 @@ function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
         }
     }, delay);
 }
+
+
+const toggles = [
+    { 
+        id: 'soundIcon', 
+        key: 'sound', 
+        onEnable: () => {
+            if (isDealing) playDealSound();
+        },
+        onDisable: () => {
+            [flipCardSound, playerStartSound, cardDropSound, winnerSound].forEach(s => {
+                s.pause();
+                s.currentTime = 0;
+            });
+            stopDealSound(); 
+            
+        }
+    },
+    { 
+        id: 'musicIcon', 
+        key: 'music', 
+        onEnable: playMusic, 
+        onDisable: stopMusic 
+    }
+];
+
+toggles.forEach(({ id, key, onEnable, onDisable }) => {
+    const icon = document.getElementById(id);
+    if (!icon) return;
+
+    const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
+    icon.src = `/assets/img/${key}_${status}.png`;
+
+    icon.addEventListener('click', () => {
+        const currentlyOn = localStorage.getItem(key) === 'on';
+        const newStatus = currentlyOn ? 'off' : 'on';
+        localStorage.setItem(key, newStatus);
+        icon.src = `/assets/img/${key}_${newStatus}.png`;
+
+        if (newStatus === 'on') onEnable?.();
+        else onDisable?.();
+
+    });
+});
 
 
 /**

@@ -709,7 +709,41 @@ input:checked + .settings-slider:before {
     display: flex;
     width: 100%;
     height: 100%;
+    position: relative;
 }
+
+.icons-container {
+    position: absolute;
+    right: 0;
+    top: 0px;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: clamp(0.8125rem, -0.1875rem + 5vw, 7.8125rem);
+    padding-left: 10px;
+    gap: 20px;
+     z-index: 20;
+}
+
+.icons-container img {
+    width: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
+    height: auto; 
+    object-fit: contain; 
+    box-sizing: content-box;
+    cursor: pointer;
+    transition: transform .15s ease;
+    background: linear-gradient(to bottom, #ffcc00, #ff9900);
+    box-shadow: 0 3px #cc7a00;
+    border: 2px solid #cc7a00;
+    border-radius: 10px;
+    padding: clamp(0.1875rem, 0.1696rem + 0.0893vw, 0.3125rem);
+}
+
+.icons-container img:hover {
+    transform: scale(1.1);
+}
+
 
 .stack-area {
     position: relative;
