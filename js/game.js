@@ -119,7 +119,7 @@ function updatePointInfo(playerData) {
 
     const parts = playerData.id.split('-');
     const key = parts[0] === 'player' ? 'player' : `opponent${parts[1]}`;
-    const stored = JSON.parse(localStorage.getItem(key)) || { name: playerData.name, points: 0, totalPoints: 0  };
+    const stored = JSON.parse(localStorage.getItem(key)) || { name: playerData.name, avatar: null, points: 0, totalPoints: 0  };
     stored.points = playerData.total;
     localStorage.setItem(key, JSON.stringify(stored));
 }
@@ -329,8 +329,6 @@ function finalizeCard(card, toEl, currentCard, imgSrc) {
         card.remove();
         gameMove();
         setTimeout(() => dragEnabled = true, 0);
-
-        console.log(discardedCards);
     }, { once: true });
 }
 
@@ -744,10 +742,10 @@ function showWinPopup() {
     const players = [{ key: 'player' }, { key: 'opponent1' }, { key: 'opponent2' }]
         .slice(0, numOpponent + 1)
         .map(p => {
-            const data = JSON.parse(localStorage.getItem(p.key)) || { name: p.key, points: 0, totalPoints: 0 };
+            const data = JSON.parse(localStorage.getItem(p.key)) || { name: p.key, avatar: null, points: 0, totalPoints: 0 };
             data.totalPoints += data.points;
             localStorage.setItem(p.key, JSON.stringify(data));
-            return { name: data.name, points: data.points, totalPoints: data.totalPoints, key: p.key };
+            return { name: data.name, avatar: data.avatar, points: data.points, totalPoints: data.totalPoints, key: p.key };
         });
 
     players.sort((a, b) => a.points - b.points);
@@ -765,7 +763,7 @@ function showWinPopup() {
 
                 if (btn.id === 'restartBtn') {
                      players.forEach(p => {
-                        const stored = JSON.parse(localStorage.getItem(p.key)) || { name: p.name, points: 0, totalPoints: 0 };
+                        const stored = JSON.parse(localStorage.getItem(p.key)) || { name: p.name, avatar: null, points: 0, totalPoints: 0 };
                         stored.points = 0;
                         localStorage.setItem(p.key, JSON.stringify(stored));
                     });
@@ -796,7 +794,7 @@ function generateHighscoreHTML(players) {
     const entriesHTML = players.map((p, i) => /*html*/`
         <div class="highscore-entry">
             <img class="rank" src="/assets/img/medaille-${medals[i]}.png" alt="Medaille ${medals[i]}">
-            <img src="assets/img/profile_image_default.png" alt="Player-Image" class="avatar">
+            <img src=${p.avatar} alt="Player-Image" class="avatar">
             <div class="score-pill ${i === 0 ? 'winner' : ''}">
                 <span class="name">${p.name}</span>
                 <div class="points-container">

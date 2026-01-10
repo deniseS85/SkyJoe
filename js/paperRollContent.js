@@ -57,30 +57,34 @@ export const paperRollContent = {
       "2 SPIELER": /*html*/`
             <div class="player-form">
                   <div class="player-field">
-                        <label for="player1-name">SPIELER 1 – NAME:</label>
-                        <input type="text" id="player1-name" name="player1" autocomplete="off">
-                        <img class="upload-image" src="/assets/img/upload-image.png" alt="Upload></img>
+                        <label for="player1-name">SPIELER 1 – NAME</label>
+                        <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="30">
+                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>
                   <div class="player-field">
-                        <label for="player2-name">SPIELER 2 – NAME:</label>
-                        <input type="text" id="player2-name" name="player2" autocomplete="off">
+                        <label for="player2-name">SPIELER 2 – NAME</label>
+                        <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="30">
+                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>    
             </div>
             <button class="submit-player-btn">SPEICHERN</button>`,
       "3 SPIELER": /*html*/`
-            <div class="player-form">
+            <div class="player-form three-players">
                   <div class="player-field">
-                        <label for="player1-name">SPIELER 1 – NAME:</label>
-                        <input type="text" id="player1-name" name="player1" autocomplete="off">
+                        <label for="player1-name">SPIELER 1 – NAME</label>
+                        <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="30">
+                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>
                   <div class="player-field">
-                        <label for="player2-name">SPIELER 2 – NAME:</label>
-                        <input type="text" id="player2-name" name="player2" autocomplete="off">
+                        <label for="player2-name">SPIELER 2 – NAME</label>
+                        <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="30">
+                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>
                   <div class="player-field">
-                        <label for="player3-name">SPIELER 3 – NAME:</label>
-                        <input type="text" id="player3-name" name="player3" autocomplete="off">
+                        <label for="player3-name">SPIELER 3 – NAME</label>
+                        <input type="text" id="player3-name" name="player3" autocomplete="off" maxlength="30">
+                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div> 
-                  <button class="submit-player-btn submit-btn-3">SPEICHERN</button>
-            </div>`
+            </div>
+            <button class="submit-player-btn submit-btn-3">SPEICHERN</button>`
 };

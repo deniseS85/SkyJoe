@@ -24,7 +24,11 @@ function openPaperRoll(content, isSettings = false, isPlayerForm = false) {
     if (closeBtn) closeBtn.addEventListener("click", closePaperRoll);
 
     if (startButton) setTimeout(() => startButton.disabled = true, 350);
-    if (isPlayerForm) bindSubmitPlayer();
+    if (isPlayerForm) {
+        setupAvatarSelect();
+        handlePlayerFormSubmit();
+        restorePlayerFormData();
+    }
     if (isSettings) {
         initBackgroundCarousel(); 
         initToggle("musicToggle", "music", playMusic, stopMusic);
@@ -49,9 +53,15 @@ function closePaperRoll() {
  */
 document.addEventListener("click", (e) => {
     const menuButtonsArray = Array.from(menuButtons);
-    if (paperRoll.classList.contains("open") &&
+
+    if (
+        paperRoll.classList.contains("open") &&
+        !e.target.closest(".avatar-image") &&
+        !e.target.closest(".avatar-menu") &&
+        !e.target.closest(".submit-avatar-btn") &&
         !paperRoll.contains(e.target) &&
-        !menuButtonsArray.includes(e.target)) {
+        !menuButtonsArray.includes(e.target)
+    ) {
         closePaperRoll();
     }
 });
@@ -63,9 +73,16 @@ document.addEventListener("click", (e) => {
  */
 menuButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-        const content = paperRollContent[btn.textContent];
-        const isSettings = btn.textContent === "EINSTELLUNGEN";
-        const isPlayerForm = ["2 SPIELER", "3 SPIELER"].includes(btn.textContent);
+        const text = btn.textContent;
+        const newNum = text === '2 SPIELER' ? 1 : text === '3 SPIELER' ? 2 : null;
+        if (newNum === null) return;
+
+        resetPlayers(newNum);
+        initPlayers(newNum); 
+
+        const content = paperRollContent[text];
+        const isSettings = text === "EINSTELLUNGEN";
+        const isPlayerForm = ["2 SPIELER", "3 SPIELER"].includes(text);
 
         if (content) openPaperRoll(content, isSettings, isPlayerForm);
     });
@@ -73,44 +90,273 @@ menuButtons.forEach(btn => {
 
 
 /**
- * Bindet EventListener für Player-Formular einmalig.
- * Speichert Spieler- und Gegnernamen in localStorage inkl. Defaultnamen.
+ * Löscht alte Spieler- und Gegnerdaten aus dem LocalStorage, wenn Anzahl Gegner sich ändert und speichert die neue Anzahl..
+ * @param {number} newNum - Neue Anzahl der Gegner
  */
-function bindSubmitPlayer() {
-    const submitPlayerButton = document.querySelector('.submit-player-btn');
-    const playerForm = document.querySelector('.player-form');
+function resetPlayers(newNum) {
+    const prevNum = Number(localStorage.getItem('numOpponent')) || 1;
+    if (newNum !== prevNum) {
+        localStorage.removeItem('player');
+        for (let i = 1; i <= 2; i++) localStorage.removeItem(`opponent${i}`);
+    }
+    localStorage.setItem('numOpponent', newNum);
+}
+
+
+/**
+ * Initialisiert Standardwerte für den Spieler und die Gegner im LocalStorage, wenn nichts existiert.
+ * @param {number} newNum - Anzahl der Gegner
+ */
+function initPlayers(newNum) {
+     const defaultAvatar = '/assets/img/profile_image_default.png';
+
+    if (!localStorage.getItem('player')) 
+        localStorage.setItem('player', JSON.stringify({ name: 'Spieler', avatar: defaultAvatar, points: 0, totalPoints: 0 }));
+    
+    for (let i = 1; i <= newNum; i++) {
+        const key = `opponent${i}`;
+        if (!localStorage.getItem(key)) 
+            localStorage.setItem(key, JSON.stringify({ name: `Gegner ${i}`, avatar: defaultAvatar, points: 0, totalPoints: 0 }));
+    }
+}
+
+
+/**
+ * Öffnet die Avatar-Auswahl für den jeweiligen Spieler.
+ * @param {number} playerIndex - Index des Spielers (0 = Spieler, 1+ = Gegner)
+ */
+function setupAvatarSelect() {
+    const avatarImages = paperContent.querySelectorAll(".avatar-image");
+    if (!avatarImages.length) return;
+
+    avatarImages.forEach((img, index) => {
+        img.addEventListener("click", () => showAvatarPicker(index));
+    });
+}
+
+
+/**
+ * Öffnet das Avatar-Auswahl-Submenu für einen Spieler und ermöglicht Auswahl.
+ * @param {number} playerIndex - Index des Spielers, dessen Avatar gewählt wird.
+ * @returns 
+ */
+function showAvatarPicker(playerIndex) {
+    const playerForm = paperContent.querySelector(".player-form");
+    const submitBtn = document.querySelector(".submit-player-btn");
+    if (!playerForm) return;
+
     const playerInputs = playerForm.querySelectorAll('input');
+    const inputValues = Array.from(playerInputs).map(input => input.value);
+    
+    if (submitBtn) submitBtn.style.display = "none";
 
-    if (!submitPlayerButton || submitPlayerButton.dataset.bound) return;
-    submitPlayerButton.dataset.bound = "true"; // verhindert, dass der Klick-EventListener mehrfach hinzugefügt wird
+    const prevContent = playerForm.innerHTML;
+    renderAvatarMenu(playerForm, playerIndex);
 
-    playerInputs.forEach(input =>
-        input.addEventListener('input', () => input.value = input.value.replace(/[^A-Za-zÄÖÜäöüß ]/g, ''))
-    );
+    const threePlayers = document.querySelector('.three-players');
+    adjustThreePlayersLayout(playerForm, threePlayers);
 
-    submitPlayerButton.addEventListener('click', () => {
-        const numOpponent = playerInputs.length - 1;
+    const avatars = playerForm.querySelectorAll(".avatar-circle img");
+    setupAvatarClick(avatars, playerIndex);
 
-        for (let i = 1; i <= 3; i++) localStorage.removeItem(`opponent${i}`);
-        
-        playerInputs.forEach((input, i) => {
-            const key = i === 0 ? 'player' : `opponent${i}`;
-            let name;
+    const key = playerIndex === 0 ? "player" : `opponent${playerIndex}`;
+    const data = JSON.parse(localStorage.getItem(key)) || {};
+    if (data.avatar) markSelectedAvatar(avatars, data.avatar);
 
-            if (i === 0) {
-                name = input.value || 'Spieler';
-            } else {
-                if (numOpponent === 1) {
-                    name = input.value || 'Gegner';
-                } else {
-                    name = input.value || `Gegner ${i}`;
-                }
-            }
-            localStorage.setItem(key, JSON.stringify({ name, points: 0, totalPoints: 0 }));
+    playerForm.querySelector(".submit-avatar-btn").addEventListener("click", () => {
+        restorePlayerForm(playerForm, prevContent, inputValues, submitBtn, threePlayers);
+    });
+}
+
+
+/**
+ * Rendert das HTML für das Avatar-Auswahlmenü eines Spielers.
+ * @param {HTMLElement} form - Container des Player-Formulars
+ * @param {number} playerIndex - Index des Spielers, dessen Avatar gewählt wird
+ */
+function renderAvatarMenu(form, playerIndex) {
+    form.innerHTML = /*html*/`
+        <div class="avatar-menu">
+            <div class="avatar-title">Bild für Spieler ${playerIndex + 1} auswählen</div>
+            <div class="avatar-circle">
+                ${Array.from({ length: 8 }, (_, i) => `<img src="/assets/img/avatar/avatar-${i+1}.png">`).join('')}
+            </div>
+        </div>
+        <button class="submit-avatar-btn">ZURÜCK</button>`;
+}
+
+
+/**
+ * Passt Layout für drei Spieler an.
+ * @param {HTMLElement} form - Player-Formular
+ * @param {HTMLElement} container - Container für das Drei-Spieler-Layout
+ */
+function adjustThreePlayersLayout(form, container) {
+    if (form.classList.contains("three-players") && container) {
+        container.style.height = "100%";
+        container.style.gap = "clamp(0.9375rem, 0.625rem + 1.5625vw, 3.125rem)";
+    }
+}
+
+
+/**
+ * Bindet Klick-Events auf alle Avatar-Bilder und speichert die Auswahl.
+ * @param {HTMLImageElement[]} avatars - Alle Avatar-Bilder
+ * @param {number} playerIndex - Index des Spielers, dessen Avatar gewählt wird
+ */
+function setupAvatarClick(avatars, playerIndex) {
+    avatars.forEach(img => {
+        img.addEventListener("click", () => {
+            const key = playerIndex === 0 ? "player" : `opponent${playerIndex}`;
+            const data = JSON.parse(localStorage.getItem(key)) || { name: "", avatar: "" };
+            const clickedFile = img.src.split("/").pop();
+            const currentFile = data.avatar.split("/").pop();
+
+            data.avatar = clickedFile === currentFile ? "/assets/img/profile_image_default.png" : img.src;
+
+            localStorage.setItem(key, JSON.stringify(data));
+            markSelectedAvatar(avatars, data.avatar);
         });
-        localStorage.setItem('numOpponent', numOpponent);
+    });
+}
+
+
+/**
+ * Stellt das ursprüngliche Player-Formular wieder her und initialisiert Events.
+ * @param {HTMLElement} form - Player-Formular
+ * @param {string} prevContent - HTML-Inhalt vor dem Avatar-Menü
+ * @param {string[]} inputValues - Gesicherte Werte der Inputfelder
+ * @param {HTMLElement} submitBtn - Submit-Button
+ * @param {HTMLElement} threePlayers - Container für Drei-Spieler-Layout
+ */
+function restorePlayerForm(form, prevContent, inputValues, submitBtn, threePlayers) {
+    form.innerHTML = prevContent;
+
+    const restoredInputs = form.querySelectorAll('input');
+    restoredInputs.forEach((input, i) => {
+        input.value = inputValues[i] || '';
+    });
+
+    validateInputs(restoredInputs);
+
+    if (submitBtn) submitBtn.style.display = '';
+    if (threePlayers) {
+        threePlayers.style.height = '';
+        threePlayers.style.gap = '';
+    }
+
+    setupAvatarSelect();
+    handlePlayerFormSubmit();
+}
+
+
+/**
+ * Bindet den Submit-Button des Spielerformulars.
+ * Speichert die Werte und schließt die Paper-Roll. Verhindert doppelte Listener (bound).
+ */
+function handlePlayerFormSubmit() {
+    const submitBtn = document.querySelector('.submit-player-btn');
+    const playerForm = document.querySelector('.player-form');
+    if (!submitBtn || submitBtn.dataset.bound) return;
+
+    submitBtn.dataset.bound = "true";
+
+    const inputs = playerForm.querySelectorAll('input');
+    validateInputs(inputs); 
+
+    submitBtn.addEventListener('click', () => {
+        applyPlayerDefaults();
         closePaperRoll();
     });
+}
+
+
+/**
+ * Wendet Standardwerte für Spieler und Gegner an, falls keine Daten vorhanden sind.
+ */
+function applyPlayerDefaults() {
+    const numOpponent = Number(localStorage.getItem("numOpponent")) || 1;
+
+    const player = JSON.parse(localStorage.getItem("player")) || {};
+    if (!player.name) player.name = "Spieler";
+    if (!player.avatar) player.avatar = "/assets/img/profile_image_default.png";
+    localStorage.setItem("player", JSON.stringify(player));
+
+    for (let i = 1; i <= numOpponent; i++) {
+        const key = `opponent${i}`;
+        const data = JSON.parse(localStorage.getItem(key)) || {};
+
+        if (!data.name) data.name = numOpponent === 1 ? "Gegner" : `Gegner ${i}`;
+        if (!data.avatar) data.avatar = "/assets/img/profile_image_default.png";
+
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+}
+
+
+/**
+ * Validiert Inputfelder: erlaubt nur Buchstaben und Bindestriche.
+ * @param {HTMLInputElement[]} inputElements - Inputfelder
+ */
+function validateInputs(inputElements) {
+    inputElements.forEach((input, index) => {
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/[^A-Za-zÄÖÜäöüß -]/g, '').trimStart();
+
+            const key = index === 0 ? "player" : `opponent${index}`;
+            const data = JSON.parse(localStorage.getItem(key)) || { name: "", avatar: "" };
+            data.name = input.value;
+            localStorage.setItem(key, JSON.stringify(data));
+        });
+
+        input.addEventListener('blur', () => input.value = input.value.trim());
+    });
+}
+
+
+/**
+ * Stellt gespeicherte Spieler- und Gegnerdaten im Formular wieder her. Inputs leeren, wenn Standardwerte.
+ */
+function restorePlayerFormData() {
+     const playerForm = paperContent.querySelector(".player-form");
+    if (!playerForm) return;
+
+    const numOpponent = Number(localStorage.getItem("numOpponent")) || 1;
+    const inputs = playerForm.querySelectorAll('input');
+    const avatarImgs = playerForm.querySelectorAll(".avatar-circle img");
+
+    for (let i = 0; i <= numOpponent; i++) {
+        const key = i === 0 ? "player" : `opponent${i}`;
+        const data = JSON.parse(localStorage.getItem(key)) || {};
+
+        const input = inputs[i];
+        const defaultNames = i === 0 ? ["Spieler"] : ["Gegner", `Gegner ${i}`];
+        if (input) input.value = data.name && !defaultNames.includes(data.name) ? data.name : '';
+
+        if (data.avatar) markSelectedAvatar(avatarImgs, data.avatar);
+    }
+}
+
+
+/**
+ * Markiert einen gewählten Avatar und dimmt die anderen.
+ * @param {NodeList|HTMLElement[]} avatarImgs - Alle Avatare im Formular
+ * @param {string} selectedSrc - URL des gewählten Avatars
+ */
+function markSelectedAvatar(avatarImgs, selectedSrc) {
+    const avatars = Array.from(avatarImgs);
+
+    if (!selectedSrc || selectedSrc.includes("profile_image_default.png")) {
+        avatars.forEach(img => img.classList.remove("selected", "dimmed"));
+        return;
+    }
+
+    const selectedImg = avatars.find(img => img.src.split("/").pop() === selectedSrc.split("/").pop());
+    if (!selectedImg) return;
+
+    avatars.forEach(img => img.classList.remove("selected", "dimmed"));
+    selectedImg.classList.add("selected");
+    avatars.filter(img => img !== selectedImg).forEach(img => img.classList.add("dimmed"));
 }
 
 
@@ -253,30 +499,28 @@ window.addEventListener('resize', () => {
     if (window.updateCarouselDimensions) window.updateCarouselDimensions();
 });
 
-/**
- * Einmalige User-Interaktion starten Musik, falls vorher aktiviert
- */
-let musicStarted = false;
-['click', 'keydown'].forEach(ev =>
-    document.addEventListener(ev, () => {
-        if (!musicStarted && localStorage.getItem("music") === "on") {
-            playMusic();
-            musicStarted = true;
-        }
-    }, { once: true })
-);
 
 
 /**
- * Startet das Spiel: blendet Startscreen aus, zeigt GameScreen.
+ * Startet das Spiel. Zeigt GeameScreen an.
+ * Initialisiert ein Default-Spieler/ Gegner-Setup, wenn der Nutzer keine Auswahl getroffen hat.
  */
 startButton.addEventListener("click", async () => {
+    let defaultAvatar = '/assets/img/profile_image_default.png';
+
     if (!localStorage.getItem('numOpponent')) {
-        localStorage.setItem('player', JSON.stringify({ name: 'Spieler', points: 0, totalPoints: 0  }));
-        localStorage.setItem('opponent1', JSON.stringify({ name: 'Gegner', points: 0, totalPoints: 0  }));
+        localStorage.setItem('player', JSON.stringify({ name: 'Spieler', avatar: defaultAvatar, points: 0, totalPoints: 0  }));
+        localStorage.setItem('opponent1', JSON.stringify({ name: 'Gegner', avatar: defaultAvatar,points: 0, totalPoints: 0  }));
         localStorage.setItem('numOpponent', 1);
     }
 
     const gameModule = await import("./setup.js");
     gameModule.showGameScreen();
+});
+
+
+document.addEventListener("dragstart", (e) => {
+    if (e.target.tagName === "IMG") {
+        e.preventDefault();
+    }
 });

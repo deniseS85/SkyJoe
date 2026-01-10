@@ -21,8 +21,7 @@ export function resetGame(isRestart = false) {
         stopDealSound();
         resetLocalStorage();
     }
-   
-    clearAllTimeouts();
+    resetGameState();
     clearGameDOM();
     resetRotationWrapper();
     resetCards();
@@ -32,7 +31,7 @@ export function resetGame(isRestart = false) {
 /**
  * Stoppt alle laufenden Zeitouts und setzt Flags zurück.
  */
-export function clearAllTimeouts() {
+function resetGameState() {
     dealTimeouts.forEach(id => clearTimeout(id));
     dealTimeouts = [];
     isDealing = false;
@@ -133,7 +132,8 @@ export function updateRound(increase = false) {
  */
 function setBackground() {
     const selectedBg = localStorage.getItem('selectedBg');
-    if (selectedBg) gameScreen.style.background = `#fffbea url(/assets/img/bg${selectedBg}.png) no-repeat center/cover`;
+    const background = selectedBg ? selectedBg : 0;
+    gameScreen.style.background = `#fffbea url(/assets/img/bg${background}.png) no-repeat center/cover`;
 }
 
 
@@ -158,9 +158,9 @@ function createPlayers() {
 function createContainer(type, index = 0) {
     let stored;
     if (type === 'player') {
-        stored = JSON.parse(localStorage.getItem('player')) || { name: 'Spieler', points: 0, totalPoints: 0  };
+        stored = JSON.parse(localStorage.getItem('player')) || { name: 'Spieler', avatar: null, points: 0, totalPoints: 0  };
     } else {
-        stored = JSON.parse(localStorage.getItem(`opponent${index + 1}`)) || { name: `Gegner ${index + 1}`, points: 0, totalPoints: 0  };
+        stored = JSON.parse(localStorage.getItem(`opponent${index + 1}`)) || { name: `Gegner ${index + 1}`, avatar: null, points: 0, totalPoints: 0  };
     }
 
     const id = type === 'player'
@@ -169,7 +169,7 @@ function createContainer(type, index = 0) {
 
     const className = type === 'player' ? 'player-grid' : 'opponent-grid';
 
-    const container = createPlayerGridWrapper(stored.name, id);
+    const container = createPlayerGridWrapper(stored.name, id, stored.avatar);
     const grid = createGrid(id, className);
     container.appendChild(grid);
 
@@ -182,7 +182,7 @@ function createContainer(type, index = 0) {
  * @param {string} imageUrl - URL für das Spielerbild
  * @returns {HTMLElement} Spielerinfo-Container
  */
-function createPlayerGridWrapper(name, id, imageUrl = '/assets/img/profile_image_default.png') {
+function createPlayerGridWrapper(name, id, imageUrl) {
     const container = document.createElement('div');
     container.className = 'grid-wrapper';
     container.dataset.playerId = id;
@@ -736,7 +736,7 @@ function rotatePlayer(player, wrapperRotation) {
  * @param {boolean} isBottom - true, wenn der Spieler unten sitzt, sonst false
  */
 function adjustGrid(grid, isBottom) {
-    const minHeight = 914;
+    const minHeight = 799;
 
     if (window.innerHeight >= minHeight) {
         grid.querySelectorAll('.card').forEach(card => {
