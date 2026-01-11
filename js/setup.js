@@ -31,7 +31,6 @@ export function resetGame(isRestart = false) {
         stopDealSound();
         resetLocalStorage();
     }
-
     clearGameDOM();
     resetRotationWrapper();
     resetCards();
@@ -92,7 +91,6 @@ export function showGameScreen(isRestart = false) {
         gameScreen.style.display = 'flex';
         
     }
-
     updateRound(isRestart);
     createPlayers();
     positionPlayersInRotationWrapper();
@@ -270,6 +268,10 @@ function createGrid(id, className) {
         const field = document.createElement('div');
         field.className = 'card-field';
         field.id = `${id}${i + 1}`;
+        const col = i % 4;  
+        const row = Math.floor(i / 4); 
+        field.dataset.row = row;
+        field.dataset.col = col;
         grid.appendChild(field);
     });
     return grid;

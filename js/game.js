@@ -1,17 +1,4 @@
-import { 
-    generateCardImage, 
-    rotatePlayers, 
-    currentStep, 
-    incrementStep, 
-    setTurnState, 
-    turnState, 
-    resetGame, 
-    showGameScreen, 
-    shuffle,
-    isDealing,
-    playDealSound,
-    stopDealSound
-  } from "./setup.js";
+import { generateCardImage, rotatePlayers, currentStep, incrementStep, setTurnState, turnState, resetGame, showGameScreen, shuffle, isDealing, playDealSound, stopDealSound} from "./setup.js";
 import { playMusic, stopMusic } from "./script.js";
 import { paperRollContent } from "./paperRollContent.js";
 
@@ -19,6 +6,7 @@ const flipCardSound = new Audio('/assets/sounds/flip-card.mp3');
 const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
 const cardDropSound = new Audio('/assets/sounds/card-drop.mp3');
 const winnerSound = new Audio('/assets/sounds/winner-sound.mp3');
+const threeColumsSound = new Audio('/assets/sounds/three-columns.mp3');
 const stack1 = document.getElementById('stack-field-1');
 const stack2 = document.getElementById('stack-field-2');
 
@@ -28,7 +16,9 @@ let dragEnabled = true;
 let lastTurnActive = false;
 let remainingLastTurns = 0;
 let discardedCards = [];
+let isThreeColums = false;
 setupGameSettings();
+
 
 /**
  * Initialisiert den Spielstart.
@@ -66,6 +56,7 @@ function flipCard(cardEl, inner, changeCard = false) {
     playSound(flipCardSound);
     cardEl.dataset.flipped = 'true';
     playerData.total += Number(cardEl.dataset.value);
+    checkThreeInColumn(wrapper);
     updatePointInfo(playerData);
 
     if (!changeCard) {
@@ -160,6 +151,7 @@ function checkAllPlayersFlipped() {
     }
 
     if (allDone) {
+        if (turnState !== 'SELECT') return;
         let startingPlayer = flippedValues.reduce((prev, curr) => curr.total > prev.total ? curr : prev);
 
         const topPlayers = flippedValues.filter(p => p.total === startingPlayer.total);
@@ -190,10 +182,13 @@ function getPlayersFlippedTwoCards() {
  *      @property {number} [volume] - Lautstärke des Sounds (0–1)
  *      @property {number} [delay] - Verzögerung vor dem Abspielen des Sounds in ms
  */
-function showPopUp(content, sound, className, onShow) {
+function showPopUp(content, sound, className, onShow, type = 'generic') {
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
+    if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type !== type) return; 
+
+    popupWrapper.dataset.type = type;
     popupContent.className = className;
     popupContent.innerHTML = content;
     popupWrapper.classList.add('show');
@@ -208,7 +203,7 @@ function showPopUp(content, sound, className, onShow) {
  * @param {Object} player - Spieler-Daten
  */
 function showStartPopup(player) {
-    showPopUp(`${player.name} beginnt das Spiel!`,playerStartSound, 'start-player-container', (_, popupWrapper) => {
+    showPopUp(`${player.name} beginnt das Spiel!`, playerStartSound, 'start-player-container', (_, popupWrapper) => {
         setTimeout(() => {
             popupWrapper.classList.remove('show');
                 
@@ -225,7 +220,9 @@ function showStartPopup(player) {
                 updateClickableCards();
             }, 800);
         }, 2000);
-    });
+    },
+    'start'
+    );
 }
 
 
@@ -614,6 +611,7 @@ function swapCards(original, targetCard) {
     }
 
     const wrapper = targetCard.closest('.grid-wrapper');
+    checkThreeInColumn(wrapper);
     refreshPoints(wrapper);
 
     originalImg.src = dragCard.img;
@@ -670,15 +668,22 @@ function refreshPoints(wrapper) {
 function handleFinishState() {
     if (turnState !== 'FINISH') return;
 
+    const rotate = () => {
+        incrementStep();
+        rotatePlayers(currentStep);
+        setTurnState('START'); 
+        updateClickableCards();
+        enableStack1Click();
+        isThreeColums = false;
+    };
+
+    const delay = isThreeColums ? 1600 : 500;
+
     if (lastTurnActive) {
         remainingLastTurns--;
 
         if (remainingLastTurns > 0) {
-            incrementStep();
-            rotatePlayers(currentStep);
-            setTurnState('START'); 
-            updateClickableCards();
-            enableStack1Click();
+            setTimeout(rotate, delay);
         } else {
             setTimeout(() => {
                 lastTurnActive = false;
@@ -687,16 +692,10 @@ function handleFinishState() {
             }, 500);
         }
     } else {
-        setTimeout(() => {
-            incrementStep();
-            rotatePlayers(currentStep);
-            setTurnState('START'); 
-            updateClickableCards();
-            enableStack1Click();
-        }, 500);
+        setTimeout(rotate, delay);
     }
-     
 }
+
 
 
 /**
@@ -712,7 +711,6 @@ function isFieldComplete(wrapper) {
 
 /**
  * Startet die letzte Runde des Spiels.
- * @returns {void}
  */
 function startLastRound() {
     if (lastTurnActive) return;
@@ -726,7 +724,6 @@ function startLastRound() {
 /**
  * Deckt alle noch nicht aufgedeckten Karten aller Spieler auf, 
  * aktualisiert die Punktestände und bestimmt den Gewinner des Spiels.
- * @returns {void}
  */
 function revealRemainingCards() {
     document.querySelectorAll('.grid-wrapper').forEach(wrapper => {
@@ -746,6 +743,139 @@ function revealRemainingCards() {
 
     showWinPopup();
     setTurnState('FINISH');
+}
+
+/**
+ * Prüft, ob in ein Speiler in einer Spalte drei gleiche Kartenwerte hat.
+ * @param {HTMLElement} wrapper - Grid-Wrapper des Spielers
+ */
+function checkThreeInColumn(wrapper) {
+    const playerData = getOrCreatePlayerData(wrapper);
+    const columns = {};
+
+    wrapper.querySelectorAll('.card[data-flipped="true"]').forEach(card => {
+        const col = Number(card.parentNode.dataset.col);
+        if (!columns[col]) columns[col] = [];
+        columns[col].push(card);
+    });
+
+    for (const col in columns) {
+        const cards = columns[col];
+        const values = cards.map(c => Number(c.dataset.value));
+
+        if (values.length === 3 && values.every(v => v === values[0])) {
+            isThreeColums = true;
+            const sum = values.reduce((a, b) => a + b, 0);
+            playerData.total -= sum;
+            playerData.count -= 3;
+           
+            cards.forEach(card => card.dataset.flipped = 'false');
+            highlightColumn(wrapper, Number(col));
+            animateColumn(cards);
+        }
+    }
+}
+
+
+/**
+ * Hebt die Spalte hervor, wo drei Kartenwerte gleich sind.
+ * @param {HTMLElement} wrapper - Grid-Wrapper des Spielers
+ * @param {number} column - Spaltenindex
+ */
+function highlightColumn(wrapper, column) {
+    const fields = wrapper.querySelectorAll(`.card-field[data-col='${column}']`);
+    if (!fields.length) return;
+
+    playSound(threeColumsSound, 0.3);
+
+    const first = fields[0].getBoundingClientRect();
+    const last = fields[fields.length - 1].getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const fieldStyle = getComputedStyle(fields[0]);
+
+    const overlay = document.createElement('div');
+    Object.assign(overlay.style, {
+        position: 'absolute',
+        left: `${first.left - wrapperRect.left}px`,
+        top: `${first.top - wrapperRect.top}px`,
+        width: `${first.width}px`,
+        height: `${last.bottom - first.top}px`,
+        borderRadius: fieldStyle.borderRadius,
+        pointerEvents: 'none',
+        transition: 'all 0.3s',
+        animation: 'glowPulse 0.9s ease-in-out infinite'
+    });
+
+    wrapper.appendChild(overlay);
+    setTimeout(() => overlay.remove(), 1500);
+}
+
+
+/**
+ * Animiert das Entfernen von drei gleichen Karten aus einer Spalte
+ * und verschiebt sie in den Ablagestapel.
+ * @param {HTMLElement[]} cards - Array von drei Karten, die entfernt werden sollen
+ */
+function animateColumn(cards) {
+    setTimeout(() => {
+        const wrapper = cards[0].closest('.grid-wrapper'); 
+
+        cards.forEach(card => {
+            const img = card.querySelector('img');
+            discardedCards.push({
+                img: img?.src || '',
+                value: Number(card.dataset.value),
+                alt: img?.alt || ''
+            });
+
+            card.style.transition = "transform 0.8s ease, opacity 0.8s ease";
+            card.style.transform = "translateY(50px) scale(0.5)";
+            card.style.opacity = "0";
+            setTimeout(() => card.remove(), 800);
+        });
+
+        setTimeout(() => {
+            checkPlayingFieldIsEmpty(wrapper);
+        }, 900);
+    }, 1400);
+}
+
+/**
+ * Prüft, ob das Grid des Spielers leer ist und startet die letzte Runde.
+ * @param {HTMLElement} wrapper - Grid-Element eines Spielers
+ */
+function checkPlayingFieldIsEmpty(wrapper) {
+    if (!wrapper) return;
+    if (isWrapperEmpty(wrapper) && !lastTurnActive) startLastRound();
+    
+    if (lastTurnActive) {
+        remainingLastTurns--;
+        if (remainingLastTurns <= 0) {
+            revealRemainingCards(); 
+        }
+    } else {
+        checkEndOfGame();
+    }
+}
+
+
+/**
+ * Prüft, ob ein Wrapper keine Karten mehr hat.
+ * @param {HTMLElement} wrapper - Das Grid-Element eines Spielers
+ * @returns {boolean} - true, wenn keine Karten mehr vorhanden sind
+ */
+function isWrapperEmpty(wrapper) {
+    return Array.from(wrapper.querySelectorAll('.card-field')).every(field => field.children.length === 0);
+}
+
+
+/**
+ * Prüft alle Grids, ob das Spiel beendet ist, und löst ggf. das Endspiel aus.
+ */
+function checkEndOfGame() {
+    const wrappers = document.querySelectorAll('.grid-wrapper');
+    const allEmpty = Array.from(wrappers).some(w => isWrapperEmpty(w));
+    if (allEmpty) revealRemainingCards();
 }
 
 
@@ -769,6 +899,7 @@ function showWinPopup() {
     const popupHTML = generateHighscoreHTML(players);
 
     showPopUp(popupHTML, winnerSound, 'highscore-container', (popupContent, popupWrapper) => {
+        popupWrapper.dataset.type = 'winner';
         popupContent.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 popupWrapper.style.transition = 'none';
@@ -795,7 +926,9 @@ function showWinPopup() {
                 }
             }, { once: true });
         });
-    });
+    },
+    'winner'    
+    );
 }
 
 
@@ -921,6 +1054,7 @@ function setupGameRulesPopup() {
     const popupWrapper = document.getElementById('popup');
 
     gameRulesIcon.addEventListener('click', () => {
+        if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type !== 'rules') return;
         if (popupWrapper.classList.contains('show')) {
             popupWrapper.classList.remove('show');
         } else {
@@ -931,12 +1065,14 @@ function setupGameRulesPopup() {
                 'game-rules-container',
                 (_, popupWrapper) => {
                     popupWrapper.style.transition = 'opacity 0.2s ease, visibility 0.2s ease';
-                }
+                },
+                'rules'
             );
         }
     });
 
     document.addEventListener('click', (e) => {
+        if (popupWrapper.dataset.type !== 'rules') return;
         const popupContent = document.getElementById('popupContent');
             if (!popupContent.contains(e.target) && e.target !== gameRulesIcon) {
             popupWrapper.classList.remove('show');
