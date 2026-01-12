@@ -141,8 +141,7 @@ function checkAllPlayersFlipped() {
     const flippedValues = getPlayersFlippedTwoCards();
     const allDone = flippedValues.length === totalPlayers;
 
-    if (!firstPlayerRotated && flippedValues.length > 0) {
-        firstPlayerRotated = true;
+    if (flippedValues.length > currentStep) {
         incrementStep();
         setTimeout(() => {
             rotatePlayers(currentStep);
@@ -203,7 +202,7 @@ function showPopUp(content, sound, className, onShow, type = 'generic') {
  * @param {Object} player - Spieler-Daten
  */
 function showStartPopup(player) {
-    showPopUp(`${player.name} beginnt das Spiel!`, playerStartSound, 'start-player-container', (_, popupWrapper) => {
+    showPopUp(`${player.name}<br>beginnt das Spiel!`, playerStartSound, 'start-player-container', (_, popupWrapper) => {
         setTimeout(() => {
             popupWrapper.classList.remove('show');
                 
@@ -1078,6 +1077,11 @@ function setupGameRulesPopup() {
             popupWrapper.classList.remove('show');
         }
     });
+}
+
+
+function setupHighScorePopup() {
+    const highScoreIcon = document.getElementById('highScore');
 }
 
 

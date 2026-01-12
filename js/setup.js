@@ -447,6 +447,7 @@ export function generateCardImage(card, width, height) {
     return canvas.toDataURL();
 }
 
+
 /**
  * Startet die Karten-Austeil-Animation für alle Spieler.
  * Spielt währenddessen einen Loop-Sound ab und stoppt diesen nach der letzten Karte.
@@ -470,7 +471,6 @@ function animateDeal(players) {
         const fieldWidth = player.querySelector('.card-field').offsetWidth;
         dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer);
     });
-
     afterDeal(dealDurationMs);
 }
 
@@ -651,21 +651,28 @@ function resizeAllCards() {
 /**
  * Positioniert alle Spieler gleichmäßig im Kreis innerhalb des Rotation-Wrappers.
  */
-function positionPlayersInRotationWrapper() {
-    const players = rotationWrapper.querySelectorAll(".grid-wrapper");
-    const wrapperWidth = rotationWrapper.offsetWidth;
-    const wrapperHeight = rotationWrapper.offsetHeight;
-    const radiusX = wrapperWidth * 0.45; 
-    const radiusY = wrapperHeight * 0.45; 
-    const center = { x: wrapperWidth / 2, y: wrapperHeight / 2 };
-    const angles = calculatePlayerAngles(players.length);
+function positionPlayersInRotationWrapper() { 
+    const players = rotationWrapper.querySelectorAll(".grid-wrapper"); 
+    const wrapperWidth = rotationWrapper.offsetWidth; 
+    const wrapperHeight = rotationWrapper.offsetHeight; 
+    let radiusX = wrapperWidth * 0.45; 
+    let radiusY = wrapperHeight * 0.45; 
+    let centerY = wrapperHeight / 2; 
 
-    players.forEach((player, i) => {
-        const pos = calculatePositionOnEllipse(angles[i], radiusX, radiusY, center);
-        applyPlayerPosition(player, pos, angles[i]);
+    if (players.length === 3) { 
+        radiusY *= 1.35; 
+        radiusX *= 1.35; 
+        centerY = wrapperHeight / 2 - wrapperHeight * 0.17; 
+    } 
+    
+    const center = { x: wrapperWidth / 2, y: centerY }; 
+    rotationWrapper.style.transformOrigin = `${center.x}px ${center.y}px`; 
+    const angles = calculatePlayerAngles(players.length); 
+    players.forEach((player, i) => { 
+        const pos = calculatePositionOnEllipse(angles[i], radiusX, radiusY, center); 
+        applyPlayerPosition(player, pos, angles[i]); 
     });
 }
-
 
 /**
  * Berechnet die x- und y-Position eines Punktes auf einer Ellipse anhand eines Winkels.

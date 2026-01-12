@@ -1037,7 +1037,6 @@ input:checked + .settings-slider:before {
     border-radius: 5px;
 }
 
-
 .highscore-container {
     justify-content: center; 
     padding: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem) 0px;
