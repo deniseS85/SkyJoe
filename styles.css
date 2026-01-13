@@ -1011,7 +1011,6 @@ input:checked + .settings-slider:before {
 
 .game-rules-container {
     font-family: "Comic Sans MS", "Fredoka", "Poppins", sans-serif;
-    width: clamp(13.125rem, 7.8571rem + 26.3393vw, 50rem);
     overflow: auto;
     padding: clamp(0.625rem, 0.5357rem + 0.4464vw, 1.25rem);
     border-radius: 12px;
@@ -1046,6 +1045,12 @@ input:checked + .settings-slider:before {
     height: auto;
 }
 
+.highscore-settings {
+    height: auto;
+    border-radius: 30px;
+    padding-bottom: clamp(1.875rem, 1.4286rem + 2.2321vw, 5rem);
+}
+
 .highscore-title {
     font-family: 'biscuit', sans-serif;
     letter-spacing: 2px;
@@ -1055,7 +1060,7 @@ input:checked + .settings-slider:before {
     font-size: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
 }
 
-.highscore-list{
+.highscore-list {
     width: 90%;
     gap: 10px;
     display: flex;
@@ -1112,7 +1117,11 @@ input:checked + .settings-slider:before {
 .points-container {
     display: flex;
     gap: clamp(0.625rem, 0.5357rem + 0.4464vw, 1.25rem);
-    width: 40%;
+   /*  width: 40%; */
+    justify-content: space-around;
+}
+
+.points-container:first-child {
     justify-content: space-between;
 }
 

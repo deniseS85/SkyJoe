@@ -887,6 +887,8 @@ function showPopUp(content, options = {}) {
     popupWrapper.dataset.type = type;
     popupContent.className = className || '';
     popupContent.innerHTML = content;
+    popupWrapper.style.transition = '';
+    popupWrapper.getBoundingClientRect();
     popupWrapper.classList.add('show');
 
     if (sound) playSound(sound, 0.3, 500);
@@ -999,45 +1001,78 @@ function loadPlayers({ updateTotal = false, sort = false } = {}) {
 }
 
 
-
 /**
  * Generiert das HTML für das Highscore-Popup.
  * @param {Array<{name: string, points: number}>} players - Sortierte Spieler mit Punkten
  */
-function generateHighscoreHTML(players) {
+function generateHighscoreHTML(players, isSettings = false) {
     const medals = ['gold', 'silber', 'bronze'];
+    const pointsWidth = isSettings ? 'auto' : '43%';
+    const headerWidth = isSettings ? 'auto' : '40%';
+    const pointKey = isSettings ? 'totalPoints' : 'points';
+    const ranks = calculateRanks(players, pointKey);
 
-    const entriesHTML = players.map((p, i) => /*html*/`
-        <div class="highscore-entry">
-            <img class="rank" src="/assets/img/medaille-${medals[i]}.png" alt="Medaille ${medals[i]}">
-            <img src=${p.avatar} alt="Player-Image" class="avatar">
-            <div class="score-pill ${i === 0 ? 'winner' : ''}">
-                <span class="name">${p.name}</span>
-                <div class="points-container">
-                    <span class="player-points">${p.points}</span>
-                    <span class="player-total">${p.totalPoints}</span>
+    const entriesHTML = players.map((p, i) => {
+        const medal = medals[ranks[i]];
+        const isWinner = ranks[i] === 0 && !isSettings;
+        return /*html*/`
+            <div class="highscore-entry">
+                <img class="rank" src="/assets/img/medaille-${medal}.png" alt="Medaille ${medal}">
+                <img src=${p.avatar} alt="Player-Image" class="avatar">
+                <div class="score-pill ${isWinner ? ' winner' : ''}">
+                    <span class="name">${p.name}</span>
+                    <div class="points-container" style="width: ${pointsWidth}">
+                        ${!isSettings ? /*html*/`
+                            <span class="player-points">${p.points}</span>` : ''}
+                        <span class="player-total">${p.totalPoints}</span>
+                    </div>
+                    
                 </div>
-                
-            </div>
-        </div>`
-    ).join('');
+            </div>`
+    }).join('');
 
     return /*html*/`
         <div class="highscore-title">HighScore</div>
         <div class="highscore-list">
             <div class="list-header">
-                <div class="points-container" style="width: 43%">
-                    <span>Jetzt</span>
+                <div class="points-container" style="width: ${headerWidth}">
+                    ${!isSettings ? /*html*/`
+                        <span>Jetzt</span>` : ''}
                     <span>Total</span>
                 </div>
             </div>
             ${entriesHTML}
         </div>
-        <div class="btn-wrapper">
-            <button class="menu-btn" id="restartBtn">Neues Spiel</button>
-            <button class="menu-btn" id="closeBtn">Schliessen</button>
-        </div>`;
+        ${!isSettings ? /*html*/`
+            <div class="btn-wrapper">
+                <button class="menu-btn" id="restartBtn">Neues Spiel</button>
+                <button class="menu-btn" id="closeBtn">Schliessen</button>
+            </div>` : ''}`;
 }
+
+
+/**
+ * Berechnet die Platzierungen der Spieler basierend auf ihren Punkten.
+ * Gleiche Punktzahlen erhalten den gleichen Rang.
+ * @param {Array} players
+ * @param {string} pointKey - Punkte oder Gesamtpunkte.
+ * @returns {Array<number>} - Array der Ränge für jeden Spieler.
+ */
+function calculateRanks(players, pointKey = 'points') {
+    const ranks = [];
+    players.forEach((p, i) => {
+        if (i === 0) {                                               // Erster Spieler bekommt immer Rank 0 (Gold)
+            ranks[i] = 0;
+        } else if (p[pointKey] === players[i - 1][pointKey]) {      // Wenn ein Spieler denselben Punktwert hat wie der vorherige,
+            ranks[i] = ranks[i - 1];                                // bekommt er den gleichen Rank (Gold/Gold; Silber/Silber; Bronze/Bronze)
+        } else {
+            ranks[i] = ranks[i - 1] + 1;                            // wenn nicht, bekommt er den nächsten Rank (Gold->Silber->Bronze)
+        }
+        if (ranks[i] > 2) ranks[i] = 2;                             // Bronze ist höchster Rank, nicht weiter gehen
+    });
+    return ranks;
+}
+
 
 
 /**
@@ -1080,9 +1115,9 @@ function setupHighScorePopup() {
 
     highScoreIcon.addEventListener('click', () => {
         const players = loadPlayers({ updateTotal: false, sort: true });
-        const content = generateHighscoreHTML(players);
+        const content = generateHighscoreHTML(players, true);
         const type = 'highscore';
-        const className = 'highscore-container';
+        const className = 'highscore-container highscore-settings';
 
         if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type === type) {
             popupWrapper.classList.remove('show');
