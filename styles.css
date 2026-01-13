@@ -969,8 +969,6 @@ input:checked + .settings-slider:before {
     border-radius: 30px;
 }
 
-
-
 .flip-card {
     background-color: transparent;
     width: 300px;
@@ -1042,6 +1040,10 @@ input:checked + .settings-slider:before {
     padding: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem) 0px;
     width: clamp(19.375rem, 15rem + 21.875vw, 50rem);
     height: clamp(16.875rem, 14.375rem + 12.5vw, 34.375rem);
+}
+
+.highscore-three {
+    height: auto;
 }
 
 .highscore-title {

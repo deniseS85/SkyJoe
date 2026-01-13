@@ -17,6 +17,7 @@ let lastTurnActive = false;
 let remainingLastTurns = 0;
 let discardedCards = [];
 let isThreeColums = false;
+
 setupGameSettings();
 
 
@@ -78,12 +79,7 @@ function getOrCreatePlayerData(wrapper) {
     const playerName = nameEl?.innerText ?? (playerId.startsWith('player') ? 'Spieler' : 'Gegner');
 
     if (!flippedCards[playerId]) {
-        flippedCards[playerId] = {
-            id: playerId,
-            count: 0,
-            total: 0,
-            name: playerName
-        };
+        flippedCards[playerId] = { id: playerId, count: 0, total: 0, name: playerName};
     }
     return flippedCards[playerId];
 }
@@ -120,8 +116,10 @@ function isPlayerBottom (element) {
 function updatePointInfo(playerData) {
     const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
     const span = wrapper?.querySelector('.point-info span');
-    if (span) span.textContent = playerData.total;
-    span.style.fontSize = playerData.total >= 100 ? 'clamp(0.75rem, 0.6964rem + 0.2679vw, 1.125rem)' : '';
+    if (span) {
+        span.textContent = playerData.total;
+        span.style.fontSize = playerData.total >= 100 ? 'clamp(0.75rem, 0.6964rem + 0.2679vw, 1.125rem)' : '';
+    }
 
     const parts = playerData.id.split('-');
     const key = parts[0] === 'player' ? 'player' : `opponent${parts[1]}`;
@@ -149,14 +147,10 @@ function checkAllPlayersFlipped() {
         }, 500);
     }
 
-    if (allDone) {
-        if (turnState !== 'SELECT') return;
+    if (allDone && turnState === 'SELECT') {
         let startingPlayer = flippedValues.reduce((prev, curr) => curr.total > prev.total ? curr : prev);
-
         const topPlayers = flippedValues.filter(p => p.total === startingPlayer.total);
-        if (topPlayers.length > 1) {
-            startingPlayer = topPlayers[Math.floor(Math.random() * topPlayers.length)];
-        }
+        if (topPlayers.length > 1) startingPlayer = topPlayers[Math.floor(Math.random() * topPlayers.length)];
         showStartPopup(startingPlayer);
     }
 }
@@ -168,60 +162,6 @@ function checkAllPlayersFlipped() {
  */
 function getPlayersFlippedTwoCards() {
     return Object.values(flippedCards).filter(p => p.count >= 2);
-}
-
-
-/**
- * Zeigt ein Popup-Fenster an.
- * @param {string} content - HTML-Inhalt, der im Popup angezeigt werden soll.
- * @param {HTMLAudioElement} [sound] - Sound, der beim Öffnen des Popups abgespielt wird.
- * @param {string} className - CSS-Klasse für das Popup-Content-Elemente.
- * @param {function} [onShow] - Callback, der aufgerufen wird, sobald das Popup angezeigt wurde.
- * @param {Object} [soundOptions={}] - Optionen für den Sound:
- *      @property {number} [volume] - Lautstärke des Sounds (0–1)
- *      @property {number} [delay] - Verzögerung vor dem Abspielen des Sounds in ms
- */
-function showPopUp(content, sound, className, onShow, type = 'generic') {
-    const popupWrapper = document.getElementById('popup');
-    const popupContent = document.getElementById('popupContent');
-
-    if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type !== type) return; 
-
-    popupWrapper.dataset.type = type;
-    popupContent.className = className;
-    popupContent.innerHTML = content;
-    popupWrapper.classList.add('show');
-
-    if (sound) playSound(sound, 0.3, 500);
-    onShow?.(popupContent, popupWrapper);
-}
-
-
-/**
- * Zeigt das Popup an mit dem Startspieler.
- * @param {Object} player - Spieler-Daten
- */
-function showStartPopup(player) {
-    showPopUp(`${player.name}<br>beginnt das Spiel!`, playerStartSound, 'start-player-container', (_, popupWrapper) => {
-        setTimeout(() => {
-            popupWrapper.classList.remove('show');
-                
-            setTimeout(() => {
-                const allPlayers = document.querySelectorAll('.grid-wrapper');
-                const winningPlayerEl = Array.from(allPlayers).find(p => p.dataset.playerId === player.id);
-                
-                if (!isPlayerBottom(winningPlayerEl)) {
-                    incrementStep();
-                    rotatePlayers(currentStep);
-                }
-                revealDiscardCard();
-                setTurnState('START');
-                updateClickableCards();
-            }, 800);
-        }, 2000);
-    },
-    'start'
-    );
 }
 
 
@@ -696,7 +636,6 @@ function handleFinishState() {
 }
 
 
-
 /**
  * Prüft, ob alle Karten in einem Spielerfeld aufgedeckt sind.
  * @param {HTMLElement} wrapper - Das Wrapper-Element des Spielerfeldes.
@@ -879,130 +818,13 @@ function checkEndOfGame() {
 
 
 /**
- * Zeigt das HighScore-Popup am Ende des Spiels an.
- */
-function showWinPopup() {
-    const numOpponent = Number(localStorage.getItem('numOpponent') || 1);
-
-    const players = [{ key: 'player' }, { key: 'opponent1' }, { key: 'opponent2' }]
-        .slice(0, numOpponent + 1)
-        .map(p => {
-            const data = JSON.parse(localStorage.getItem(p.key)) || { name: p.key, avatar: null, points: 0, totalPoints: 0 };
-            data.totalPoints += data.points;
-            localStorage.setItem(p.key, JSON.stringify(data));
-            return { name: data.name, avatar: data.avatar, points: data.points, totalPoints: data.totalPoints, key: p.key };
-        });
-
-    players.sort((a, b) => a.points - b.points);
-
-    const popupHTML = generateHighscoreHTML(players);
-
-    showPopUp(popupHTML, winnerSound, 'highscore-container', (popupContent, popupWrapper) => {
-        popupWrapper.dataset.type = 'winner';
-        popupContent.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                popupWrapper.style.transition = 'none';
-                popupWrapper.classList.remove('show');
-                requestAnimationFrame(() => {
-                    popupWrapper.style.transition = '';
-                });
-
-                if (btn.id === 'restartBtn') {
-                     players.forEach(p => {
-                        const stored = JSON.parse(localStorage.getItem(p.key)) || { name: p.name, avatar: null, points: 0, totalPoints: 0 };
-                        stored.points = 0;
-                        localStorage.setItem(p.key, JSON.stringify(stored));
-                    });
-                    resetGame(true);
-                    showGameScreen(true);
-                    setTurnState('INIT');
-                    startGame();
-                }
-                if (btn.id === 'closeBtn') {
-                    gameScreen.style.display = 'none';
-                    startScreen.style.display = 'flex';
-                    resetGame();
-                }
-            }, { once: true });
-        });
-    },
-    'winner'    
-    );
-}
-
-
-/**
- * Generiert das HTML für das Highscore-Popup.
- * @param {Array<{name: string, points: number}>} players - Sortierte Spieler mit Punkten
- * @returns {string} HTML-String für das Highscore-Popup
- */
-function generateHighscoreHTML(players) {
-    const medals = ['gold', 'silber', 'bronze'];
-
-    const entriesHTML = players.map((p, i) => /*html*/`
-        <div class="highscore-entry">
-            <img class="rank" src="/assets/img/medaille-${medals[i]}.png" alt="Medaille ${medals[i]}">
-            <img src=${p.avatar} alt="Player-Image" class="avatar">
-            <div class="score-pill ${i === 0 ? 'winner' : ''}">
-                <span class="name">${p.name}</span>
-                <div class="points-container">
-                    <span class="player-points">${p.points}</span>
-                    <span class="player-total">${p.totalPoints}</span>
-                </div>
-                
-            </div>
-        </div>`
-    ).join('');
-
-    return /*html*/`
-        <div class="highscore-title">HighScore</div>
-        <div class="highscore-list">
-            <div class="list-header">
-                <div class="points-container" style="width: 43%">
-                    <span>Jetzt</span>
-                    <span>Total</span>
-                </div>
-            </div>
-            ${entriesHTML}
-        </div>
-        <div class="btn-wrapper">
-            <button class="menu-btn" id="restartBtn">Neues Spiel</button>
-            <button class="menu-btn" id="closeBtn">Schliessen</button>
-        </div>`;
-}
-
-
-/**
- * Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.
- * @param {HTMLAudioElement} sound - Audio-Objekt
- * @param {number} [volume=1] - Lautstärke (0.0 - 1.0)
- * @param {number} [delay=0] - Verzögerung vor Abspielen in ms
- * @param {number} [playbackRate=1] - Geschwindigkeit des Sounds
- */
-function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
-    if (!sound) return;
-    if (localStorage.getItem('sound') !== 'on') return;
-
-    setTimeout(() => {
-        try {
-            sound.currentTime = 0;
-            sound.volume = volume;
-            sound.playbackRate = playbackRate;
-            sound.play();
-        } catch (e) {
-            console.warn('Sound konnte nicht abgespielt werden', e);
-        }
-    }, delay);
-}
-
-
-/**
  * Initialisiert die Toggle-Icons für Sound und Musik.
  * Speichert den Status in localStorage und spielt/stoppt Sounds.
  */
 function setupGameSettings() {
     setupToggles();
     setupGameRulesPopup();
+    setupHighScorePopup();
 }
 
 function setupToggles() {
@@ -1046,42 +868,277 @@ function setupToggles() {
 
 
 /**
+ * Zeigt ein Popup-Fenster an.
+ * @param {string} content - HTML-Inhalt, der im Popup angezeigt werden soll.
+ * @param {HTMLAudioElement} [sound] - Sound, der beim Öffnen des Popups abgespielt wird.
+ * @param {string} className - CSS-Klasse für das Popup-Content-Elemente.
+ * @param {function} [onShow] - Callback, der aufgerufen wird, sobald das Popup angezeigt wurde.
+ * @param {Object} [soundOptions={}] - Optionen für den Sound:
+ *      @property {number} [volume] - Lautstärke des Sounds (0–1)
+ *      @property {number} [delay] - Verzögerung vor dem Abspielen des Sounds in ms
+ */
+function showPopUp(content, options = {}) {
+    const { sound, className, type = 'generic', onShow } = options;
+    const popupWrapper = document.getElementById('popup');
+    const popupContent = document.getElementById('popupContent');
+
+    if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type !== type) return;
+
+    popupWrapper.dataset.type = type;
+    popupContent.className = className || '';
+    popupContent.innerHTML = content;
+    popupWrapper.classList.add('show');
+
+    if (sound) playSound(sound, 0.3, 500);
+    onShow?.(popupContent, popupWrapper);
+}
+
+
+
+/**
+ * Zeigt das Popup an mit dem Startspieler.
+ * @param {Object} player - Spieler-Daten
+ */
+function showStartPopup(player) {
+    showPopUp(`${player.name}<br>beginnt das Spiel!`, {
+        sound: playerStartSound,
+        className: 'start-player-container',
+        type: 'start',
+        onShow: (_, popupWrapper) => {
+            setTimeout(() => {
+                popupWrapper.classList.remove('show');
+
+                setTimeout(() => {
+                    const allPlayers = document.querySelectorAll('.grid-wrapper');
+                    const winningPlayerEl = Array.from(allPlayers).find(p => p.dataset.playerId === player.id);
+
+                    if (!isPlayerBottom(winningPlayerEl)) {
+                        incrementStep();
+                        rotatePlayers(currentStep);
+                    }
+                    revealDiscardCard();
+                    setTurnState('START');
+                    updateClickableCards();
+                }, 800);
+            }, 2000);
+        }
+    });
+}
+
+
+/**
+ * Zeigt das HighScore-Popup am Ende des Spiels an.
+ */
+function showWinPopup() {
+    const players = loadPlayers({ updateTotal: true, sort: true });
+    const popupHTML = generateHighscoreHTML(players);
+    const popupClass = `highscore-container ${players.length === 3 ? 'highscore-three' : ''}`.trim();
+
+    showPopUp(popupHTML, {
+        sound: winnerSound,
+        className: popupClass,
+        type: 'winner',
+        onShow: (popupContent, popupWrapper) => {
+            popupContent.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    popupWrapper.style.transition = 'none';
+                    popupWrapper.classList.remove('show');
+                    requestAnimationFrame(() => popupWrapper.style.transition = '');
+
+                    if (btn.id === 'restartBtn') {
+                        players.forEach(p => {
+                            const stored = JSON.parse(localStorage.getItem(p.key)) || { name: p.name, avatar: null, points: 0, totalPoints: 0 };
+                            stored.points = 0;
+                            localStorage.setItem(p.key, JSON.stringify(stored));
+                        });
+                        resetGame(true);
+                        showGameScreen(true);
+                        setTurnState('INIT');
+                        startGame();
+                    }
+
+                    if (btn.id === 'closeBtn') {
+                        gameScreen.style.display = 'none';
+                        startScreen.style.display = 'flex';
+                        resetGame();
+                    }
+                }, { once: true });
+            });
+        }
+    });
+}
+
+
+/**
+ * Lädt die Spieler aus dem LocalStorage.
+ * @param {boolean} [options.updateTotal=false] - Addiert Punkte zu totalPoints
+ * @param {boolean} [options.sort=false] - Sortiert Spieler nach Punkten (aufsteigend)
+ * @returns {Array} - Spieler
+ */
+function loadPlayers({ updateTotal = false, sort = false } = {}) {
+    const numOpponent = Number(localStorage.getItem('numOpponent') || 1);
+    const keys = ['player', 'opponent1', 'opponent2'].slice(0, numOpponent + 1);
+
+    const players = keys.map(key => {
+        const data = JSON.parse(localStorage.getItem(key)) || { 
+            name: key, 
+            avatar: null, 
+            points: 0, 
+            totalPoints: 0 
+        };
+
+        if (updateTotal) {
+            data.totalPoints += data.points;
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+        return { ...data, key };
+    });
+
+    if (sort) players.sort((a, b) => a.points - b.points);
+    return players;
+}
+
+
+
+/**
+ * Generiert das HTML für das Highscore-Popup.
+ * @param {Array<{name: string, points: number}>} players - Sortierte Spieler mit Punkten
+ */
+function generateHighscoreHTML(players) {
+    const medals = ['gold', 'silber', 'bronze'];
+
+    const entriesHTML = players.map((p, i) => /*html*/`
+        <div class="highscore-entry">
+            <img class="rank" src="/assets/img/medaille-${medals[i]}.png" alt="Medaille ${medals[i]}">
+            <img src=${p.avatar} alt="Player-Image" class="avatar">
+            <div class="score-pill ${i === 0 ? 'winner' : ''}">
+                <span class="name">${p.name}</span>
+                <div class="points-container">
+                    <span class="player-points">${p.points}</span>
+                    <span class="player-total">${p.totalPoints}</span>
+                </div>
+                
+            </div>
+        </div>`
+    ).join('');
+
+    return /*html*/`
+        <div class="highscore-title">HighScore</div>
+        <div class="highscore-list">
+            <div class="list-header">
+                <div class="points-container" style="width: 43%">
+                    <span>Jetzt</span>
+                    <span>Total</span>
+                </div>
+            </div>
+            ${entriesHTML}
+        </div>
+        <div class="btn-wrapper">
+            <button class="menu-btn" id="restartBtn">Neues Spiel</button>
+            <button class="menu-btn" id="closeBtn">Schliessen</button>
+        </div>`;
+}
+
+
+/**
  * Initialisiert das Popup für die Spielregeln.
  */
 function setupGameRulesPopup() {
     const gameRulesIcon = document.getElementById('gameRules');
     const popupWrapper = document.getElementById('popup');
+    const popupContent = document.getElementById('popupContent');
 
     gameRulesIcon.addEventListener('click', () => {
-        if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type !== 'rules') return;
-        if (popupWrapper.classList.contains('show')) {
-            popupWrapper.classList.remove('show');
-        } else {
-            const content = paperRollContent["SPIELREGELN"]; 
-            showPopUp(
-                content,
-                null,
-                'game-rules-container',
-                (_, popupWrapper) => {
-                    popupWrapper.style.transition = 'opacity 0.2s ease, visibility 0.2s ease';
-                },
-                'rules'
-            );
-        }
-    });
+        const content = paperRollContent["SPIELREGELN"];
+        const type = 'rules';
+        const className = 'game-rules-container';
 
+        if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type === type) {
+            popupWrapper.classList.remove('show');
+            return;
+        }
+
+        showPopUp(content, { 
+            className, 
+            type,
+            onShow: (_, popupWrapper) => {
+                popupWrapper.style.transition = 'opacity 0.2s ease, visibility 0.2s ease';
+            }
+        });
+    });
+    setupClickOutside(popupWrapper, popupContent, gameRulesIcon, 'rules');
+}
+
+
+/**
+ * Initialisiert das Popup für die Highscore.
+ */
+function setupHighScorePopup() {
+    const highScoreIcon = document.getElementById('highScore');
+    const popupWrapper = document.getElementById('popup');
+    const popupContent = document.getElementById('popupContent');
+
+    highScoreIcon.addEventListener('click', () => {
+        const players = loadPlayers({ updateTotal: false, sort: true });
+        const content = generateHighscoreHTML(players);
+        const type = 'highscore';
+        const className = 'highscore-container';
+
+        if (popupWrapper.classList.contains('show') && popupWrapper.dataset.type === type) {
+            popupWrapper.classList.remove('show');
+            return;
+        }
+
+        showPopUp(content, { 
+            className, 
+            type,
+            onShow: (_, popupWrapper) => {
+                popupWrapper.style.transition = 'opacity 0.2s ease, visibility 0.2s ease';
+            }
+        });
+    });
+    setupClickOutside(popupWrapper, popupContent, highScoreIcon, 'highscore');
+}
+
+
+/**
+ * Schließt ein Popup, wenn außerhalb des Inhalts oder demselben Icon geklickt wird.
+ * @param {HTMLElement} popupWrapper
+ * @param {HTMLElement} popupContent
+ * @param {HTMLElement} triggerElement - Element, das das Popup öffnet
+ * @param {string} type - Dataset Typ des Popups
+ */
+function setupClickOutside(popupWrapper, popupContent, triggerElement, type) {
     document.addEventListener('click', (e) => {
-        if (popupWrapper.dataset.type !== 'rules') return;
-        const popupContent = document.getElementById('popupContent');
-            if (!popupContent.contains(e.target) && e.target !== gameRulesIcon) {
+        if (popupWrapper.dataset.type !== type) return;
+        if (!popupContent.contains(e.target) && e.target !== triggerElement) {
             popupWrapper.classList.remove('show');
         }
     });
 }
 
 
-function setupHighScorePopup() {
-    const highScoreIcon = document.getElementById('highScore');
+/**
+ * Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.
+ * @param {HTMLAudioElement} sound - Audio-Objekt
+ * @param {number} [volume=1] - Lautstärke (0.0 - 1.0)
+ * @param {number} [delay=0] - Verzögerung vor Abspielen in ms
+ * @param {number} [playbackRate=1] - Geschwindigkeit des Sounds
+ */
+function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
+    if (!sound) return;
+    if (localStorage.getItem('sound') !== 'on') return;
+
+    setTimeout(() => {
+        try {
+            sound.currentTime = 0;
+            sound.volume = volume;
+            sound.playbackRate = playbackRate;
+            sound.play();
+        } catch (e) {
+            console.warn('Sound konnte nicht abgespielt werden', e);
+        }
+    }, delay);
 }
 
 
