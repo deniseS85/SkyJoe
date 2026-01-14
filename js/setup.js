@@ -6,12 +6,11 @@ const backButton = document.getElementById("backBtn");
 const startScreen = document.getElementById("startScreen");
 const rotationWrapper = document.querySelector(".rotation-wrapper");
 export const cardSound = new Audio('/assets/sounds/deal-cards.mp3');
-
-let dealTimeouts = []; 
-export let isDealing = false; 
-let afterDealTimeoutId = null;
 export let currentStep = 0;
 export let turnState = 'INIT';
+export let isDealing = false; 
+let dealTimeouts = [];
+let afterDealTimeoutId = null;
 
 
 /**
@@ -31,6 +30,7 @@ export function resetGame(isRestart = false) {
         stopDealSound();
         resetLocalStorage();
     }
+
     clearGameDOM();
     resetRotationWrapper();
     resetCards();
@@ -89,8 +89,8 @@ export function showGameScreen(isRestart = false) {
         setSoundMusicIcons();
         startScreen.style.display = 'none';
         gameScreen.style.display = 'flex';
-        
     }
+
     updateRound(isRestart);
     createPlayers();
     positionPlayersInRotationWrapper();
@@ -146,7 +146,7 @@ function setSoundMusicIcons() {
             { id: 'musicIcon', key: 'music', default: 'off' }
         ];
 
-         icons.forEach(({ id, key, defaultStatus }) => {
+        icons.forEach(({ id, key, defaultStatus }) => {
             const icon = document.getElementById(id);
             if (!icon) return;
 
@@ -191,7 +191,6 @@ function createContainer(type, index = 0) {
     const container = createPlayerGridWrapper(stored.name, id, stored.avatar);
     const grid = createGrid(id, className);
     container.appendChild(grid);
-
     return container;
 }
 
@@ -290,6 +289,7 @@ function createDeck() {
             img: card.img ?? null
         }))
     );
+
     shuffle(deck);
     return deck;
 }
@@ -375,6 +375,7 @@ function createCardWrapper(card, width, borderRadius) {
         borderRadius,
         perspective: '1000px',
     });
+
     return cardEl;
 }
 
@@ -396,6 +397,7 @@ function createCardInner() {
         transition: 'transform 0.6s',
         transform: 'rotateY(180deg)',
     });
+
     return inner;
 }
 
@@ -421,6 +423,7 @@ function createCardFace(src, alt, borderRadius, extraStyles = {}) {
         backfaceVisibility: 'hidden',
         ...extraStyles
     });
+
     return img;
 }
 
@@ -471,6 +474,7 @@ function animateDeal(players) {
         const fieldWidth = player.querySelector('.card-field').offsetWidth;
         dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer);
     });
+    
     afterDeal(dealDurationMs);
 }
 

@@ -35,6 +35,7 @@ export function startGame() {
             cardEl.dataset.listener = 'true';
         }
     });
+
     updateClickableCards();
     gameMove(); 
 }
@@ -81,6 +82,7 @@ function getOrCreatePlayerData(wrapper) {
     if (!flippedCards[playerId]) {
         flippedCards[playerId] = { id: playerId, count: 0, total: 0, name: playerName};
     }
+
     return flippedCards[playerId];
 }
 
@@ -110,12 +112,13 @@ function isPlayerBottom (element) {
 
 
 /**
- * Aktualisiert die Punkteanzeige eines Spielers
+ * Aktualisiert die sichtbare Punkteanzeige im DOM und speichert die Werte im localStorage.
  * @param {{id:string, total:number}} playerData - Spielerinformationen
  */
 function updatePointInfo(playerData) {
     const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
     const span = wrapper?.querySelector('.point-info span');
+
     if (span) {
         span.textContent = playerData.total;
         span.style.fontSize = playerData.total >= 100 ? 'clamp(0.75rem, 0.6964rem + 0.2679vw, 1.125rem)' : '';
@@ -186,6 +189,7 @@ function revealDiscardCard() {
         window.stacks.stack1 = [...discardedCards];
         discardedCards.length = 0;
     }
+
     const drawDeck = window.stacks.stack1;
     dragEnabled = false;
     const currentCard = drawDeck.shift();
@@ -219,7 +223,8 @@ function createFlyingCard(imgSrc, fromRect) {
         transform: 'translate(0, 0) rotate(0deg)',
         transformOrigin: 'center center',
         boxShadow: '4px 4px 8px rgba(0, 0, 0, 0.35)',
-    })
+    });
+
     return card;
 }
 
@@ -307,10 +312,8 @@ function updatePlayerCard(card, wrapper) {
                 card.onclick = () => {
                     if (turnState !== 'DECIDE') return;
                     if (isFlipped) return;
-
                     const inner = card.querySelector('div');
                     if (!inner) return;
-
                     flipCard(card, inner, true);
                     refreshPoints(wrapper);
                     setTurnState('FINISH');
@@ -386,7 +389,7 @@ function enableStack1Click() {
     const handleClick = () => {
         if (turnState !== 'START') return;
         revealDiscardCard();
-        setTurnState('DECIDE'); 
+        setTurnState('DECIDE');
         updateClickableCards();
         stack1.removeEventListener('click', handleClick);
     };
@@ -395,12 +398,14 @@ function enableStack1Click() {
 
 
 /**
- * Aktiviert Drag-and-Drop für den Ablagestapel.
+ * Aktiviert Drag-and-Drop für den Ablagestapel (Mouse & Touch).
  */
 function enableStack2Drag() {
-    stack2.onmousedown = e => {
+    stack2.addEventListener('pointerdown', e => {
         if (turnState !== 'START' && turnState !== 'DECIDE') return;
+
         e.preventDefault();
+        stack2.setPointerCapture(e.pointerId);
 
         const rect = stack2.getBoundingClientRect();
         handleCardDrag(
@@ -408,15 +413,15 @@ function enableStack2Drag() {
             e.clientX - rect.left,
             e.clientY - rect.top
         );
-    };
+    });
 }
 
 
 /**
- * Aktiviert Drag & Drop für eine Karte.
+ * Aktiviert Drag & Drop für eine Karte (Mouse & Touch via Pointer Events).
  * @param {HTMLElement} original - Die gezogene Karte
- * @param {number} offsetX - Maus-Offset X
- * @param {number} offsetY - Maus-Offset Y
+ * @param {number} offsetX - Pointer-Offset X
+ * @param {number} offsetY - Pointer-Offset Y
  */
 function handleCardDrag(original, offsetX, offsetY) {
     const playerCards = Array.from(document.querySelectorAll('.player-bottom .card'));
@@ -424,9 +429,9 @@ function handleCardDrag(original, offsetX, offsetY) {
     let isDragging = false;
 
     /**
-    * Bewegt die Klonkarte mit der Maus und hebt mögliche Drop-Zonen hervor.
-    * @param {MouseEvent} event - Mausbewegungs-Ereignis
-    */
+     * Bewegt die Klonkarte mit dem Pointer und hebt mögliche Drop-Zonen hervor.
+     * @param {PointerEvent} event
+     */
     function startDrag(event) {
         if (!dragEnabled) return;
 
@@ -434,25 +439,29 @@ function handleCardDrag(original, offsetX, offsetY) {
             clone = createClone(original);
             original.style.opacity = '0.01';
             clone.style.transform = window.getComputedStyle(original).transform;
+
             requestAnimationFrame(() => {
                 clone.style.transition = 'transform 0.3s ease';
                 clone.style.transform = 'rotate(0deg)';
             });
+
             isDragging = true;
         }
+
         clone.style.left = `${event.clientX - offsetX}px`;
         clone.style.top = `${event.clientY - offsetY}px`;
         highlightDropzone(event.clientX, event.clientY, playerCards);
     }
 
     /**
-    * Beendet den Drag-Vorgang, führt Swap durch oder setzt Klon zurück.
-    * @param {MouseEvent} event - Mausfreigabe-Ereignis
-    */
+     * Beendet den Drag-Vorgang, führt Swap durch oder setzt Klon zurück.
+     * @param {PointerEvent} event
+     */
     function stopDrag(event) {
         playerCards.forEach(c => c.classList.remove('drop-hover'));
-        document.removeEventListener('mousemove', startDrag);
-        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('pointermove', startDrag);
+        document.removeEventListener('pointerup', stopDrag);
+        document.removeEventListener('pointercancel', stopDrag);
 
         if (!isDragging) return;
 
@@ -473,12 +482,16 @@ function handleCardDrag(original, offsetX, offsetY) {
                 original.style.opacity = '1';
             }, 50);
             return;
-        }       
+        }
+
         resetClone(clone, original);
     }
-    document.addEventListener('mousemove', startDrag);
-    document.addEventListener('mouseup', stopDrag);
+
+    document.addEventListener('pointermove', startDrag);
+    document.addEventListener('pointerup', stopDrag);
+    document.addEventListener('pointercancel', stopDrag);
 }
+
 
 
 /**
@@ -501,6 +514,7 @@ function createClone(element, offsetLeft = 15, offsetTop = 9) {
         transition: 'transform 0.3s ease',
         zIndex: 9999
     });
+
     document.body.appendChild(clone);
     return clone;
 }
@@ -527,6 +541,7 @@ function highlightDropzone(x, y, playerCards) {
         card.classList.toggle('drop-hover', isOver);
         if (isOver) active = card;
     }
+
     return active;
 }
 
@@ -581,12 +596,11 @@ function resetClone(clone, original) {
 
 
 /**
- * Aktualisiert Punkte und gezählte Karten eines Spielers.
+ * Berechnet die aktuellen Punkte eines Spielers anhand der aufgedeckten Karten
  * @param {HTMLElement} wrapper - Grid-Wrapper des Spielers
  */
 function refreshPoints(wrapper) {
     const playerData = getOrCreatePlayerData(wrapper);
-
     let total = 0;
     let count = 0;
 
@@ -652,7 +666,6 @@ function isFieldComplete(wrapper) {
  */
 function startLastRound() {
     if (lastTurnActive) return;
-    
     lastTurnActive = true;
     const allPlayers = document.querySelectorAll('.grid-wrapper');
     remainingLastTurns = allPlayers.length;
@@ -673,7 +686,7 @@ function revealRemainingCards() {
                 if (inner) inner.style.transform = 'rotateY(0deg)';
                 playSound(flipCardSound);
                 card.dataset.flipped = 'true';
-                playerData.total += Number(card.dataset.value);
+                if (!isThreeColums) playerData.total += Number(card.dataset.value);
             }
         });
         updatePointInfo(playerData);
@@ -682,6 +695,7 @@ function revealRemainingCards() {
     showWinPopup();
     setTurnState('FINISH');
 }
+
 
 /**
  * Prüft, ob in ein Speiler in einer Spalte drei gleiche Kartenwerte hat.
@@ -730,8 +744,8 @@ function highlightColumn(wrapper, column) {
     const last = fields[fields.length - 1].getBoundingClientRect();
     const wrapperRect = wrapper.getBoundingClientRect();
     const fieldStyle = getComputedStyle(fields[0]);
-
     const overlay = document.createElement('div');
+
     Object.assign(overlay.style, {
         position: 'absolute',
         left: `${first.left - wrapperRect.left}px`,
@@ -778,6 +792,7 @@ function animateColumn(cards) {
     }, 1400);
 }
 
+
 /**
  * Prüft, ob das Grid des Spielers leer ist und startet die letzte Runde.
  * @param {HTMLElement} wrapper - Grid-Element eines Spielers
@@ -813,6 +828,7 @@ function isWrapperEmpty(wrapper) {
 function checkEndOfGame() {
     const wrappers = document.querySelectorAll('.grid-wrapper');
     const allEmpty = Array.from(wrappers).some(w => isWrapperEmpty(w));
+
     if (allEmpty) revealRemainingCards();
 }
 
@@ -827,6 +843,10 @@ function setupGameSettings() {
     setupHighScorePopup();
 }
 
+
+/**
+ * Initialisiert Sound- und Musik-Toggles, synchronisiert deren Status mit dem localStorage
+ */
 function setupToggles() {
     const toggles = [
         { 
@@ -894,7 +914,6 @@ function showPopUp(content, options = {}) {
     if (sound) playSound(sound, 0.3, 500);
     onShow?.(popupContent, popupWrapper);
 }
-
 
 
 /**
@@ -1074,7 +1093,6 @@ function calculateRanks(players, pointKey = 'points') {
 }
 
 
-
 /**
  * Initialisiert das Popup für die Spielregeln.
  */
@@ -1132,6 +1150,7 @@ function setupHighScorePopup() {
             }
         });
     });
+    
     setupClickOutside(popupWrapper, popupContent, highScoreIcon, 'highscore');
 }
 
@@ -1183,9 +1202,11 @@ function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
 export function resetCards() {
     for (const key in flippedCards) delete flippedCards[key];
     firstPlayerRotated = false;
+     dragEnabled = true;
     lastTurnActive = false;
     remainingLastTurns = 0;
     discardedCards.length = 0;
+    isThreeColums = false;
     setTurnState('INIT');
     updateClickableCards();
 

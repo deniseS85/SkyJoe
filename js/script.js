@@ -85,7 +85,7 @@ menuButtons.forEach(btn => {
             resetPlayers(newNum);
             initPlayers(newNum); 
         }
-
+        
         openPaperRoll(content, isSettings, isPlayerForm);
     });
 });
@@ -110,7 +110,7 @@ function resetPlayers(newNum) {
  * @param {number} newNum - Anzahl der Gegner
  */
 function initPlayers(newNum) {
-     const defaultAvatar = '/assets/img/profile_image_default.png';
+    const defaultAvatar = '/assets/img/profile_image_default.png';
 
     if (!localStorage.getItem('player')) 
         localStorage.setItem('player', JSON.stringify({ name: 'Spieler', avatar: defaultAvatar, points: 0, totalPoints: 0 }));
@@ -548,6 +548,12 @@ startButton.addEventListener("click", async () => {
 
 document.addEventListener("dragstart", (e) => {
     if (e.target.tagName === "IMG") {
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('pointerdown', e => {
+    if (e.target.tagName === 'IMG') {
         e.preventDefault();
     }
 });
