@@ -16,7 +16,7 @@ let dragEnabled = true;
 let lastTurnActive = false;
 let remainingLastTurns = 0;
 let discardedCards = [];
-let isThreeColums = false;
+let isThreeColumns = false;
 
 setupGameSettings();
 
@@ -133,7 +133,7 @@ function updatePointInfo(playerData) {
 
 
 /**
- * Prüft, ob alle Spieler ihre Karten aufgedeckt haben und startet ggf. 
+ * Prüft, ob alle Spieler ihre 2 Karten aufgedeckt haben und startet ggf. 
  * die Spielrotation bzw. zeigt den Startspieler an.
  */
 function checkAllPlayersFlipped() {
@@ -627,10 +627,10 @@ function handleFinishState() {
         setTurnState('START'); 
         updateClickableCards();
         enableStack1Click();
-        isThreeColums = false;
+        isThreeColumns = false;
     };
 
-    const delay = isThreeColums ? 1600 : 500;
+    const delay = isThreeColumns ? 1600 : 500;
 
     if (lastTurnActive) {
         remainingLastTurns--;
@@ -686,7 +686,7 @@ function revealRemainingCards() {
                 if (inner) inner.style.transform = 'rotateY(0deg)';
                 playSound(flipCardSound);
                 card.dataset.flipped = 'true';
-                if (!isThreeColums) playerData.total += Number(card.dataset.value);
+                if (!isThreeColumns) playerData.total += Number(card.dataset.value);
             }
         });
         updatePointInfo(playerData);
@@ -716,7 +716,7 @@ function checkThreeInColumn(wrapper) {
         const values = cards.map(c => Number(c.dataset.value));
 
         if (values.length === 3 && values.every(v => v === values[0])) {
-            isThreeColums = true;
+            isThreeColumns = true;
             const sum = values.reduce((a, b) => a + b, 0);
             playerData.total -= sum;
             playerData.count -= 3;
@@ -930,12 +930,17 @@ function showStartPopup(player) {
                 popupWrapper.classList.remove('show');
 
                 setTimeout(() => {
-                    const allPlayers = document.querySelectorAll('.grid-wrapper');
-                    const winningPlayerEl = Array.from(allPlayers).find(p => p.dataset.playerId === player.id);
-
+                    const allPlayers = Array.from(document.querySelectorAll('.grid-wrapper'));
+                    const winningPlayerEl = allPlayers.find(p => p.dataset.playerId === player.id);
+                    const numOpponents = Number(localStorage.getItem('numOpponent') || 1);
+                    
                     if (!isPlayerBottom(winningPlayerEl)) {
-                        incrementStep();
-                        rotatePlayers(currentStep);
+                        const rotations = (numOpponents === 2 && player.id.startsWith('opponent-1-')) ? 2 : 1;
+
+                        for (let i = 0; i < rotations; i++) {
+                            incrementStep();
+                            rotatePlayers(currentStep);
+                        } 
                     }
                     revealDiscardCard();
                     setTurnState('START');
@@ -1206,7 +1211,7 @@ export function resetCards() {
     lastTurnActive = false;
     remainingLastTurns = 0;
     discardedCards.length = 0;
-    isThreeColums = false;
+    isThreeColumns = false;
     setTurnState('INIT');
     updateClickableCards();
 
