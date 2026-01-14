@@ -1189,11 +1189,7 @@ input:checked + .settings-slider:before {
 
 /* kleine Handys */
 @media (max-height: 799px) {
-    .card-field,
-    .grid-wrapper.player-bottom .card-field,
-    .grid-wrapper.player-top .card-field {
-        width: 40px;      
-        aspect-ratio: 2/3;
+    .card-field {     
         border-radius: 4px;
     }
 
@@ -1226,15 +1222,25 @@ input:checked + .settings-slider:before {
         font-size: 12px;
     }
 
-    .card-field, #stack-field-1,
-    .grid-wrapper.player-bottom .card-field,
-    .grid-wrapper.player-top .card-field {
-        width: 25px;      
-        aspect-ratio: 2/3;
+    .player-name {
+        font-size: 10px;
+        margin-right: 7px;
+        margin-top: -14px;
     }
 
-    .player-name {
-       font-size: 12px;
-       margin-right: 7px;
+    .player-image {
+        width: 35px;
+        height: 35px;
+        transform: translateY(-60%);
+    }
+
+    .point-info {
+        width: 25px;
+        height: 25px;
+        
+    }
+
+    .point-info span {
+        font-size: 15px;
     }
 }

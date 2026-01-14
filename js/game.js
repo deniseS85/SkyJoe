@@ -122,6 +122,7 @@ function updatePointInfo(playerData) {
     if (span) {
         span.textContent = playerData.total;
         span.style.fontSize = playerData.total >= 100 ? 'clamp(0.75rem, 0.6964rem + 0.2679vw, 1.125rem)' : '';
+        if (window.innerHeight <= 614) span.style.fontSize = '10px';
     }
 
     const parts = playerData.id.split('-');

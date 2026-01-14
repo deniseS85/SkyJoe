@@ -471,6 +471,8 @@ function animateDeal(players) {
 
     players.forEach((player, pIndex) => {
         const fieldWidth = player.querySelector('.card-field').offsetWidth;
+
+        console.log(fieldWidth)
         dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer);
     });
     
@@ -785,20 +787,16 @@ function rotatePlayer(player, wrapperRotation) {
  * @param {boolean} isBottom - true, wenn der Spieler unten sitzt, sonst false
  */
 function adjustGrid(grid, isBottom) {
-    const minHeight = 799;
+    grid.querySelectorAll('.card').forEach(card => {
+        card.style.width = isBottom 
+            ? 'var(--player-card-width)' 
+            : 'calc(var(--player-card-width) * 0.7)';
+    });
 
-    if (window.innerHeight >= minHeight) {
-        grid.querySelectorAll('.card').forEach(card => {
-            card.style.width = isBottom 
-                ? 'var(--player-card-width)' 
-                : 'calc(var(--player-card-width) * 0.7)';
-        });
-        grid.style.gap = isBottom 
-            ? 'clamp(0.3125rem, 0.2679rem + 0.2232vw, 0.625rem)' 
-            : '2px';
-    } else {
-        grid.style.gap = '2px';
-    }
+    grid.style.gap = isBottom 
+        ? 'clamp(0.3125rem, 0.2679rem + 0.2232vw, 0.625rem)' 
+        : '2px';
+
 }
 
 
