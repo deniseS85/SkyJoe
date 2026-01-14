@@ -453,7 +453,6 @@ export function generateCardImage(card, width, height) {
 
 /**
  * Startet die Karten-Austeil-Animation für alle Spieler.
- * Spielt währenddessen einen Loop-Sound ab und stoppt diesen nach der letzten Karte.
  * @param {Array} players - Array aus Spieler- und Gegner-Rastern
  */
 function animateDeal(players) {
@@ -541,7 +540,6 @@ function dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRa
 
         positionCardAtDeck(cardEl, deckRect, i);
         document.body.appendChild(cardEl);
-
         const timeoutId = setTimeout(() => {
             if (!isDealing) return; 
             animateSingleCard(cardEl, player, i, fieldWidth, deckRect);
@@ -559,8 +557,15 @@ function dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRa
  * @param {number} index - Index der Karte (für zIndex)
  */
 function positionCardAtDeck(cardEl, deckRect, index) {
-    cardEl.style.top = `${deckRect.top - 7}px`;
-    cardEl.style.left = `${deckRect.left - 7}px`;
+    let offsetX = -7;
+    let offsetY = -7;
+
+    if (window.innerHeight <= 799) {
+        offsetX = -3;
+        offsetY = -3;
+    }
+    cardEl.style.top = `${deckRect.top + offsetY}px`;
+    cardEl.style.left = `${deckRect.left + offsetX}px`;
     cardEl.style.zIndex = 2000 + index;
 }
 
