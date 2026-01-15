@@ -7,6 +7,7 @@ const playerStartSound = new Audio('assets/sounds/player-starts.mp3');
 const cardDropSound = new Audio('/assets/sounds/card-drop.mp3');
 const winnerSound = new Audio('/assets/sounds/winner-sound.mp3');
 const threeColumsSound = new Audio('/assets/sounds/three-columns.mp3');
+const failSound = new Audio('/assets/sounds/fail-sound.mp3');
 const stack1 = document.getElementById('stack-field-1');
 const stack2 = document.getElementById('stack-field-2');
 
@@ -17,6 +18,7 @@ let lastTurnActive = false;
 let remainingLastTurns = 0;
 let discardedCards = [];
 let isThreeColumns = false;
+let firstPlayerToFinish = null;
 
 
 /**
@@ -63,7 +65,10 @@ function flipCard(cardEl, inner, changeCard = false) {
         playerData.count++;
         checkAllPlayersFlipped();
     }
-    if (isFieldComplete(wrapper) && !lastTurnActive) startLastRound();
+    if (isFieldComplete(wrapper) && !lastTurnActive) {
+        startLastRound();
+        firstPlayerToFinish ||= playerData; // nur setzen, falls noch nicht gesetzt
+    }
 }
 
 
@@ -113,7 +118,7 @@ function isPlayerBottom (element) {
  * Aktualisiert die sichtbare Punkteanzeige im DOM und speichert die Werte im localStorage.
  * @param {{id:string, total:number}} playerData - Spielerinformationen
  */
-function updatePointInfo(playerData) {
+function updatePointInfo(playerData, blink = false) {
     const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
     const span = wrapper?.querySelector('.point-info span');
 
@@ -121,6 +126,13 @@ function updatePointInfo(playerData) {
         span.textContent = playerData.total;
         span.style.fontSize = playerData.total >= 100 ? 'clamp(0.75rem, 0.6964rem + 0.2679vw, 1.125rem)' : '';
         if (window.innerHeight <= 614) span.style.fontSize = '10px';
+
+        const pointInfo = wrapper.querySelector('.point-info');
+        if (playerData.total >= 100 || blink) {
+            playSound(failSound, 0.3);
+            pointInfo.classList.add('blink');
+            setTimeout(() => pointInfo.classList.remove('blink'), 1400);
+        }
     }
 
     const parts = playerData.id.split('-');
@@ -711,7 +723,6 @@ function showLastRoundBanner() {
 }
 
 
-
 /**
  * Deckt alle noch nicht aufgedeckten Karten aller Spieler auf, 
  * aktualisiert die Punktestände und bestimmt den Gewinner des Spiels.
@@ -732,9 +743,28 @@ function revealRemainingCards() {
         updatePointInfo(playerData);
     });
 
+    applyFirstPlayerPenalty();
     showWinPopup();
     setTurnState('FINISH');
 }
+
+
+/**
+ * Prüft, ob der erste Spieler, der die Runde beendet hat, die niedrigste Punktzahl hat,
+ * wenn nicht, dann bekommt er eine Strafe (Punkte werden verdoppelt)
+ */
+function applyFirstPlayerPenalty() {
+    if (!firstPlayerToFinish || firstPlayerToFinish.total <= 0) return;
+
+    const allPlayers = Array.from(document.querySelectorAll('.grid-wrapper')).map(w => getOrCreatePlayerData(w));
+    const minPoints = Math.min(...allPlayers.map(p => p.total));
+
+    if (firstPlayerToFinish.total > minPoints) {
+        firstPlayerToFinish.total *= 2;
+        updatePointInfo(firstPlayerToFinish, true);
+    }
+}
+
 
 
 /**
@@ -869,7 +899,6 @@ function isWrapperEmpty(wrapper) {
 function checkEndOfGame() {
     const wrappers = document.querySelectorAll('.grid-wrapper');
     const allEmpty = Array.from(wrappers).some(w => isWrapperEmpty(w));
-
     if (allEmpty) revealRemainingCards();
 }
 
@@ -1255,6 +1284,7 @@ export function resetCards() {
     isThreeColumns = false;
     setTurnState('INIT');
     updateClickableCards();
+    firstPlayerToFinish = null;
 
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';

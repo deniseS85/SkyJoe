@@ -1,4 +1,4 @@
-/* export const skyjoCards = [
+export const skyjoCards = [
     { value: -2, color: "#4B0082", count: 5, img: null },
     { value: -1, color: "#8A2BE2", count: 10, img: null },
     { value: 0,  color: "#1E90FF", count: 15, img: "assets/img/cards/0.png" },
@@ -14,7 +14,7 @@
     { value: 10, color: "#FF1493", count: 10, img: "assets/img/cards/10.png" },
     { value: 11, color: "#FF69B4", count: 10, img: "assets/img/cards/11.png"},
     { value: 12, color: "#FF69B4", count: 10, img: "assets/img/cards/12.png" }
-]; */
+];
 
 /* 
 export const skyjoCards = [
@@ -24,6 +24,7 @@ export const skyjoCards = [
 ]; */
 
 
-export const skyjoCards = [
-     { value: 10, color: "#FF1493", count: 56, img: "assets/img/cards/10.png" },
-];
+/* export const skyjoCards = [
+     { value: 10, color: "#FF1493", count: 10, img: "assets/img/cards/10.png" },
+
+]; */

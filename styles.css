@@ -827,6 +827,13 @@ input:checked + .settings-slider:before {
     border: 2px solid white;
     background: radial-gradient(circle at 30% 30%, #ffffff, #dddddd 30%, #666666 80%);
     box-shadow: inset 0 0 10px #ffffff, 0 4px 8px #333333;
+    transition: box-shadow 0.9s ease-in-out, background 0.9s ease-in-out, border-color 0.9s ease-in-out;
+}
+
+.point-info.blink {
+    box-shadow: 0 0 0 2px rgba(255,0,0,0.9), 0 0 14px 8px rgba(255,0,0,0.7);
+    background: rgba(243, 97, 97, 0.9);
+    border-color: rgba(243, 97, 97, 0.9);
 }
 
 .point-info span {
@@ -903,11 +910,11 @@ input:checked + .settings-slider:before {
 
 .card.drop-hover {
     transform: scale(1.03);
-    animation: glowPulse 0.9s ease-in-out infinite;
+    animation: glowPulseGreen 0.9s ease-in-out infinite;
 }
 
-@keyframes glowPulse {
-    0% {
+@keyframes glowPulseGreen {
+    0%, 100% {
         box-shadow:
             0 0 0 2px rgba(0, 255, 0, 0.9),
             0 0 8px 4px rgba(0, 255, 0, 0.4);
@@ -916,11 +923,6 @@ input:checked + .settings-slider:before {
         box-shadow:
             0 0 0 2px rgba(0, 255, 0, 0.9),
             0 0 14px 8px rgba(0, 255, 0, 0.7);
-    }
-    100% {
-        box-shadow:
-            0 0 0 2px rgba(0, 255, 0, 0.9),
-            0 0 8px 4px rgba(0, 255, 0, 0.4);
     }
 }
 
