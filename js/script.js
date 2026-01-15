@@ -535,12 +535,26 @@ window.addEventListener('resize', () => {
 startButton.addEventListener("click", async () => {
     let defaultAvatar = '/assets/img/profile_image_default.png';
 
-    if (!localStorage.getItem('numOpponent')) {
-        localStorage.setItem('player', JSON.stringify({ name: 'Spieler', avatar: defaultAvatar, points: 0, totalPoints: 0  }));
-        localStorage.setItem('opponent1', JSON.stringify({ name: 'Gegner', avatar: defaultAvatar,points: 0, totalPoints: 0  }));
-        localStorage.setItem('numOpponent', 1);
-    }
+    const defaultPlayers = {
+        player: { name: 'Spieler', avatar: defaultAvatar, points: 0, totalPoints: 0 },
+        opponent1: { name: 'Gegner', avatar: defaultAvatar, points: 0, totalPoints: 0 },
+        numOpponent: 1
+    };
 
+    const defaultSettings = {
+        sound: 'off',
+        music: 'off',
+        selectedBg: 0
+    };
+
+    const setIfEmpty = (key, value) => {
+        if (!localStorage.getItem(key)) {
+            localStorage.setItem(key, typeof value === 'object' ? JSON.stringify(value) : value);
+        }
+    };
+
+    Object.entries(defaultPlayers).forEach(([key, value]) => setIfEmpty(key, value));
+    Object.entries(defaultSettings).forEach(([key, value]) => setIfEmpty(key, value));
     const gameModule = await import("./setup.js");
     gameModule.showGameScreen();
 });

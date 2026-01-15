@@ -132,8 +132,7 @@ export function updateRound(increase = false) {
  */
 function setBackground() {
     const selectedBg = localStorage.getItem('selectedBg');
-    const background = selectedBg ? selectedBg : 0;
-    gameScreen.style.background = `#fffbea url(/assets/img/bg${background}.png) no-repeat center/cover`;
+    gameScreen.style.background = `#fffbea url(/assets/img/bg${selectedBg}.png) no-repeat center/cover`;
 }
 
 
