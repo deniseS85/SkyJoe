@@ -779,15 +779,41 @@ input:checked + .settings-slider:before {
     aspect-ratio: auto;
     border-radius: 50%;
     margin: auto;
-    --size: min(60vw, 35rem);
+   /*  --size: min(60vh, 60vw, 35rem); */
+   --size: min(85vh, 55vw, 40rem);
     width: var(--size);
     height: var(--size);
 }
 
-@media (max-height: 950px) {
+
+
+/* Extra kleine Medium-Laptops: 1024×800 und 1280×800 */
+@media (width: 1024px) and (height: 800px),
+       (width: 1280px) and (height: 800px) {
     .rotation-wrapper {
-        width: clamp(16rem, 32vw, 28rem);
-        height: clamp(16rem, 32vw, 28rem);
+        --size: min(66vh, 54vw, 28rem);
+    }
+}
+
+
+/* Medium Screens (1024–1600 Breite, 801–950 Höhe) → kompakt */
+@media (min-width: 1024px) and (max-width: 1600px) and (min-height: 801px) and (max-height: 950px) {
+    .rotation-wrapper {
+        --size: min(55vh, 38vw, 28rem);
+    }
+}
+
+/* XXL Desktop (≥2560 Breite) */
+@media (min-width: 2000px) {
+    .rotation-wrapper {
+        --size: min(92vh, 50vw, 48rem);
+    }
+}
+
+/* Ultrawide */
+@media (min-aspect-ratio: 16/9) {
+    .rotation-wrapper {
+        --size: min(85vh, 50vw, 42rem);
     }
 }
 
