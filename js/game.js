@@ -18,8 +18,6 @@ let remainingLastTurns = 0;
 let discardedCards = [];
 let isThreeColumns = false;
 
-setupGameSettings();
-
 
 /**
  * Initialisiert den Spielstart.
@@ -65,7 +63,7 @@ function flipCard(cardEl, inner, changeCard = false) {
         playerData.count++;
         checkAllPlayersFlipped();
     }
-    if (isFieldComplete(wrapper)) startLastRound();
+    if (isFieldComplete(wrapper) && !lastTurnActive) startLastRound();
 }
 
 
@@ -476,7 +474,6 @@ function handleCardDrag(original, offsetX, offsetY) {
 
         if (targetCard && (turnState === 'START' || turnState === 'DECIDE')) {
             swapCards(original, targetCard);
-
             clone.style.transition = 'transform 0.3s ease';
             setTimeout(() => {
                 clone.remove();
@@ -512,7 +509,7 @@ function createClone(element, offsetLeft = 15, offsetTop = 9) {
         top: `${rect.top + offsetTop}px`,
         pointerEvents: 'none',
         transform: window.getComputedStyle(element).transform,
-        transition: 'transform 0.3s ease',
+        transition: 'transform 0.3s ease' ,
         zIndex: 9999
     });
 
@@ -613,6 +610,8 @@ function refreshPoints(wrapper) {
     playerData.total = total;
     playerData.count = count;
     updatePointInfo(playerData);
+
+    if (playerData.total >= 100 && !lastTurnActive) startLastRound();
 }
 
 
@@ -668,9 +667,49 @@ function isFieldComplete(wrapper) {
 function startLastRound() {
     if (lastTurnActive) return;
     lastTurnActive = true;
+    showLastRoundBanner();
     const allPlayers = document.querySelectorAll('.grid-wrapper');
     remainingLastTurns = allPlayers.length;
 }
+
+
+/**
+ * Zeigt Info letzte Runde, dann ist das Spiel vorbei.
+ */
+function showLastRoundBanner() {
+    if (document.getElementById('last-round-banner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'last-round-banner';
+    banner.textContent = 'Letzte Runde!';
+    Object.assign(banner.style, {
+        position: 'fixed',
+        top: '0',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: 'rgba(255, 0, 0, 0.9)',
+        color: 'white',
+        padding: '1rem 2rem',
+        fontSize: '1.5rem',
+        fontWeight: 'bold',
+        borderBottomLeftRadius: '10px',
+        borderBottomRightRadius: '10px',
+        zIndex: 9999,
+        textAlign: 'center',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+        opacity: '0',
+        transition: 'opacity 0.5s ease'
+    });
+
+    document.body.appendChild(banner);
+    requestAnimationFrame(() => banner.style.opacity = '1');
+
+    setTimeout(() => {
+        banner.style.opacity = '0';
+        banner.addEventListener('transitionend', () => banner.remove(), { once: true });
+    }, 3000);
+}
+
 
 
 /**
@@ -800,6 +839,7 @@ function animateColumn(cards) {
  */
 function checkPlayingFieldIsEmpty(wrapper) {
     if (!wrapper) return;
+    
     if (isWrapperEmpty(wrapper) && !lastTurnActive) startLastRound();
     
     if (lastTurnActive) {
@@ -838,7 +878,7 @@ function checkEndOfGame() {
  * Initialisiert die Toggle-Icons für Sound und Musik.
  * Speichert den Status in localStorage und spielt/stoppt Sounds.
  */
-function setupGameSettings() {
+export function setupGameSettings() {
     setupToggles();
     setupGameRulesPopup();
     setupHighScorePopup();

@@ -1,5 +1,5 @@
 import { skyjoCards } from "./skyjoCardsObj.js";
-import { startGame, resetCards } from './game.js'; 
+import { startGame, setupGameSettings, resetCards } from './game.js'; 
 
 const gameScreen = document.getElementById("gameScreen");
 const backButton = document.getElementById("backBtn");
@@ -471,8 +471,6 @@ function animateDeal(players) {
 
     players.forEach((player, pIndex) => {
         const fieldWidth = player.querySelector('.card-field').offsetWidth;
-
-        console.log(fieldWidth)
         dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer);
     });
     
@@ -492,6 +490,7 @@ function afterDeal(delayMs) {
         if (!isDealing) return;
         stopDealSound();
         startGame();
+        setupGameSettings();
         isDealing = false;
         afterDealTimeoutId = null;
     }, delayMs);

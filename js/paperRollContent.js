@@ -11,7 +11,7 @@ export const paperRollContent = {
                   <li>Tauschen: Eine Karte (verdeckt oder offen) wird gegen die gezogene Karte ersetzt. Die getauschte Karte kommt auf den Ablagestapel.</li>
                   <li>Kein Tausch: gezogene Karte auf Ablagestapel, eine verdeckte Karte aufdecken.</li>
             </ul>
-            <p style="margin-bottom:0.25rem;"><strong>Sonderregel – Drillinge:</strong> Drei gleiche Zahlen in einer Spalte müssen auf den Ablagestapel gelegt werden, auch in der letzten Runde. Stern-Karten zählen am Ende als die Zahl, die sie ersetzen.</p>
+            <p style="margin-bottom:0.25rem;"><strong>Sonderregel – Drillinge:</strong> Drei gleiche Zahlen in einer Spalte müssen auf den Ablagestapel gelegt werden, auch in der letzten Runde und zählen sofort als Minuspunkte.</p>
             <p style="margin-bottom:0.25rem;"><strong>Rundenende:</strong> Sobald ein Spieler alle Karten aufgedeckt hat, ist die Runde zuende. Alle anderen Spieler dürfen noch einen Zug machen. Dann werden die Punkte aller Karten addiert. Wer die Runde beendet, sollte die geringste Punktzahl haben, sonst wird sie verdoppelt.</p>
             <p style="margin-bottom:0.25rem;"><strong>Spielende:</strong> Nach jeder Runde werden Punkte aufaddiert. Sobald ein Spieler 100 Punkte erreicht, endet das Spiel. Gewinner ist der Spieler mit den wenigsten Punkten.</p>
             <p style="margin-bottom:0.25rem;"><strong>Tipps:</strong></p>
@@ -57,12 +57,12 @@ export const paperRollContent = {
             <div class="player-form">
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME</label>
-                        <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="30">
+                        <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="20">
                         <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME</label>
-                        <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="30">
+                        <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="20">
                         <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>    
             </div>
@@ -71,17 +71,17 @@ export const paperRollContent = {
             <div class="player-form three-players">
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME</label>
-                        <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="30">
+                        <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="20">
                         <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME</label>
-                        <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="30">
+                        <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="20">
                         <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div>
                   <div class="player-field">
                         <label for="player3-name">SPIELER 3 – NAME</label>
-                        <input type="text" id="player3-name" name="player3" autocomplete="off" maxlength="30">
+                        <input type="text" id="player3-name" name="player3" autocomplete="off" maxlength="20">
                         <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
                   </div> 
             </div>

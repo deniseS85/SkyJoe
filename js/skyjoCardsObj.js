@@ -16,8 +16,14 @@
     { value: 12, color: "#FF69B4", count: 10, img: "assets/img/cards/12.png" }
 ]; */
 
+/* 
+export const skyjoCards = [
+     { value: 10, color: "#FF1493", count: 10, img: "assets/img/cards/10.png" },
+    { value: 11, color: "#FF69B4", count: 10, img: "assets/img/cards/11.png"},
+    { value: 12, color: "#7FFF00", count: 56, img: null },
+]; */
 
 
 export const skyjoCards = [
-    { value: 3, color: "#7FFF00", count: 56, img: null },
+     { value: 10, color: "#FF1493", count: 56, img: "assets/img/cards/10.png" },
 ];
