@@ -312,6 +312,7 @@ function updatePlayerCard(card, wrapper) {
     switch (turnState) {
         case 'SELECT':
             setCardInteractive(card, bottom, 'pointer');
+            card.onclick = null;
             break;
 
         case 'DECIDE': {
@@ -341,6 +342,7 @@ function updatePlayerCard(card, wrapper) {
         case 'FINISH':
         default:
             setCardInteractive(card, false);
+            card.onclick = null;
     }
 }
 
@@ -1225,7 +1227,6 @@ function setupHighScorePopup() {
             }
         });
     });
-    
     setupClickOutside(popupWrapper, popupContent, highScoreIcon, 'highscore');
 }
 
@@ -1277,7 +1278,7 @@ function playSound(sound, volume = 1, delay = 0, playbackRate = 1) {
 export function resetCards() {
     for (const key in flippedCards) delete flippedCards[key];
     firstPlayerRotated = false;
-     dragEnabled = true;
+    dragEnabled = true;
     lastTurnActive = false;
     remainingLastTurns = 0;
     discardedCards.length = 0;

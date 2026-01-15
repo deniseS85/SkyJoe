@@ -827,7 +827,7 @@ input:checked + .settings-slider:before {
     border: 2px solid white;
     background: radial-gradient(circle at 30% 30%, #ffffff, #dddddd 30%, #666666 80%);
     box-shadow: inset 0 0 10px #ffffff, 0 4px 8px #333333;
-    transition: box-shadow 0.9s ease-in-out, background 0.9s ease-in-out, border-color 0.9s ease-in-out;
+    transition: box-shadow 0.3s ease-in-out;
 }
 
 .point-info.blink {
@@ -836,12 +836,18 @@ input:checked + .settings-slider:before {
     border-color: rgba(243, 97, 97, 0.9);
 }
 
+.point-info.blink span { 
+    color: white;
+    text-shadow: 1px 1px 3px black;
+}
+
 .point-info span {
     font-family: 'biscuit', sans-serif;
     font-size: clamp(0.9375rem, 0.8482rem + 0.4464vw, 1.5625rem);
     color: #5a3b1e;
     text-shadow: 1px 1px rgba(255,255,255,0.4);
-    transform: translate(-1px, 3px)
+    transform: translate(-1px, 3px);
+    transition: color 0.3 ease-in-out;
 }
 
 .player-grid, .opponent-grid {   
