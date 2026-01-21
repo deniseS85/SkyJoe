@@ -505,7 +505,6 @@ function handleCardDrag(original, offsetX, offsetY) {
 }
 
 
-
 /**
  * Erstellt eine optische Kopie (Clone) einer Karte für Drag-Effekt.
  * @param {HTMLElement} element - Karte zum Klonen
@@ -691,36 +690,22 @@ function startLastRound() {
  * Zeigt Info letzte Runde, dann ist das Spiel vorbei.
  */
 function showLastRoundBanner() {
-    if (document.getElementById('last-round-banner')) return;
-
     const banner = document.createElement('div');
+    banner.classList.add('last-round-banner');
     banner.id = 'last-round-banner';
     banner.textContent = 'Letzte Runde!';
-    Object.assign(banner.style, {
-        position: 'fixed',
-        top: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        backgroundColor: 'rgba(255, 0, 0, 0.9)',
-        color: 'white',
-        padding: '1rem 2rem',
-        fontSize: '1.5rem',
-        fontWeight: 'bold',
-        borderBottomLeftRadius: '10px',
-        borderBottomRightRadius: '10px',
-        zIndex: 9999,
-        textAlign: 'center',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-        opacity: '0',
-        transition: 'opacity 0.5s ease'
-    });
-
     document.body.appendChild(banner);
-    requestAnimationFrame(() => banner.style.opacity = '1');
+
+    requestAnimationFrame(() => { banner.classList.add('show'); });
 
     setTimeout(() => {
-        banner.style.opacity = '0';
-        banner.addEventListener('transitionend', () => banner.remove(), { once: true });
+        banner.classList.remove('show');
+
+        banner.addEventListener(
+            'transitionend',
+            () => banner.remove(),
+            { once: true }
+        );
     }, 3000);
 }
 
@@ -766,7 +751,6 @@ function applyFirstPlayerPenalty() {
         updatePointInfo(firstPlayerToFinish, true);
     }
 }
-
 
 
 /**
@@ -827,7 +811,7 @@ function highlightColumn(wrapper, column) {
         borderRadius: fieldStyle.borderRadius,
         pointerEvents: 'none',
         transition: 'all 0.3s',
-        animation: 'glowPulse 0.9s ease-in-out infinite'
+        animation: 'glowPulseGreen 0.9s ease-in-out infinite'
     });
 
     wrapper.appendChild(overlay);
@@ -851,6 +835,10 @@ function animateColumn(cards) {
                 value: Number(card.dataset.value),
                 alt: img?.alt || ''
             });
+
+            stack2.src = img.src;
+            stack2.dataset.value = Number(card.dataset.value);
+            stack2.alt = img.alt;
 
             card.style.transition = "transform 0.8s ease, opacity 0.8s ease";
             card.style.transform = "translateY(50px) scale(0.5)";
@@ -1196,6 +1184,7 @@ function setupGameRulesPopup() {
             }
         });
     });
+
     setupClickOutside(popupWrapper, popupContent, gameRulesIcon, 'rules');
 }
 

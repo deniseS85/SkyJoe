@@ -248,6 +248,7 @@ h1 {
 
 .start-btn {
     font-family: 'biscuit', sans-serif;
+   /*  text-shadow: 2px 2px #444; */
     letter-spacing: 2px;
     position: absolute;
     bottom: -10%;
@@ -1172,6 +1173,36 @@ input:checked + .settings-slider:before {
     display: flex;
     width: 80%;
     gap: clamp(0.625rem, 0.3571rem + 1.3393vw, 2.5rem);
+}
+
+.last-round-banner {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #ffcc00, #ff9900);
+    color: white;
+    padding: clamp(0.625rem, 0.4464rem + 0.8929vw, 1.875rem);
+    font-family: 'biscuit', sans-serif;
+    font-size: clamp(1.25rem, 1.0714rem + 0.8929vw, 2.5rem);
+    letter-spacing: 1px;
+    text-shadow: 2px 2px #444;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    width: clamp(12.5rem, 10.7143rem + 8.9286vw, 25rem);
+    opacity: 0;
+    visibility: hidden;    
+    transition: opacity 0.5s ease 0.5s, visibility 0.5s ease 0.5s;
+}
+
+.last-round-banner.show {
+    opacity: 1;
+    visibility: visible;
 }
 
 
