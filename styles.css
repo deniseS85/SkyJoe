@@ -215,6 +215,7 @@ h1 {
     font-size: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
     text-shadow: 2px 2px #444;
     margin-top: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
+    margin-bottom: 0;
 }
 
 .menu-btn {

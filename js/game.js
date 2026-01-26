@@ -19,7 +19,8 @@ let remainingLastTurns = 0;
 let discardedCards = [];
 let isThreeColumns = false;
 let firstPlayerToFinish = null;
-
+let settingsInitialized = false;
+let clickOutsideInitialized = false;
 
 /**
  * Initialisiert den Spielstart.
@@ -898,9 +899,16 @@ function checkEndOfGame() {
  * Speichert den Status in localStorage und spielt/stoppt Sounds.
  */
 export function setupGameSettings() {
+    if (settingsInitialized) return;
+    settingsInitialized = true;
     setupToggles();
     setupGameRulesPopup();
     setupHighScorePopup();
+
+    if (!clickOutsideInitialized) {
+        setupClickOutside();
+        clickOutsideInitialized = true;
+    }
 }
 
 
@@ -908,17 +916,23 @@ export function setupGameSettings() {
  * Initialisiert Sound- und Musik-Toggles, synchronisiert deren Status mit dem localStorage
  */
 function setupToggles() {
+    const gameSounds = [flipCardSound, playerStartSound, cardDropSound, winnerSound];
+    
     const toggles = [
         { 
             id: 'soundIcon', 
             key: 'sound', 
             onEnable: () => { if (isDealing) playDealSound(); },
             onDisable: () => {
-                [flipCardSound, playerStartSound, cardDropSound, winnerSound].forEach(s => {
-                    s.pause();
-                    s.currentTime = 0;
-                });
-                stopDealSound();   
+                setTimeout(() => {
+                    gameSounds.forEach(s => {
+                        if (!s.paused) {
+                            s.pause();
+                        }
+                        s.currentTime = 0;
+                    });
+                    stopDealSound();
+                }, 50);
             }
         },
         { 
@@ -931,17 +945,27 @@ function setupToggles() {
 
     toggles.forEach(({ id, key, onEnable, onDisable }) => {
         const icon = document.getElementById(id);
+        if (!icon) return;
 
         const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
         icon.src = `/assets/img/${key}_${status}.png`;
 
-        icon.addEventListener('click', () => {
+        const newIcon = icon.cloneNode(true);
+        icon.replaceWith(newIcon);
+
+        newIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
             const currentlyOn = localStorage.getItem(key) === 'on';
             const newStatus = currentlyOn ? 'off' : 'on';
             localStorage.setItem(key, newStatus);
-            icon.src = `/assets/img/${key}_${newStatus}.png`;
-            if (newStatus === 'on') onEnable?.();
-            else onDisable?.();
+            newIcon.src = `/assets/img/${key}_${newStatus}.png`;
+            
+            if (newStatus === 'on') {
+                onEnable?.();
+            } else {
+                onDisable?.();
+            }
         });
     });
 }
@@ -1163,10 +1187,16 @@ function calculateRanks(players, pointKey = 'points') {
  */
 function setupGameRulesPopup() {
     const gameRulesIcon = document.getElementById('gameRules');
+    if (!gameRulesIcon) return; 
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
-    gameRulesIcon.addEventListener('click', () => {
+    const newIcon = gameRulesIcon.cloneNode(true);
+    gameRulesIcon.parentNode.replaceChild(newIcon, gameRulesIcon);
+
+    newIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
         const content = paperRollContent["SPIELREGELN"];
         const type = 'rules';
         const className = 'game-rules-container';
@@ -1185,7 +1215,7 @@ function setupGameRulesPopup() {
         });
     });
 
-    setupClickOutside(popupWrapper, popupContent, gameRulesIcon, 'rules');
+    /* setupClickOutside(popupWrapper, popupContent, newIcon, 'rules'); */
 }
 
 
@@ -1194,10 +1224,16 @@ function setupGameRulesPopup() {
  */
 function setupHighScorePopup() {
     const highScoreIcon = document.getElementById('highScore');
+    if (!highScoreIcon) return;
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
-    highScoreIcon.addEventListener('click', () => {
+    const newIcon = highScoreIcon.cloneNode(true);
+    highScoreIcon.parentNode.replaceChild(newIcon, highScoreIcon);
+
+    newIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
         const players = loadPlayers({ updateTotal: false, sort: true });
         const content = generateHighscoreHTML(players, true);
         const type = 'highscore';
@@ -1216,21 +1252,23 @@ function setupHighScorePopup() {
             }
         });
     });
-    setupClickOutside(popupWrapper, popupContent, highScoreIcon, 'highscore');
+    
+   /*  setupClickOutside(popupWrapper, popupContent, newIcon, 'highscore'); */
 }
 
 
 /**
- * Schließt ein Popup, wenn außerhalb des Inhalts oder demselben Icon geklickt wird.
- * @param {HTMLElement} popupWrapper
- * @param {HTMLElement} popupContent
- * @param {HTMLElement} triggerElement - Element, das das Popup öffnet
- * @param {string} type - Dataset Typ des Popups
+ * Schließt Popups, wenn außerhalb geklickt wird.
  */
-function setupClickOutside(popupWrapper, popupContent, triggerElement, type) {
+function setupClickOutside() {
+    const popupWrapper = document.getElementById('popup');
+    const popupContent = document.getElementById('popupContent');
+    
     document.addEventListener('click', (e) => {
-        if (popupWrapper.dataset.type !== type) return;
-        if (!popupContent.contains(e.target) && e.target !== triggerElement) {
+        if (!popupWrapper.classList.contains('show')) return;
+        
+        const allowedIds = ['gameRules', 'highScore'];
+        if (!popupContent.contains(e.target) && !allowedIds.includes(e.target.id)) {
             popupWrapper.classList.remove('show');
         }
     });
@@ -1275,6 +1313,8 @@ export function resetCards() {
     setTurnState('INIT');
     updateClickableCards();
     firstPlayerToFinish = null;
+    settingsInitialized = false;
+    clickOutsideInitialized = false;
 
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';

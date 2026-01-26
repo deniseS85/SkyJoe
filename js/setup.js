@@ -87,6 +87,7 @@ export function showGameScreen(isRestart = false) {
     if (!isRestart) {
         setBackground();
         setSoundMusicIcons();
+        setupGameSettings();
         startScreen.style.display = 'none';
         gameScreen.style.display = 'flex';
     }
@@ -489,7 +490,6 @@ function afterDeal(delayMs) {
         if (!isDealing) return;
         stopDealSound();
         startGame();
-        setupGameSettings();
         isDealing = false;
         afterDealTimeoutId = null;
     }, delayMs);
