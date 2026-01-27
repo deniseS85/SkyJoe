@@ -15,7 +15,7 @@
     <main class="start-screen" id="startScreen">
         <h1>Skyjoe</h1>
         
-        <div class="background-animations">
+        <div class="background-animations" aria-hidden="true">
             <div class="card-shape"></div>
             <div class="card-shape"></div>
             <div class="card-shape"></div>
@@ -29,10 +29,10 @@
 
         <div class="start-content">
             <div class="cat-wrapper">
-                <img class="header-img" src="/assets/img/catWood.png" alt="Cat">
-                <img class="cat-paw" src="/assets/img/catPaw.png" alt="CatPaw">
+                <img class="header-img" src="/assets/img/catWood.png" alt="">
+                <img class="cat-paw" src="/assets/img/catPaw.png" alt="">
 
-                <div class="paper-roll" id="paperRoll">
+                <div class="paper-roll" id="paperRoll" role="dialog" aria-modal="true">
                     <div class="paper-content" id="paperContent" tabindex="-1"></div>
                 </div>   
             </div>
@@ -40,7 +40,7 @@
             <nav class="menu-box" aria-label="Hauptmenü">
                 <div class="menu-title">MENU</div>
                 <button class="menu-btn">SPIELREGELN</button>
-                <button class="menu-btn">EINSTELLUNGEN</button>
+                <button class="menu-btn" >EINSTELLUNGEN</button>
                 <div class="btn-wrapper">
                     <button class="menu-btn">2 SPIELER</button>
                     <button class="menu-btn">3 SPIELER</button>
@@ -65,12 +65,12 @@
                     <div class="draw-discard-stack">
                         <div class="card-field" id="stack-field-1"></div>
                     </div>
-                    <img class="card-field" id="stack-field-2" style="visibility: hidden;">
+                    <img class="card-field" id="stack-field-2" style="visibility: hidden;" alt="">
                 </div>
                 
                 <div class="rotation-wrapper"></div> 
                 
-                <div class="popup" id="popup">
+                <div class="popup" id="popup" role="dialog" aria-modal="true">
                     <div id="popupContent"></div>
                 </div> 
 

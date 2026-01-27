@@ -1,6 +1,6 @@
 export const paperRollContent = {
       "SPIELREGELN": /*html*/`
-            <div class="paper-roll-header">Skyjo – Spielregeln</div>
+            <div class="paper-roll-header"tabindex="-1" >Skyjo – Spielregeln</div>
             <p style="margin-bottom:0.25rem;"><strong>Ziel:</strong> Sammle Karten, um am Ende möglichst wenige Punkte zu haben. Wer zuerst 100 Punkte oder mehr erreicht, beendet das Spiel; gewonnen hat der Spieler mit den wenigsten Punkten.</p>
             <p style="margin-bottom:0.25rem;"><strong>Vorbereitung:</strong> Jeder Spieler erhält 12 Karten, die verdeckt in einem 3x4-Rechteck vor ihm liegen. Jeder deckt zu Beginn 2 Karten auf. Die restlichen Karten bilden den Nachziehstapel in der Mitte. Der Spieler mit den meisten Punkten auf seinen aufgedeckten Karten beginnt.</p>
             <p style="margin-bottom:0.25rem;"><strong>Ablauf pro Zug:</strong></p>
@@ -47,12 +47,12 @@ export const paperRollContent = {
       
                         <div class="scene">
                               <div class="carousel">
-                                    <img src="/assets/img/bg0.png" class="carousel-image">
-                                    <img src="/assets/img/bg1.png" class="carousel-image">
-                                    <img src="/assets/img/bg2.png" class="carousel-image">
-                                    <img src="/assets/img/bg3.png" class="carousel-image">
-                                    <img src="/assets/img/bg4.png" class="carousel-image">
-                                    <img src="/assets/img/bg5.png" class="carousel-image">
+                                    <img src="/assets/img/bg0.png" class="carousel-image" alt="" aria-hidden="true">
+                                    <img src="/assets/img/bg1.png" class="carousel-image" alt="" aria-hidden="true">
+                                    <img src="/assets/img/bg2.png" class="carousel-image" alt="" aria-hidden="true">
+                                    <img src="/assets/img/bg3.png" class="carousel-image" alt="" aria-hidden="true">
+                                    <img src="/assets/img/bg4.png" class="carousel-image" alt="" aria-hidden="true">
+                                    <img src="/assets/img/bg5.png" class="carousel-image" alt="" aria-hidden="true">
                               </div>
                         </div>
                   
@@ -66,14 +66,14 @@ export const paperRollContent = {
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME</label>
                         <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="20">
-                        <button class="avatar-image">
+                        <button class="avatar-image" aria-label="Avatar für Spieler eins auswählen">
                               <img src="/assets/img/avatar-image.png" alt="">
                         </button>
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME</label>
                         <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="20">
-                        <button class="avatar-image">
+                        <button class="avatar-image" aria-label="Avatar für Spieler zwei auswählen">
                               <img src="/assets/img/avatar-image.png" alt="">
                         </button>
                   </div>    
@@ -84,21 +84,21 @@ export const paperRollContent = {
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME</label>
                         <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="20">
-                        <button class="avatar-image">
+                        <button class="avatar-image" aria-label="Avatar für Spieler eins auswählen">
                               <img src="/assets/img/avatar-image.png" alt="">
                         </button>
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME</label>
                         <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="20">
-                        <button class="avatar-image">
+                        <button class="avatar-image" aria-label="Avatar für Spieler zwei auswählen">
                               <img src="/assets/img/avatar-image.png" alt="">
                         </button>
                   </div>
                   <div class="player-field">
                         <label for="player3-name">SPIELER 3 – NAME</label>
                         <input type="text" id="player3-name" name="player3" autocomplete="off" maxlength="20">
-                        <button class="avatar-image">
+                        <button class="avatar-image" aria-label="Avatar für Spieler drei auswählen">
                               <img src="/assets/img/avatar-image.png" alt="">
                         </button>
                   </div> 

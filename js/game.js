@@ -8,6 +8,7 @@ const cardDropSound = new Audio('/assets/sounds/card-drop.mp3');
 const winnerSound = new Audio('/assets/sounds/winner-sound.mp3');
 const threeColumsSound = new Audio('/assets/sounds/three-columns.mp3');
 const failSound = new Audio('/assets/sounds/fail-sound.mp3');
+const lastRoundSound = new Audio('/assets/sounds/last-round.mp3');
 const stack1 = document.getElementById('stack-field-1');
 const stack2 = document.getElementById('stack-field-2');
 
@@ -681,6 +682,7 @@ function startLastRound() {
     if (lastTurnActive) return;
     lastTurnActive = true;
     showLastRoundBanner();
+    playSound(lastRoundSound, 0.25, 200);
     const allPlayers = document.querySelectorAll('.grid-wrapper');
     remainingLastTurns = allPlayers.length;
 }
@@ -706,7 +708,7 @@ function showLastRoundBanner() {
             () => banner.remove(),
             { once: true }
         );
-    }, 3000);
+    }, 3300);
 }
 
 

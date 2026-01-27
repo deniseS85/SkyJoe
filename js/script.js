@@ -22,7 +22,7 @@ function openPaperRoll(content, isSettings = false, isPlayerForm = false, trigge
 
     paperContent.innerHTML = /*html*/`
         <button class="close-btn" aria-label="Schließen">
-            <img src="/assets/img/close-icon.png" alt="">
+            <img src="/assets/img/close-icon.png" alt="" aria-hidden="true">
         </button>
         ${content}`;
 
@@ -171,7 +171,7 @@ function showAvatarPicker(playerIndex) {
     const threePlayers = document.querySelector('.three-players');
     adjustThreePlayersLayout(playerForm, threePlayers);
 
-    const avatars = playerForm.querySelectorAll(".avatar-circle img");
+    const avatars = playerForm.querySelectorAll(".avatar-btn");
     setupAvatarClick(avatars, playerIndex);
 
     const key = playerIndex === 0 ? "player" : `opponent${playerIndex}`;
@@ -194,24 +194,16 @@ function renderAvatarMenu(form, playerIndex) {
         <div class="avatar-menu">
             <div class="avatar-title">Bild für Spieler ${playerIndex + 1} auswählen</div>
             <div class="avatar-circle">
-                ${Array.from({ length: 8 }, (_, i) => `<img src="/assets/img/avatar/avatar-${i+1}.png">`).join('')}
+                ${Array.from({ length: 8 }, (_, i) => /*html*/`
+                    <button class="avatar-btn" aria-label="Avatar ${i+1}">
+                        <img src="/assets/img/avatar/avatar-${i+1}.png" alt="">
+                    </button>
+                `).join('')}
             </div>
         </div>
         <button class="submit-avatar-btn">ZURÜCK</button>`;
 }
 
-/* 
-/*  <div class="avatar-menu">
-            <div class="avatar-title">Bild für Spieler ${playerIndex + 1} auswählen</div>
-            <div class="avatar-circle">
-                ${Array.from({ length: 8 }, (_, i) => `
-                    <button class="avatar-btn" aria-label="Avatar ${i+1}">
-                        <img src="/assets/img/avatar/avatar-${i+1}.png" alt="Avatar ${i+1}">
-                    </button>
-                `).join('')}
-            </div>
-        </div>
-        <button class="submit-avatar-btn">ZURÜCK</button> */
 
 /**
  * Passt Layout für drei Spieler an.
@@ -232,8 +224,9 @@ function adjustThreePlayersLayout(form, container) {
  * @param {number} playerIndex - Index des Spielers, dessen Avatar gewählt wird
  */
 function setupAvatarClick(avatars, playerIndex) {
-    avatars.forEach(img => {
-        img.addEventListener("click", () => {
+    avatars.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const img = btn.querySelector("img");
             const key = playerIndex === 0 ? "player" : `opponent${playerIndex}`;
             const data = JSON.parse(localStorage.getItem(key)) || { name: "", avatar: "" };
             const clickedFile = img.src.split("/").pop();
@@ -350,7 +343,7 @@ function restorePlayerFormData() {
 
     const numOpponent = Number(localStorage.getItem("numOpponent")) || 1;
     const inputs = playerForm.querySelectorAll('input');
-    const avatarImgs = playerForm.querySelectorAll(".avatar-circle img");
+    const avatarBtns = playerForm.querySelectorAll(".avatar-btn");
 
     for (let i = 0; i <= numOpponent; i++) {
         const key = i === 0 ? "player" : `opponent${i}`;
@@ -360,7 +353,7 @@ function restorePlayerFormData() {
         const defaultNames = i === 0 ? ["Spieler"] : ["Gegner", `Gegner ${i}`];
         if (input) input.value = data.name && !defaultNames.includes(data.name) ? data.name : '';
 
-        if (data.avatar) markSelectedAvatar(avatarImgs, data.avatar);
+        if (data.avatar) markSelectedAvatar(avatarBtns, data.avatar);
     }
 
     showSelectedAvatarInPlayerForm(playerForm);
@@ -369,24 +362,30 @@ function restorePlayerFormData() {
 
 /**
  * Markiert einen gewählten Avatar und dimmt die anderen.
- * @param {NodeList|HTMLElement[]} avatarImgs - Alle Avatare im Formular
+ * @param {NodeList|HTMLElement[]} avatarBtns - Alle Avatare im Formular
  * @param {string} selectedSrc - URL des gewählten Avatars
  */
-function markSelectedAvatar(avatarImgs, selectedSrc) {
-    const avatars = Array.from(avatarImgs);
+function markSelectedAvatar(avatarBtns, selectedSrc) {
+    const buttons = Array.from(avatarBtns);
 
     if (!selectedSrc || selectedSrc.includes("profile_image_default.png")) {
-        avatars.forEach(img => img.classList.remove("selected", "dimmed"));
+        buttons.forEach(btn => btn.classList.remove("selected", "dimmed"));
         return;
     }
 
-    const selectedImg = avatars.find(img => img.src.split("/").pop() === selectedSrc.split("/").pop());
-    if (!selectedImg) return;
+    const selectedBtn = buttons.find(btn =>
+        btn.querySelector("img").src.split("/").pop() === selectedSrc.split("/").pop()
+    );
 
-    avatars.forEach(img => img.classList.remove("selected", "dimmed"));
-    selectedImg.classList.add("selected");
-    avatars.filter(img => img !== selectedImg).forEach(img => img.classList.add("dimmed"));
+    if (!selectedBtn) return;
+    buttons.forEach(btn => btn.classList.remove("selected", "dimmed"));
+    selectedBtn.classList.add("selected");
+
+    buttons
+        .filter(btn => btn !== selectedBtn)
+        .forEach(btn => btn.classList.add("dimmed"));
 }
+
 
 
 /**
