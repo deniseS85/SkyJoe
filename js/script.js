@@ -6,6 +6,8 @@ const menuButtons = document.querySelectorAll(".menu-btn");
 const paperContent = document.getElementById("paperContent");
 const music = document.getElementById('bgMusic');
 const backgroundNames = ["Strand","Felsenschlucht","Kristallsee","Wanderdüne","Spielarena","Schneelandschaft"];
+const avatarNames = ["Frau mit braungelocktem Haar","Junge mit Mütze","Rothaariges Mädchen","Älterer Herr","Blondes Mädchen mit Mütze","Mann mit Mütze und Brille","Dunkelhaarige junge Dame mit Mütze","Mann mit Schnautzer"];
+
 let accessibilityFocusBtn = null;
 
 
@@ -195,7 +197,7 @@ function renderAvatarMenu(form, playerIndex) {
             <div class="avatar-title">Bild für Spieler ${playerIndex + 1} auswählen</div>
             <div class="avatar-circle">
                 ${Array.from({ length: 8 }, (_, i) => /*html*/`
-                    <button class="avatar-btn" aria-label="Avatar ${i+1}">
+                    <button class="avatar-btn" aria-label="${avatarNames[i]}">
                         <img src="/assets/img/avatar/avatar-${i+1}.png" alt="">
                     </button>
                 `).join('')}

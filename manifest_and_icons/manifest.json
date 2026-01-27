@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "SkyJoe",
+  "short_name": "SkyJoe",
+  "description": "Das digitale Kartenspiel SkyJoe – schnell, taktisch und spannend.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#7dd3fc",
+  "theme_color": "#4ade80",
+  "lang": "de-DE",
+  "dir": "auto",
+  "icons": [
+    {
+      "src": "/manifest_and_icons/icon512_maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/manifest_and_icons/icon512_rounded.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

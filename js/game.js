@@ -56,6 +56,9 @@ function flipCard(cardEl, inner, changeCard = false) {
     if (!changeCard && !canFlipCard(wrapper, cardEl, playerData)) return;
 
     inner.style.transform = 'rotateY(0deg)';
+    cardEl.setAttribute("aria-label", `Karte ${cardEl.dataset.value}`);
+    const live = document.getElementById("sr-live"); 
+    if (live) live.textContent = `Karte ${cardEl.dataset.value} aufgedeckt`;
     playSound(flipCardSound);
     cardEl.dataset.flipped = 'true';
     playerData.total += Number(cardEl.dataset.value);

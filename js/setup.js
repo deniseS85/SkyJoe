@@ -367,7 +367,16 @@ function createCardElement(card, width, borderRadius) {
 function createCardWrapper(card, width, borderRadius) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
+    cardEl.tabIndex = 0;
+    cardEl.setAttribute("role", "button");
+    cardEl.setAttribute("aria-label", "Verdeckte Karte");
     cardEl.dataset.value = card.value;
+
+    cardEl.addEventListener("keydown", e => { 
+        if (e.key === "Enter" || e.key === " ") { 
+            cardEl.click(); 
+        } 
+    });
 
     Object.assign(cardEl.style, {
         width: `${width}px`,

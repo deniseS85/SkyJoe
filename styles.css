@@ -28,7 +28,7 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-
+    background-color: #7dd3fc; 
     touch-action: manipulation;
 }
 
@@ -528,10 +528,8 @@ input:checked + .settings-slider:before {
 .avatar-image img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
-
-
 
 .has-avatar {
     width: clamp(1.875rem, 1.6071rem + 1.3393vw, 3.75rem);
