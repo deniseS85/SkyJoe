@@ -181,11 +181,20 @@ h1 {
     width: clamp(1.25rem, 1.0714rem + 0.8929vw, 2.5rem);
     cursor: pointer;
     transition: transform 0.2s ease, filter 0.2s ease; 
+    background: none;
+    border: none;
+    padding: 0;
 }
 
 .close-btn:hover {
     transform: scale(1.2);
     filter: brightness(1.2);
+}
+
+.close-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .paper-roll-header {
@@ -215,7 +224,6 @@ h1 {
     font-size: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
     text-shadow: 2px 2px #444;
     margin-top: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
-    margin-bottom: 0;
 }
 
 .menu-btn {
@@ -403,6 +411,13 @@ input:checked + .settings-slider:before {
     width: clamp(1.5625rem, 1.4286rem + 0.6696vw, 2.5rem);               
     height: clamp(1.5625rem, 1.4286rem + 0.6696vw, 2.5rem);  
     filter: drop-shadow(1px 1px 2px rgba(255,255,255,0.4));
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    transition: transform 0.2s ease;
 }
 
 .prev-btn {          
@@ -413,6 +428,20 @@ input:checked + .settings-slider:before {
 .next-btn {
     right: -10px;   
     transform: translateY(-50%);
+}
+
+.prev-btn:hover, .prev-btn:focus { 
+    transform: translateY(-50%) rotate(180deg) scale(1.2); 
+} 
+
+.next-btn:hover, .next-btn:focus { 
+    transform: translateY(-50%) scale(1.2); 
+}
+
+.prev-btn img, .next-btn img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; 
 }
   
 .carousel {
@@ -434,6 +463,15 @@ input:checked + .settings-slider:before {
     transition: transform 0.5s, opacity 0.5s;
     transform-origin: center;
 }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
 
 .player-form {
     display: flex;
@@ -477,12 +515,23 @@ input:checked + .settings-slider:before {
     width: clamp(1.5625rem, 1.4286rem + 0.6696vw, 2.5rem);
     cursor: pointer;
     transition: transform 0.2s ease, filter 0.2s ease; 
+    background: none;
+    border: none;
+    padding: 0;
 }
 
 .avatar-image:hover {
     transform: scale(1.1);
     filter: drop-shadow(1px 1px 2px #c28a54);
 }
+
+.avatar-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+
 
 .has-avatar {
     width: clamp(1.875rem, 1.6071rem + 1.3393vw, 3.75rem);
@@ -730,7 +779,7 @@ input:checked + .settings-slider:before {
     z-index: 20;
 }
 
-.icons-container img {
+.icons-container button {
     width: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
     height: auto; 
     object-fit: contain; 
@@ -744,9 +793,23 @@ input:checked + .settings-slider:before {
     padding: clamp(0.1875rem, 0.1696rem + 0.0893vw, 0.3125rem);
 }
 
-.icons-container img:hover {
+.icons-container button:hover {
     transform: scale(1.1);
 }
+
+.icons-container button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+}
+
+
+.icons-container button img {
+    width: clamp(1.25rem, 0.9821rem + 1.3393vw, 3.125rem);
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+}
+
 
 .stack-area {
     position: relative;
@@ -781,8 +844,8 @@ input:checked + .settings-slider:before {
     aspect-ratio: auto;
     border-radius: 50%;
     margin: auto;
-   /*  --size: min(60vh, 60vw, 35rem); */
    --size: min(85vh, 55vw, 40rem);
+  /*  --size: min(83vh, 53vw, 38rem); */
     width: var(--size);
     height: var(--size);
 }
@@ -923,6 +986,10 @@ input:checked + .settings-slider:before {
     top: -3px;
     left: -3px;
     z-index: -2;
+}
+
+#stack-field-2 {
+    touch-action: none;
 }
 
 .grid-wrapper.player-bottom .card-field {

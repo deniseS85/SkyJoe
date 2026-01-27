@@ -12,6 +12,6 @@ export const skyjoCards = [
     { value: 8,  color: "#FF4500", count: 10, img: "assets/img/cards/8.png" },
     { value: 9,  color: "#B22222", count: 10, img: "assets/img/cards/9.png" },
     { value: 10, color: "#FF1493", count: 10, img: "assets/img/cards/10.png" },
-    { value: 11, color: "#FF69B4", count: 10, img: "assets/img/cards/11.png"},
+    { value: 11, color: "#FF69B4", count: 10, img: "assets/img/cards/11.png" },
     { value: 12, color: "#FF69B4", count: 10, img: "assets/img/cards/12.png" }
 ];

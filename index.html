@@ -12,7 +12,7 @@
     <title>SkyJoe</title>
 </head>
 <body>
-    <div class="start-screen" id="startScreen">
+    <main class="start-screen" id="startScreen">
         <h1>Skyjoe</h1>
         
         <div class="background-animations">
@@ -33,11 +33,11 @@
                 <img class="cat-paw" src="/assets/img/catPaw.png" alt="CatPaw">
 
                 <div class="paper-roll" id="paperRoll">
-                    <div class="paper-content" id="paperContent"></div>
+                    <div class="paper-content" id="paperContent" tabindex="-1"></div>
                 </div>   
             </div>
         
-            <div class="menu-box">
+            <nav class="menu-box" aria-label="Hauptmenü">
                 <div class="menu-title">MENU</div>
                 <button class="menu-btn">SPIELREGELN</button>
                 <button class="menu-btn">EINSTELLUNGEN</button>
@@ -46,15 +46,15 @@
                     <button class="menu-btn">3 SPIELER</button>
                 </div>
                 <button class="start-btn" id="startBtn">NEUES SPIEL</button>   
-            </div>
+            </nav>
         </div>
-    </div>
+    </main>
 
     <div class="game-screen" id="gameScreen" style="display: none;">
         <div class="game-header">
-            <div class="back-btn" id="backBtn">
-                <img src="/assets/img/arrow.png" alt="Back">
-            </div>
+            <button class="back-btn" id="backBtn" aria-label="Zurück">
+                <img src="/assets/img/arrow.png" alt="">
+            </button>
 
             <div class="round-number" id="roundNumber"></div>
         </div>
@@ -75,10 +75,21 @@
                 </div> 
 
                 <div class="icons-container">
-                    <img src="/assets/img/gaming-rules.png" id="gameRules" alt="Spielregeln">
-                    <img src="/assets/img/sound_on.png" id="soundIcon" alt="SoundToggle">
-                    <img src="/assets/img/music_on.png" id="musicIcon" alt="MusikToggle">
-                    <img src="/assets/img/high-score.png" id="highScore" alt="HighScore">
+                    <button id="gameRules" aria-label="Spielregeln anzeigen"> 
+                        <img src="/assets/img/gaming-rules.png" alt=""> 
+                    </button> 
+                    
+                    <button id="soundIcon" aria-label="Sound"> 
+                        <img src="/assets/img/sound_on.png" alt=""> 
+                    </button> 
+                    
+                    <button id="musicIcon" aria-label="Musik"> 
+                        <img src="/assets/img/music_on.png" alt=""> 
+                    </button> 
+                    
+                    <button id="highScore" aria-label="Highscore anzeigen"> 
+                        <img src="/assets/img/high-score.png" alt=""> 
+                    </button>
                 </div>
             </div>
         </div>

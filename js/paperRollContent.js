@@ -24,14 +24,14 @@ export const paperRollContent = {
       "EINSTELLUNGEN": /*html*/`
             <div class="settings">
                   <div class="settings-option">
-                        <span class="settings-label">SOUND</span>
+                        <label for="soundToggle" class="settings-label">SOUND</label>
                         <label class="settings-toggle">
                               <input type="checkbox" id="soundToggle">
                               <span class="settings-slider"></span>
                         </label>
                   </div>
                   <div class="settings-option">
-                        <span class="settings-label">MUSIK</span>
+                        <label for="musicToggle" class="settings-label">MUSIK</label>
                         <label class="settings-toggle">
                               <input type="checkbox" id="musicToggle">
                               <span class="settings-slider"></span>
@@ -39,7 +39,12 @@ export const paperRollContent = {
                   </div>
                   <div class="settings-background">
                         <span class="settings-label">HINTERGRUND</span>
-                        <img class="prev-btn" src="/assets/img/arrow.png" alt="Prev">
+                        <div id="carouselStatus" aria-live="polite" class="sr-only"></div>
+                        
+                        <button class="prev-btn" aria-label="Vorheriger Hintergrund"> 
+                              <img src="/assets/img/arrow.png" alt=""> 
+                        </button>
+      
                         <div class="scene">
                               <div class="carousel">
                                     <img src="/assets/img/bg0.png" class="carousel-image">
@@ -50,7 +55,10 @@ export const paperRollContent = {
                                     <img src="/assets/img/bg5.png" class="carousel-image">
                               </div>
                         </div>
-                        <img class="next-btn" src="/assets/img/arrow.png" alt="Next">
+                  
+                        <button class="next-btn" aria-label="Nächster Hintergrund"> 
+                              <img src="/assets/img/arrow.png" alt=""> 
+                        </button>
                   </div>
             </div>`,
       "2 SPIELER": /*html*/`
@@ -58,12 +66,16 @@ export const paperRollContent = {
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME</label>
                         <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="20">
-                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
+                        <button class="avatar-image">
+                              <img src="/assets/img/avatar-image.png" alt="">
+                        </button>
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME</label>
                         <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="20">
-                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
+                        <button class="avatar-image">
+                              <img src="/assets/img/avatar-image.png" alt="">
+                        </button>
                   </div>    
             </div>
             <button class="submit-player-btn">SPEICHERN</button>`,
@@ -72,17 +84,23 @@ export const paperRollContent = {
                   <div class="player-field">
                         <label for="player1-name">SPIELER 1 – NAME</label>
                         <input type="text" id="player1-name" name="player1" autocomplete="off" maxlength="20">
-                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
+                        <button class="avatar-image">
+                              <img src="/assets/img/avatar-image.png" alt="">
+                        </button>
                   </div>
                   <div class="player-field">
                         <label for="player2-name">SPIELER 2 – NAME</label>
                         <input type="text" id="player2-name" name="player2" autocomplete="off" maxlength="20">
-                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
+                        <button class="avatar-image">
+                              <img src="/assets/img/avatar-image.png" alt="">
+                        </button>
                   </div>
                   <div class="player-field">
                         <label for="player3-name">SPIELER 3 – NAME</label>
                         <input type="text" id="player3-name" name="player3" autocomplete="off" maxlength="20">
-                        <img class="avatar-image" src="/assets/img/avatar-image.png" alt="Avatar">
+                        <button class="avatar-image">
+                              <img src="/assets/img/avatar-image.png" alt="">
+                        </button>
                   </div> 
             </div>
             <button class="submit-player-btn submit-btn-3">SPEICHERN</button>`

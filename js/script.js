@@ -5,6 +5,8 @@ const startButton = document.getElementById("startBtn");
 const menuButtons = document.querySelectorAll(".menu-btn");
 const paperContent = document.getElementById("paperContent");
 const music = document.getElementById('bgMusic');
+const backgroundNames = ["Strand","Felsenschlucht","Kristallsee","Wanderdüne","Spielarena","Schneelandschaft"];
+let accessibilityFocusBtn = null;
 
 
 /**
@@ -15,11 +17,20 @@ const music = document.getElementById('bgMusic');
  * @param {boolean} isSettings - true: initBackgroundCarousel & MusicToggle aufrufen
  * @param {boolean} isPlayerForm - true: Player-Formular initialisieren
  */
-function openPaperRoll(content, isSettings = false, isPlayerForm = false) {
-    paperContent.innerHTML = /*html*/`
-        <img class="close-btn" src="/assets/img/close-icon.png" alt="Close">${content}`;
-    paperRoll.classList.add("open");
+function openPaperRoll(content, isSettings = false, isPlayerForm = false, triggerBtn = null) {
+    accessibilityFocusBtn = triggerBtn;
 
+    paperContent.innerHTML = /*html*/`
+        <button class="close-btn" aria-label="Schließen">
+            <img src="/assets/img/close-icon.png" alt="">
+        </button>
+        ${content}`;
+
+    paperRoll.classList.add("open");
+    document.querySelector(".menu-box").inert = true;
+    paperRoll.inert = false;
+    paperContent.querySelector("button, input, [tabindex]")?.focus();
+  
     const closeBtn = paperContent.querySelector(".close-btn");
     if (closeBtn) closeBtn.addEventListener("click", closePaperRoll);
 
@@ -43,6 +54,9 @@ function openPaperRoll(content, isSettings = false, isPlayerForm = false) {
 function closePaperRoll() {
     paperRoll.classList.remove("open");
     if (startButton) startButton.disabled = false;
+    paperRoll.inert = true;
+    document.querySelector(".menu-box").inert = false;
+    accessibilityFocusBtn?.focus();
 }
 
 
@@ -85,8 +99,7 @@ menuButtons.forEach(btn => {
             resetPlayers(newNum);
             initPlayers(newNum); 
         }
-        
-        openPaperRoll(content, isSettings, isPlayerForm);
+        openPaperRoll(content, isSettings, isPlayerForm, btn);
     });
 });
 
@@ -128,11 +141,11 @@ function initPlayers(newNum) {
  * @param {number} playerIndex - Index des Spielers (0 = Spieler, 1+ = Gegner)
  */
 function setupAvatarSelect() {
-    const avatarImages = paperContent.querySelectorAll(".avatar-image");
-    if (!avatarImages.length) return;
+    const avatarButtons = paperContent.querySelectorAll(".avatar-image");
+    if (!avatarButtons.length) return;
 
-    avatarImages.forEach((img, index) => {
-        img.addEventListener("click", () => showAvatarPicker(index));
+    avatarButtons.forEach((btn, index) => {
+        btn.addEventListener("click", () => showAvatarPicker(index));
     });
 }
 
@@ -187,6 +200,18 @@ function renderAvatarMenu(form, playerIndex) {
         <button class="submit-avatar-btn">ZURÜCK</button>`;
 }
 
+/* 
+/*  <div class="avatar-menu">
+            <div class="avatar-title">Bild für Spieler ${playerIndex + 1} auswählen</div>
+            <div class="avatar-circle">
+                ${Array.from({ length: 8 }, (_, i) => `
+                    <button class="avatar-btn" aria-label="Avatar ${i+1}">
+                        <img src="/assets/img/avatar/avatar-${i+1}.png" alt="Avatar ${i+1}">
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+        <button class="submit-avatar-btn">ZURÜCK</button> */
 
 /**
  * Passt Layout für drei Spieler an.
@@ -371,7 +396,8 @@ function markSelectedAvatar(avatarImgs, selectedSrc) {
 function showSelectedAvatarInPlayerForm(form) {
     const playerFields = form.querySelectorAll('.player-field');
     playerFields.forEach((field, i) => {
-        const avatarImg = field.querySelector('.avatar-image');
+        const avatarBtn = field.querySelector('.avatar-image');
+        const avatarImg = avatarBtn.querySelector('img');
         const key = i === 0 ? 'player' : `opponent${i}`;
         const data = JSON.parse(localStorage.getItem(key)) || {};
 
@@ -452,7 +478,7 @@ function initBackgroundCarousel() {
     let theta = 360 / imageCount;
     const prevButton = document.querySelector('.prev-btn');
     const nextButton = document.querySelector('.next-btn');
-
+   
     if (!carousel || images.length === 0 || !prevButton || !nextButton) return;
    
     window.updateCarouselDimensions = function() {
@@ -471,14 +497,27 @@ function initBackgroundCarousel() {
     prevButton.addEventListener('click', () => {
         selectedIndex = (selectedIndex - 1 + imageCount) % imageCount;
         rotateCarousel(carousel, images, selectedIndex, theta, radius, rotateFn);
+        setBackgroundName(selectedIndex);
     });
 
     nextButton.addEventListener('click', () => {
         selectedIndex = (selectedIndex + 1) % imageCount;
         rotateCarousel(carousel, images, selectedIndex, theta, radius, rotateFn);
+        setBackgroundName(selectedIndex);
     });
 
     updateCarouselDimensions();
+}
+
+
+/**
+ * Setzt den Screenreader‑Text für den aktuell ausgewählten Hintergrund.
+ * @param {number} index - Index des ausgewählten Hintergrund vom Array backgroundNames
+ */
+function setBackgroundName(index) {
+    const status = document.getElementById('carouselStatus');
+    if (status) status.textContent = `${backgroundNames[index]} ausgewählt`;
+    
 }
 
 
@@ -571,3 +610,4 @@ document.addEventListener('pointerdown', e => {
         e.preventDefault();
     }
 });
+

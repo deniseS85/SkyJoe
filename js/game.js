@@ -19,8 +19,7 @@ let remainingLastTurns = 0;
 let discardedCards = [];
 let isThreeColumns = false;
 let firstPlayerToFinish = null;
-let settingsInitialized = false;
-let clickOutsideInitialized = false;
+let gameSettingsInitialized = false;
 
 /**
  * Initialisiert den Spielstart.
@@ -899,40 +898,30 @@ function checkEndOfGame() {
  * Speichert den Status in localStorage und spielt/stoppt Sounds.
  */
 export function setupGameSettings() {
-    if (settingsInitialized) return;
-    settingsInitialized = true;
+    if (gameSettingsInitialized) return;
+    gameSettingsInitialized = true;
     setupToggles();
     setupGameRulesPopup();
     setupHighScorePopup();
-
-    if (!clickOutsideInitialized) {
-        setupClickOutside();
-        clickOutsideInitialized = true;
-    }
 }
 
 
 /**
- * Initialisiert Sound- und Musik-Toggles, synchronisiert deren Status mit dem localStorage
+ * Initialisiert Sound- und Musik-Toggles, synchronisiert deren Status mit dem localStorage.
  */
 function setupToggles() {
     const gameSounds = [flipCardSound, playerStartSound, cardDropSound, winnerSound];
-    
     const toggles = [
         { 
             id: 'soundIcon', 
             key: 'sound', 
             onEnable: () => { if (isDealing) playDealSound(); },
             onDisable: () => {
-                setTimeout(() => {
-                    gameSounds.forEach(s => {
-                        if (!s.paused) {
-                            s.pause();
-                        }
-                        s.currentTime = 0;
-                    });
-                    stopDealSound();
-                }, 50);
+                gameSounds.forEach(s => {
+                    s.pause();
+                    s.currentTime = 0;
+                });
+                stopDealSound();   
             }
         },
         { 
@@ -944,30 +933,37 @@ function setupToggles() {
     ];
 
     toggles.forEach(({ id, key, onEnable, onDisable }) => {
-        const icon = document.getElementById(id);
-        if (!icon) return;
+        const button = document.getElementById(id);
+        if (button) initializeToggleButton(button, key, onEnable, onDisable); 
+    });
+}
 
+
+/**
+ * Initialisiert einen Toggle-Button (Sound oder Musik).
+ *
+ * @param {HTMLButtonElement} button - Der ursprüngliche Button im DOM.
+ * @param {string} key - "Sound" oder "Musik"
+ * @param {Function} [onEnable] - Funktion, wenn der Toggle aktiviert wird.
+ * @param {Function} [onDisable] - Funktion, wenn der Toggle deaktiviert wird.
+ */
+function initializeToggleButton(button, key, onEnable, onDisable) {
+        const img = button.querySelector('img');
         const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
-        icon.src = `/assets/img/${key}_${status}.png`;
+        
+        button.setAttribute("aria-label", `${key} ${status === 'on' ? 'an' : 'aus'}`);
+        img.src = `/assets/img/${key}_${status}.png`;
 
-        const newIcon = icon.cloneNode(true);
-        icon.replaceWith(newIcon);
-
-        newIcon.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
+        button.addEventListener('click', () => {
             const currentlyOn = localStorage.getItem(key) === 'on';
             const newStatus = currentlyOn ? 'off' : 'on';
             localStorage.setItem(key, newStatus);
-            newIcon.src = `/assets/img/${key}_${newStatus}.png`;
-            
-            if (newStatus === 'on') {
-                onEnable?.();
-            } else {
-                onDisable?.();
-            }
+            button.setAttribute("aria-label", `${key} ${newStatus === 'on' ? 'an' : 'aus'}`);
+            img.src = `/assets/img/${key}_${newStatus}.png`;
+
+            if (newStatus === 'on') onEnable?.();
+            else onDisable?.();
         });
-    });
 }
 
 
@@ -1187,16 +1183,10 @@ function calculateRanks(players, pointKey = 'points') {
  */
 function setupGameRulesPopup() {
     const gameRulesIcon = document.getElementById('gameRules');
-    if (!gameRulesIcon) return; 
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
-    const newIcon = gameRulesIcon.cloneNode(true);
-    gameRulesIcon.parentNode.replaceChild(newIcon, gameRulesIcon);
-
-    newIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        
+    gameRulesIcon.addEventListener('click', () => {
         const content = paperRollContent["SPIELREGELN"];
         const type = 'rules';
         const className = 'game-rules-container';
@@ -1215,25 +1205,18 @@ function setupGameRulesPopup() {
         });
     });
 
-    /* setupClickOutside(popupWrapper, popupContent, newIcon, 'rules'); */
+    setupClickOutside(popupWrapper, popupContent, gameRulesIcon, 'rules');
 }
-
 
 /**
  * Initialisiert das Popup für die Highscore.
  */
 function setupHighScorePopup() {
     const highScoreIcon = document.getElementById('highScore');
-    if (!highScoreIcon) return;
     const popupWrapper = document.getElementById('popup');
     const popupContent = document.getElementById('popupContent');
 
-    const newIcon = highScoreIcon.cloneNode(true);
-    highScoreIcon.parentNode.replaceChild(newIcon, highScoreIcon);
-
-    newIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        
+    highScoreIcon.addEventListener('click', () => {
         const players = loadPlayers({ updateTotal: false, sort: true });
         const content = generateHighscoreHTML(players, true);
         const type = 'highscore';
@@ -1252,28 +1235,21 @@ function setupHighScorePopup() {
             }
         });
     });
-    
-   /*  setupClickOutside(popupWrapper, popupContent, newIcon, 'highscore'); */
+    setupClickOutside(popupWrapper, popupContent, highScoreIcon, 'highscore');
 }
-
 
 /**
  * Schließt Popups, wenn außerhalb geklickt wird.
  */
-function setupClickOutside() {
-    const popupWrapper = document.getElementById('popup');
-    const popupContent = document.getElementById('popupContent');
-    
+function setupClickOutside(popupWrapper, popupContent, triggerElement, type) {
     document.addEventListener('click', (e) => {
-        if (!popupWrapper.classList.contains('show')) return;
-        
-        const allowedIds = ['gameRules', 'highScore'];
-        if (!popupContent.contains(e.target) && !allowedIds.includes(e.target.id)) {
+        if (popupWrapper.dataset.type !== type) return;
+        if (!popupContent.contains(e.target) && e.target !== triggerElement) {
             popupWrapper.classList.remove('show');
+            popupWrapper.dataset.type = '';
         }
     });
 }
-
 
 /**
  * Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.
@@ -1313,8 +1289,6 @@ export function resetCards() {
     setTurnState('INIT');
     updateClickableCards();
     firstPlayerToFinish = null;
-    settingsInitialized = false;
-    clickOutsideInitialized = false;
 
     document.querySelectorAll('.card').forEach(cardEl => {
         cardEl.dataset.flipped = 'false';
