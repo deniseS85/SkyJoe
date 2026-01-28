@@ -427,20 +427,26 @@ function initToggle(toggleId, storageKey, onEnable = () => {}, onDisable = () =>
     const toggle = document.getElementById(toggleId);
     if (!toggle) return;
 
-    const isOn = localStorage.getItem(storageKey) === "on";
-    toggle.checked = isOn;
-    if (isOn) onEnable();
+    const iconButton = document.getElementById(`${storageKey}Icon`);
+    const icon = iconButton?.querySelector("img");
 
-    toggle.addEventListener("change", () => {
-        if (toggle.checked) {
-            localStorage.setItem(storageKey, "on");
-            onEnable();
-        } else {
-            localStorage.setItem(storageKey, "off");
-            onDisable();
+    const setState = (isOn) => {
+        localStorage.setItem(storageKey, isOn ? "on" : "off");
+        toggle.checked = isOn;
+
+        if (icon) {
+            icon.src = `/assets/img/${storageKey}_${isOn ? "on" : "off"}.png`;
+            iconButton.setAttribute("aria-label", `${storageKey} ${isOn ? "an" : "aus"}`);
         }
-    });
+
+        isOn ? onEnable() : onDisable();
+    };
+
+    setState(localStorage.getItem(storageKey) === "on");
+    toggle.addEventListener("change", () => setState(toggle.checked));
 }
+
+
 
 
 /**

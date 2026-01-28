@@ -22,6 +22,7 @@ let isThreeColumns = false;
 let firstPlayerToFinish = null;
 let gameSettingsInitialized = false;
 
+
 /**
  * Initialisiert den Spielstart.
  */
@@ -955,6 +956,8 @@ function setupToggles() {
 function initializeToggleButton(button, key, onEnable, onDisable) {
         const img = button.querySelector('img');
         const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
+
+        console.log(status)
         
         button.setAttribute("aria-label", `${key} ${status === 'on' ? 'an' : 'aus'}`);
         img.src = `/assets/img/${key}_${status}.png`;
