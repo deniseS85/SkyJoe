@@ -1,0 +1,2493 @@
+Need to install the following packages:
+marked@17.0.1
+Ok to proceed? (y) <h2>Functions</h2>
+<dl>
+<dt><a href="#startGame">startGame()</a></dt>
+<dd><p>Initialisiert den Spielstart.</p>
+</dd>
+<dt><a href="#flipCard">flipCard(cardEl, inner, [changeCard])</a> ⇒ <code>void</code></dt>
+<dd><p>Dreht eine Karte um und aktualisiert den Spielstand.</p>
+</dd>
+<dt><a href="#getOrCreatePlayerData">getOrCreatePlayerData(wrapper)</a> ⇒ <code>Object</code></dt>
+<dd><p>Liefert vorhandene Spieler-Daten oder legt sie neu an</p>
+</dd>
+<dt><a href="#canFlipCard">canFlipCard(wrapper, cardEl, playerData)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Prüft, ob die Karte eines Spielers aufgedeckt werden darf.</p>
+</dd>
+<dt><a href="#isPlayerBottom">isPlayerBottom(element)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Prüft, ob ein Karten-Wrapper ein Spieler-Bottom ist.</p>
+</dd>
+<dt><a href="#updatePointInfo">updatePointInfo(playerData, blink)</a></dt>
+<dd><p>Aktualisiert die sichtbare Punkteanzeige im DOM und speichert die Werte im localStorage.</p>
+</dd>
+<dt><a href="#checkAllPlayersFlipped">checkAllPlayersFlipped()</a></dt>
+<dd><p>Prüft, ob alle Spieler ihre 2 Karten aufgedeckt haben und startet ggf. 
+die Spielrotation bzw. zeigt den Startspieler an.</p>
+</dd>
+<dt><a href="#getPlayersFlippedTwoCards">getPlayersFlippedTwoCards()</a> ⇒ <code>Array.&lt;Object&gt;</code></dt>
+<dd><p>gibt alle Spieler zurück, die bereits 2 Karten aufgedeckt haben.</p>
+</dd>
+<dt><a href="#updateClickableCards">updateClickableCards()</a></dt>
+<dd><p>Setzt Klickbarkeit und Cursor für alle Karten im Spiel.</p>
+</dd>
+<dt><a href="#revealDiscardCard">revealDiscardCard()</a></dt>
+<dd><p>Lässt die oberste Karte vom Ziehstapel in den Ablagestapel fliegen.</p>
+</dd>
+<dt><a href="#createFlyingCard">createFlyingCard(imgSrc, fromRect)</a> ⇒ <code>HTMLImageElement</code></dt>
+<dd><p>Erstellt ein fliegendes Karten-Element.</p>
+</dd>
+<dt><a href="#animationDirection">animationDirection(fromRect, toRect)</a> ⇒ <code>Object</code></dt>
+<dd><p>Berechnet die Richtung der Kartenanimation.</p>
+</dd>
+<dt><a href="#animateFlyingCard">animateFlyingCard(card, delta)</a></dt>
+<dd><p>Animiert die fliegende Karte.</p>
+</dd>
+<dt><a href="#finalizeCard">finalizeCard(card, toEl, currentCard, imgSrc)</a></dt>
+<dd><p>Finalisiert die Animation einer Karte und setzt sie in das Ziel-Element.</p>
+</dd>
+<dt><a href="#updatePlayerCard">updatePlayerCard(card, wrapper)</a></dt>
+<dd><p>Aktualisiert Klickbarkeit und Event-Handler für Spielerkarten.</p>
+</dd>
+<dt><a href="#updateStackCard">updateStackCard(card)</a></dt>
+<dd><p>Passt Klickbarkeit und Cursor für Stapelkarten an, je nach Spielphase.</p>
+</dd>
+<dt><a href="#setCardInteractive">setCardInteractive(card, clickable, [cursor])</a></dt>
+<dd><p>Aktiviert oder deaktiviert Klickbarkeit und Cursor einer Karte.</p>
+</dd>
+<dt><a href="#gameMove">gameMove()</a></dt>
+<dd><p>Startet den ersten Spielzug, aktiviert Klick- und Drag-Events für Stapel.</p>
+</dd>
+<dt><a href="#enableStack1Click">enableStack1Click()</a></dt>
+<dd><p>Aktiviert den Klick auf dem Ziehstapel, um die oberste Karte zu ziehen.</p>
+</dd>
+<dt><a href="#enableStack2Drag">enableStack2Drag()</a></dt>
+<dd><p>Aktiviert Drag-and-Drop für den Ablagestapel (Mouse &amp; Touch).</p>
+</dd>
+<dt><a href="#handleCardDrag">handleCardDrag(original, offsetX, offsetY)</a></dt>
+<dd><p>Aktiviert Drag &amp; Drop für eine Karte (Mouse &amp; Touch via Pointer Events).</p>
+</dd>
+<dt><a href="#createClone">createClone(element, [offsetLeft], [offsetTop])</a> ⇒ <code>HTMLElement</code></dt>
+<dd><p>Erstellt eine optische Kopie (Clone) einer Karte für Drag-Effekt.</p>
+</dd>
+<dt><a href="#highlightDropzone">highlightDropzone(x, y, playerCards)</a> ⇒ <code>HTMLElement</code> | <code>null</code></dt>
+<dd><p>Hebt Drop-Zonen hervor, über denen die Maus ist.</p>
+</dd>
+<dt><a href="#swapCards">swapCards(original, targetCard)</a></dt>
+<dd><p>Tauscht die Inhalte der gezogenen Karte und Zielkarte.</p>
+</dd>
+<dt><a href="#resetClone">resetClone(clone, original)</a></dt>
+<dd><p>Setzt die Klonkarte zurück, wenn kein Drop erfolgt.</p>
+</dd>
+<dt><a href="#refreshPoints">refreshPoints(wrapper)</a></dt>
+<dd><p>Berechnet die aktuellen Punkte eines Spielers anhand der aufgedeckten Karten</p>
+</dd>
+<dt><a href="#handleFinishState">handleFinishState()</a></dt>
+<dd><p>wenn ein Spielzug beendet wird, rotiert das Spielfeld, nächster Spieler beginnt.</p>
+</dd>
+<dt><a href="#isFieldComplete">isFieldComplete(wrapper)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Prüft, ob alle Karten in einem Spielerfeld aufgedeckt sind.</p>
+</dd>
+<dt><a href="#startLastRound">startLastRound()</a></dt>
+<dd><p>Startet die letzte Runde des Spiels.</p>
+</dd>
+<dt><a href="#showLastRoundBanner">showLastRoundBanner()</a></dt>
+<dd><p>Zeigt Info letzte Runde, dann ist das Spiel vorbei.</p>
+</dd>
+<dt><a href="#revealRemainingCards">revealRemainingCards()</a></dt>
+<dd><p>Deckt alle noch nicht aufgedeckten Karten aller Spieler auf, 
+aktualisiert die Punktestände und bestimmt den Gewinner des Spiels.</p>
+</dd>
+<dt><a href="#applyFirstPlayerPenalty">applyFirstPlayerPenalty()</a></dt>
+<dd><p>Prüft, ob der erste Spieler, der die Runde beendet hat, die niedrigste Punktzahl hat,
+wenn nicht, dann bekommt er eine Strafe (Punkte werden verdoppelt)</p>
+</dd>
+<dt><a href="#checkThreeInColumn">checkThreeInColumn(wrapper)</a></dt>
+<dd><p>Prüft, ob in ein Speiler in einer Spalte drei gleiche Kartenwerte hat.</p>
+</dd>
+<dt><a href="#highlightColumn">highlightColumn(wrapper, column)</a></dt>
+<dd><p>Hebt die Spalte hervor, wo drei Kartenwerte gleich sind.</p>
+</dd>
+<dt><a href="#animateColumn">animateColumn(cards)</a></dt>
+<dd><p>Animiert das Entfernen von drei gleichen Karten aus einer Spalte
+und verschiebt sie in den Ablagestapel.</p>
+</dd>
+<dt><a href="#checkPlayingFieldIsEmpty">checkPlayingFieldIsEmpty(wrapper)</a></dt>
+<dd><p>Prüft, ob das Grid des Spielers leer ist und startet die letzte Runde.</p>
+</dd>
+<dt><a href="#isWrapperEmpty">isWrapperEmpty(wrapper)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Prüft, ob ein Wrapper keine Karten mehr hat.</p>
+</dd>
+<dt><a href="#checkEndOfGame">checkEndOfGame()</a></dt>
+<dd><p>Prüft alle Grids, ob das Spiel beendet ist, und löst ggf. das Endspiel aus.</p>
+</dd>
+<dt><a href="#setupGameSettings">setupGameSettings()</a></dt>
+<dd><p>Initialisiert die Toggle-Icons für Sound und Musik.
+Speichert den Status in localStorage und spielt/stoppt Sounds.</p>
+</dd>
+<dt><a href="#setupToggles">setupToggles()</a></dt>
+<dd><p>Initialisiert Sound- und Musik-Toggles, synchronisiert deren Status mit dem localStorage.</p>
+</dd>
+<dt><a href="#initializeToggleButton">initializeToggleButton(button, key, [onEnable], [onDisable])</a></dt>
+<dd><p>Initialisiert einen Toggle-Button (Sound oder Musik).</p>
+</dd>
+<dt><a href="#showPopUp">showPopUp(content, [soundOptions])</a></dt>
+<dd><p>Zeigt ein Popup-Fenster an.</p>
+</dd>
+<dt><a href="#showStartPopup">showStartPopup(player)</a></dt>
+<dd><p>Zeigt das Popup an mit dem Startspieler.</p>
+</dd>
+<dt><a href="#showWinPopup">showWinPopup()</a></dt>
+<dd><p>Zeigt das HighScore-Popup am Ende des Spiels an.</p>
+</dd>
+<dt><a href="#loadPlayers">loadPlayers()</a> ⇒ <code>Array</code></dt>
+<dd><p>Lädt die Spieler aus dem LocalStorage.</p>
+</dd>
+<dt><a href="#generateHighscoreHTML">generateHighscoreHTML(players, isSettings)</a> ⇒ <code>string</code></dt>
+<dd><p>Generiert das HTML für das Highscore-Popup.</p>
+</dd>
+<dt><a href="#calculateRanks">calculateRanks(players, pointKey)</a> ⇒ <code>Array.&lt;number&gt;</code></dt>
+<dd><p>Berechnet die Platzierungen der Spieler basierend auf ihren Punkten.
+Gleiche Punktzahlen erhalten den gleichen Rang.</p>
+</dd>
+<dt><a href="#setupGameRulesPopup">setupGameRulesPopup()</a></dt>
+<dd><p>Initialisiert das Popup für die Spielregeln.</p>
+</dd>
+<dt><a href="#setupHighScorePopup">setupHighScorePopup()</a></dt>
+<dd><p>Initialisiert das Popup für die Highscore.</p>
+</dd>
+<dt><a href="#setupClickOutside">setupClickOutside(popupWrapper, popupContent, triggerElement, type)</a></dt>
+<dd><p>Schließt ein Popup, wenn außerhalb des Popup-Inhalts geklickt wird.</p>
+</dd>
+<dt><a href="#playSound">playSound(sound, [volume], [delay], [playbackRate])</a></dt>
+<dd><p>Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.</p>
+</dd>
+<dt><a href="#resetCards">resetCards()</a></dt>
+<dd><p>Setzt alle Karten zurück und löscht Spielerinformationen.</p>
+</dd>
+<dt><a href="#openPaperRoll">openPaperRoll(content, isSettings, isPlayerForm, triggerBtn)</a></dt>
+<dd><p>Öffnet die Paper-Roll mit Inhalt.
+Fügt automatisch einen Close-Button hinzu.
+Start-Button wird kurz deaktiviert.</p>
+</dd>
+<dt><a href="#closePaperRoll">closePaperRoll()</a></dt>
+<dd><p>Schließt die Paper-Roll und aktiviert den Start-Button wieder.</p>
+</dd>
+<dt><a href="#resetPlayers">resetPlayers(newNum)</a></dt>
+<dd><p>Löscht alte Spieler- und Gegnerdaten aus dem LocalStorage, wenn Anzahl Gegner sich ändert und speichert die neue Anzahl..</p>
+</dd>
+<dt><a href="#initPlayers">initPlayers(newNum)</a></dt>
+<dd><p>Initialisiert Standardwerte für den Spieler und die Gegner im LocalStorage, wenn nichts existiert.</p>
+</dd>
+<dt><a href="#setupAvatarSelect">setupAvatarSelect()</a></dt>
+<dd><p>Öffnet die Avatar-Auswahl für den jeweiligen Spieler.</p>
+</dd>
+<dt><a href="#showAvatarPicker">showAvatarPicker(playerIndex)</a> ⇒ <code>void</code></dt>
+<dd><p>Öffnet das Avatar-Auswahl-Submenu für einen Spieler und ermöglicht Auswahl.</p>
+</dd>
+<dt><a href="#renderAvatarMenu">renderAvatarMenu(form, playerIndex)</a></dt>
+<dd><p>Rendert das HTML für das Avatar-Auswahlmenü eines Spielers.</p>
+</dd>
+<dt><a href="#adjustThreePlayersLayout">adjustThreePlayersLayout(form, container)</a></dt>
+<dd><p>Passt Layout für drei Spieler an.</p>
+</dd>
+<dt><a href="#setupAvatarClick">setupAvatarClick(avatars, playerIndex)</a></dt>
+<dd><p>Bindet Klick-Events auf alle Avatar-Bilder und speichert die Auswahl.</p>
+</dd>
+<dt><a href="#restorePlayerForm">restorePlayerForm(form, prevContent, inputValues, submitBtn, threePlayers)</a></dt>
+<dd><p>Stellt das ursprüngliche Player-Formular wieder her und initialisiert Events.</p>
+</dd>
+<dt><a href="#handlePlayerFormSubmit">handlePlayerFormSubmit()</a></dt>
+<dd><p>Bindet den Submit-Button des Spielerformulars.
+Speichert die Werte und schließt die Paper-Roll. Verhindert doppelte Listener (bound).</p>
+</dd>
+<dt><a href="#applyPlayerDefaults">applyPlayerDefaults()</a></dt>
+<dd><p>Wendet Standardwerte für Spieler und Gegner an, falls keine Daten vorhanden sind.</p>
+</dd>
+<dt><a href="#validateInputs">validateInputs(inputElements)</a></dt>
+<dd><p>Validiert Inputfelder: erlaubt nur Buchstaben und Bindestriche.</p>
+</dd>
+<dt><a href="#restorePlayerFormData">restorePlayerFormData()</a></dt>
+<dd><p>Stellt gespeicherte Spieler- und Gegnerdaten im Formular wieder her. Inputs leeren, wenn Standardwerte.</p>
+</dd>
+<dt><a href="#markSelectedAvatar">markSelectedAvatar(avatarBtns, selectedSrc)</a></dt>
+<dd><p>Markiert einen gewählten Avatar und dimmt die anderen.</p>
+</dd>
+<dt><a href="#showSelectedAvatarInPlayerForm">showSelectedAvatarInPlayerForm(form)</a></dt>
+<dd><p>Setzt das gewählte Avatar-Bild in Formular, bei Deselektierung Default-Image (upload-image.png).</p>
+</dd>
+<dt><a href="#initToggle">initToggle(toggleId, storageKey, onEnable, onDisable)</a></dt>
+<dd><p>Initialisiert einen Toggle für Sound oder Musik.</p>
+</dd>
+<dt><a href="#playMusic">playMusic()</a></dt>
+<dd><p>Startet Hintergrundmusik, falls Element vorhanden.</p>
+</dd>
+<dt><a href="#stopMusic">stopMusic()</a></dt>
+<dd><p>Stoppt Musik und setzt Zeit auf 0</p>
+</dd>
+<dt><a href="#initBackgroundCarousel">initBackgroundCarousel()</a></dt>
+<dd><p>Initialisiert das 3D Carousel für Hintergrundbilder.
+Passt Größe an Bildschirmbreite an.</p>
+</dd>
+<dt><a href="#setBackgroundName">setBackgroundName(index)</a></dt>
+<dd><p>Setzt den Screenreader‑Text für den aktuell ausgewählten Hintergrund.</p>
+</dd>
+<dt><a href="#updateCells">updateCells(images, selectedIndex, theta, radius, rotateFn)</a></dt>
+<dd><p>Aktualisiert Position und Opazität aller Carousel-Bilder.
+Das vorderste Bild (selectedIndex) wird hervorgehoben, alle anderen leicht transparent.</p>
+</dd>
+<dt><a href="#rotateCarousel">rotateCarousel(carousel, images, selectedIndex, theta, radius, rotateFn)</a></dt>
+<dd><p>Dreht das gesamte Carousel auf das aktuell ausgewählte Bild.
+Ruft updateCells auf und speichert die Auswahl in localStorage.</p>
+</dd>
+<dt><a href="#resetGame">resetGame(isRestart)</a></dt>
+<dd></dd>
+<dt><a href="#clearGameDOM">clearGameDOM()</a></dt>
+<dd><p>Entfernt alle Karten aus dem DOM</p>
+</dd>
+<dt><a href="#resetRotationWrapper">resetRotationWrapper()</a></dt>
+<dd><p>Setzt den Rotation-Wrapper zurück.</p>
+</dd>
+<dt><a href="#resetLocalStorage">resetLocalStorage()</a></dt>
+<dd><p>Löscht Spieler-Informationen aus localStorage.</p>
+</dd>
+<dt><a href="#showGameScreen">showGameScreen(isRestart)</a></dt>
+<dd><p>Zeigt den Spielbildschirm und initialisiert Spieler und Deck.</p>
+</dd>
+<dt><a href="#updateRound">updateRound(increase)</a> ⇒ <code>number</code></dt>
+<dd><p>Zeigt die Rundenanzahl an</p>
+</dd>
+<dt><a href="#setBackground">setBackground()</a></dt>
+<dd><p>Setzt den Hintergrund abhängig von der Auswahl.</p>
+</dd>
+<dt><a href="#setSoundMusicIcons">setSoundMusicIcons()</a></dt>
+<dd><p>Setzt die Icons für Sound und Musik anhand des LocalStorage-Status.</p>
+</dd>
+<dt><a href="#createPlayers">createPlayers()</a></dt>
+<dd><p>Erstellt Spieler- und Gegner-Container und fügt sie dem Rotation-Wrapper hinzu.</p>
+</dd>
+<dt><a href="#createContainer">createContainer(type, index)</a> ⇒ <code>HTMLElement</code></dt>
+<dd><p>Erstellt einen Container für Spieler oder Gegner inklusive Spielerinfos und Raster.</p>
+</dd>
+<dt><a href="#createPlayerGridWrapper">createPlayerGridWrapper(name, id, imageUrl)</a> ⇒ <code>HTMLElement</code></dt>
+<dd><p>Erstellt die Spielerinfo mit Bild, Name und Punkteanzeige.</p>
+</dd>
+<dt><a href="#createProfileImage">createProfileImage(container, imageUrl)</a></dt>
+<dd><p>Erstellt ein Profilbild-Element und fügt es in ein Container-Element ein.</p>
+</dd>
+<dt><a href="#createUserName">createUserName(container, name)</a></dt>
+<dd><p>Erstellt ein Namens-Element und fügt es in ein Container-Element ein.</p>
+</dd>
+<dt><a href="#createPointsInfo">createPointsInfo(container)</a></dt>
+<dd><p>Fügt ein Punktefeld in den Container ein.</p>
+</dd>
+<dt><a href="#createGrid">createGrid(id, className)</a> ⇒ <code>HTMLElement</code></dt>
+<dd><p>Erstellt ein Raster mit 12 Kartenfeldern.</p>
+</dd>
+<dt><a href="#createDeck">createDeck()</a> ⇒ <code>Array</code></dt>
+<dd><p>Erstellt ein Kartendeck aus skyjoCards-Objekten.</p>
+</dd>
+<dt><a href="#shuffle">shuffle(array)</a></dt>
+<dd><p>Mischt die Karten durch</p>
+</dd>
+<dt><a href="#createStacks">createStacks(deck)</a> ⇒ <code>Object</code></dt>
+<dd><p>Teilt das Deck in drei Stacks: Hauptstapel (stack1) und aktuelle Karte (stack2)</p>
+</dd>
+<dt><a href="#placeStacks">placeStacks(stack1)</a></dt>
+<dd><p>Platziert den Ziehstapel auf dem Spielbildschirm.</p>
+</dd>
+<dt><a href="#createCardElement">createCardElement(card, width, borderRadius)</a> ⇒ <code>HTMLElement</code></dt>
+<dd><p>Erstellt Kartenelement mit Vorder- und Rückseite</p>
+</dd>
+<dt><a href="#createCardWrapper">createCardWrapper(card, width, borderRadius)</a> ⇒ <code>HTMLDivElement</code></dt>
+<dd><p>Erstellt den äußeren Wrapper einer Karte.</p>
+</dd>
+<dt><a href="#createCardInner">createCardInner()</a> ⇒ <code>HTMLDivElement</code></dt>
+<dd><p>Erstellt den inneren Flip-Container der Karte.</p>
+</dd>
+<dt><a href="#createCardFace">createCardFace(src, alt, borderRadius, [extraStyles])</a> ⇒ <code>HTMLImageElement</code></dt>
+<dd><p>Erstellt eine einzelne Kartenfläche (Vorder- oder Rückseite).</p>
+</dd>
+<dt><a href="#generateCardImage">generateCardImage(card, width, height)</a> ⇒ <code>string</code></dt>
+<dd><p>Erzeugt ein dynamisches Bild für eine Karte über ein Canvas.</p>
+</dd>
+<dt><a href="#animateDeal">animateDeal(players)</a></dt>
+<dd><p>Startet die Karten-Austeil-Animation für alle Spieler.</p>
+</dd>
+<dt><a href="#afterDeal">afterDeal(delayMs)</a></dt>
+<dd><p>Stoppt den Deal-Sound nach der angegebenen Zeit.
+Startet das Spiel.</p>
+</dd>
+<dt><a href="#incrementStep">incrementStep()</a></dt>
+<dd><p>Erhöht <code>currentStep</code> um 1 und fährt mit dem nächsten Spieler fort.</p>
+</dd>
+<dt><a href="#setTurnState">setTurnState(state)</a></dt>
+<dd><p>Setzt den aktuellen Spielzustand.</p>
+<ul>
+<li>&#39;INIT&#39;   : Spiel wird aufgbaut, alle Karten deaktiviert</li>
+<li>&#39;SELECT&#39; : Auswahl wer das Spiel beginnt</li>
+<li>&#39;START&#39;  : Spieler beginnt das Spiel</li>
+<li>&#39;DECIDE&#39; : Spieler hat Zugmöglichkeiten</li>
+<li>&#39;FINISH&#39; : 1. Spielzug fertig, alle Karten deaktiviert</li>
+</ul>
+</dd>
+<dt><a href="#dealToPlayer">dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer)</a></dt>
+<dd><p>Teilt einem Spieler seine Karten aus und startet die Animation jeder Karte.</p>
+</dd>
+<dt><a href="#positionCardAtDeck">positionCardAtDeck(cardEl, deckRect, index)</a></dt>
+<dd><p>Positioniert die Karte am Deck vor dem Start der Animation.</p>
+</dd>
+<dt><a href="#animateSingleCard">animateSingleCard(cardEl, player, index, fieldWidth, deckRect)</a></dt>
+<dd><p>Animiert eine einzelne Karte vom Deck zum Spielerfeld.</p>
+</dd>
+<dt><a href="#playDealSound">playDealSound()</a></dt>
+<dd><p>Spielt den Sound des Kartenausteilens einmalig ab, solange er noch nicht läuft.</p>
+</dd>
+<dt><a href="#stopDealSound">stopDealSound()</a></dt>
+<dd><p>Stoppt den Deal-Sound, setzt Position zurück und deaktiviert Loop.</p>
+</dd>
+<dt><a href="#finalizeCardPlacement">finalizeCardPlacement(cardEl, field, widthValue)</a></dt>
+<dd><p>Platziert die Karte dauerhaft auf dem Spielerfeld und setzt Stil zurück.</p>
+</dd>
+<dt><a href="#resizeAllCards">resizeAllCards()</a></dt>
+<dd><p>Passt die Größe aller Karten initial und bei windows resize an ihre jeweiligen Kartenfelder an.</p>
+</dd>
+<dt><a href="#positionPlayersInRotationWrapper">positionPlayersInRotationWrapper()</a></dt>
+<dd><p>Positioniert alle Spieler gleichmäßig im Kreis innerhalb des Rotation-Wrappers.</p>
+</dd>
+<dt><a href="#calculatePositionOnEllipse">calculatePositionOnEllipse(angle, radiusX, radiusY, center)</a> ⇒ <code>Object</code></dt>
+<dd><p>Berechnet die x- und y-Position eines Punktes auf einer Ellipse anhand eines Winkels.</p>
+</dd>
+<dt><a href="#calculatePlayerAngles">calculatePlayerAngles(count)</a> ⇒ <code>Array.&lt;number&gt;</code></dt>
+<dd><p>Berechnet die Winkel für jeden Spieler abhängig von der Spielerzahl.</p>
+</dd>
+<dt><a href="#applyPlayerPosition">applyPlayerPosition(player, pos, angle)</a></dt>
+<dd><p>Setzt die Position, Rotation und CSS-Klassen eines Spielers.</p>
+</dd>
+<dt><a href="#rotatePlayers">rotatePlayers(step)</a></dt>
+<dd><p>Dreht den Spieler-Wrapper und alle Spieler-Container um einen Schritt.
+Berechnet die Rotation für jeden Spieler und passt deren Layout entsprechend an.</p>
+</dd>
+<dt><a href="#rotateWrapper">rotateWrapper(degrees)</a></dt>
+<dd><p>Dreht den gesamten Spieler-Wrapper.</p>
+</dd>
+<dt><a href="#rotatePlayer">rotatePlayer(player, wrapperRotation)</a></dt>
+<dd><p>Dreht einen einzelnen Spieler entgegen der Wrapper-Drehung
+und passt die CSS-Klassen für bottom/top sowie das Grid-Layout an.</p>
+</dd>
+<dt><a href="#adjustGrid">adjustGrid(grid, isBottom)</a></dt>
+<dd><p>Passt die Breite der Karten und den Abstand (Gap) innerhalb eines Grids an,
+abhängig davon, ob der Spieler unten sitzt und von der Fensterhöhe.</p>
+</dd>
+</dl>
+
+<p><a name="startGame"></a></p>
+<h2>startGame()</h2>
+<p>Initialisiert den Spielstart.</p>
+<p><strong>Kind</strong>: global function<br><a name="flipCard"></a></p>
+<h2>flipCard(cardEl, inner, [changeCard]) ⇒ <code>void</code></h2>
+<p>Dreht eine Karte um und aktualisiert den Spielstand.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cardEl</td>
+<td><code>HTMLElement</code></td>
+<td></td>
+<td>Kartenelement (Wrapper)</td>
+</tr>
+<tr>
+<td>inner</td>
+<td><code>HTMLElement</code></td>
+<td></td>
+<td>inneres Flip-Element</td>
+</tr>
+<tr>
+<td>[changeCard]</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>true bei Kartentausch (ohne Flip-Regelprüfung)</td>
+</tr>
+</tbody></table>
+<p><a name="getOrCreatePlayerData"></a></p>
+<h2>getOrCreatePlayerData(wrapper) ⇒ <code>Object</code></h2>
+<p>Liefert vorhandene Spieler-Daten oder legt sie neu an</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>grid-wrapper des Spielers</td>
+</tr>
+</tbody></table>
+<p><a name="canFlipCard"></a></p>
+<h2>canFlipCard(wrapper, cardEl, playerData) ⇒ <code>boolean</code></h2>
+<p>Prüft, ob die Karte eines Spielers aufgedeckt werden darf.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>boolean</code> - true, wenn die Karte aufgedeckt werden darf  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Wrapper-Element der Karte</td>
+</tr>
+<tr>
+<td>cardEl</td>
+<td><code>HTMLElement</code></td>
+<td>Kartenelement</td>
+</tr>
+<tr>
+<td>playerData</td>
+<td><code>Object</code></td>
+<td>Spielerinformationen aus flippedCards</td>
+</tr>
+</tbody></table>
+<p><a name="isPlayerBottom"></a></p>
+<h2>isPlayerBottom(element) ⇒ <code>boolean</code></h2>
+<p>Prüft, ob ein Karten-Wrapper ein Spieler-Bottom ist.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>boolean</code> - true, wenn es player-bottom ist  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>element</td>
+<td><code>HTMLElement</code></td>
+<td>Wrapper-Element</td>
+</tr>
+</tbody></table>
+<p><a name="updatePointInfo"></a></p>
+<h2>updatePointInfo(playerData, blink)</h2>
+<p>Aktualisiert die sichtbare Punkteanzeige im DOM und speichert die Werte im localStorage.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>playerData</td>
+<td><code>Object</code></td>
+<td></td>
+<td>Spielerinformationen</td>
+</tr>
+<tr>
+<td>blink</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>gitb visuellen Feedback bei true</td>
+</tr>
+</tbody></table>
+<p><a name="checkAllPlayersFlipped"></a></p>
+<h2>checkAllPlayersFlipped()</h2>
+<p>Prüft, ob alle Spieler ihre 2 Karten aufgedeckt haben und startet ggf. 
+die Spielrotation bzw. zeigt den Startspieler an.</p>
+<p><strong>Kind</strong>: global function<br><a name="getPlayersFlippedTwoCards"></a></p>
+<h2>getPlayersFlippedTwoCards() ⇒ <code>Array.&lt;Object&gt;</code></h2>
+<p>gibt alle Spieler zurück, die bereits 2 Karten aufgedeckt haben.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Array.&lt;Object&gt;</code> - Array der Spieler-Daten<br><a name="updateClickableCards"></a></p>
+<h2>updateClickableCards()</h2>
+<p>Setzt Klickbarkeit und Cursor für alle Karten im Spiel.</p>
+<p><strong>Kind</strong>: global function<br><a name="revealDiscardCard"></a></p>
+<h2>revealDiscardCard()</h2>
+<p>Lässt die oberste Karte vom Ziehstapel in den Ablagestapel fliegen.</p>
+<p><strong>Kind</strong>: global function<br><a name="createFlyingCard"></a></p>
+<h2>createFlyingCard(imgSrc, fromRect) ⇒ <code>HTMLImageElement</code></h2>
+<p>Erstellt ein fliegendes Karten-Element.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLImageElement</code> - Neues fliegendes Karten-Element  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>imgSrc</td>
+<td><code>string</code></td>
+<td>Bildquelle der Karte</td>
+</tr>
+<tr>
+<td>fromRect</td>
+<td><code>DOMRect</code></td>
+<td>Ausgangsposition</td>
+</tr>
+</tbody></table>
+<p><a name="animationDirection"></a></p>
+<h2>animationDirection(fromRect, toRect) ⇒ <code>Object</code></h2>
+<p>Berechnet die Richtung der Kartenanimation.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Object</code> - Bewegungsvektor  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>fromRect</td>
+<td><code>DOMRect</code></td>
+<td>Startposition</td>
+</tr>
+<tr>
+<td>toRect</td>
+<td><code>DOMRect</code></td>
+<td>Zielposition</td>
+</tr>
+</tbody></table>
+<p><a name="animateFlyingCard"></a></p>
+<h2>animateFlyingCard(card, delta)</h2>
+<p>Animiert die fliegende Karte.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>HTMLImageElement</code></td>
+<td>Fliegendes Karten-Element</td>
+</tr>
+<tr>
+<td>delta</td>
+<td><code>Object</code></td>
+<td>Bewegungsvektor</td>
+</tr>
+</tbody></table>
+<p><a name="finalizeCard"></a></p>
+<h2>finalizeCard(card, toEl, currentCard, imgSrc)</h2>
+<p>Finalisiert die Animation einer Karte und setzt sie in das Ziel-Element.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>HTMLImageElement</code></td>
+<td>Fliegendes Karten-Element</td>
+</tr>
+<tr>
+<td>toEl</td>
+<td><code>HTMLElement</code></td>
+<td>Ziel-Element</td>
+</tr>
+<tr>
+<td>currentCard</td>
+<td><code>Object</code></td>
+<td>Kartendaten</td>
+</tr>
+<tr>
+<td>imgSrc</td>
+<td><code>string</code></td>
+<td>Bildquelle</td>
+</tr>
+</tbody></table>
+<p><a name="updatePlayerCard"></a></p>
+<h2>updatePlayerCard(card, wrapper)</h2>
+<p>Aktualisiert Klickbarkeit und Event-Handler für Spielerkarten.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>HTMLElement</code></td>
+<td>Karte, deren Klickbarkeit und Events angepasst werden.</td>
+</tr>
+<tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Übergeordnetes Grid-Element zur Reihenprüfung.</td>
+</tr>
+</tbody></table>
+<p><a name="updateStackCard"></a></p>
+<h2>updateStackCard(card)</h2>
+<p>Passt Klickbarkeit und Cursor für Stapelkarten an, je nach Spielphase.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>HTMLElement</code></td>
+<td>Karte, deren Interaktion gesetzt wird.</td>
+</tr>
+</tbody></table>
+<p><a name="setCardInteractive"></a></p>
+<h2>setCardInteractive(card, clickable, [cursor])</h2>
+<p>Aktiviert oder deaktiviert Klickbarkeit und Cursor einer Karte.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>HTMLElement</code></td>
+<td></td>
+<td>Die Karte, deren Interaktion angepasst wird.</td>
+</tr>
+<tr>
+<td>clickable</td>
+<td><code>boolean</code></td>
+<td></td>
+<td>Ob die Karte anklickbar sein soll.</td>
+</tr>
+<tr>
+<td>[cursor]</td>
+<td><code>string</code></td>
+<td><code>&quot;&#x27;pointer&#x27;&quot;</code></td>
+<td>Angezeigter Cursor bei Klickbarkeit.</td>
+</tr>
+</tbody></table>
+<p><a name="gameMove"></a></p>
+<h2>gameMove()</h2>
+<p>Startet den ersten Spielzug, aktiviert Klick- und Drag-Events für Stapel.</p>
+<p><strong>Kind</strong>: global function<br><a name="enableStack1Click"></a></p>
+<h2>enableStack1Click()</h2>
+<p>Aktiviert den Klick auf dem Ziehstapel, um die oberste Karte zu ziehen.</p>
+<p><strong>Kind</strong>: global function<br><a name="enableStack2Drag"></a></p>
+<h2>enableStack2Drag()</h2>
+<p>Aktiviert Drag-and-Drop für den Ablagestapel (Mouse &amp; Touch).</p>
+<p><strong>Kind</strong>: global function<br><a name="handleCardDrag"></a></p>
+<h2>handleCardDrag(original, offsetX, offsetY)</h2>
+<p>Aktiviert Drag &amp; Drop für eine Karte (Mouse &amp; Touch via Pointer Events).</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>original</td>
+<td><code>HTMLElement</code></td>
+<td>Die gezogene Karte</td>
+</tr>
+<tr>
+<td>offsetX</td>
+<td><code>number</code></td>
+<td>Pointer-Offset X</td>
+</tr>
+<tr>
+<td>offsetY</td>
+<td><code>number</code></td>
+<td>Pointer-Offset Y</td>
+</tr>
+</tbody></table>
+<ul>
+<li><a href="#handleCardDrag">handleCardDrag(original, offsetX, offsetY)</a><ul>
+<li><a href="#handleCardDrag..startDrag">~startDrag(event)</a></li>
+<li><a href="#handleCardDrag..stopDrag">~stopDrag(event)</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="handleCardDrag..startDrag"></a></p>
+<h3>handleCardDrag~startDrag(event)</h3>
+<p>Bewegt die Klonkarte mit dem Pointer und hebt mögliche Drop-Zonen hervor.</p>
+<p><strong>Kind</strong>: inner method of <a href="#handleCardDrag"><code>handleCardDrag</code></a>  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>event</td>
+<td><code>PointerEvent</code></td>
+</tr>
+</tbody></table>
+<p><a name="handleCardDrag..stopDrag"></a></p>
+<h3>handleCardDrag~stopDrag(event)</h3>
+<p>Beendet den Drag-Vorgang, führt Swap durch oder setzt Klon zurück.</p>
+<p><strong>Kind</strong>: inner method of <a href="#handleCardDrag"><code>handleCardDrag</code></a>  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>event</td>
+<td><code>PointerEvent</code></td>
+</tr>
+</tbody></table>
+<p><a name="createClone"></a></p>
+<h2>createClone(element, [offsetLeft], [offsetTop]) ⇒ <code>HTMLElement</code></h2>
+<p>Erstellt eine optische Kopie (Clone) einer Karte für Drag-Effekt.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLElement</code> - Clone-Element  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>element</td>
+<td><code>HTMLElement</code></td>
+<td></td>
+<td>Karte zum Klonen</td>
+</tr>
+<tr>
+<td>[offsetLeft]</td>
+<td><code>number</code></td>
+<td><code>15</code></td>
+<td>Linksoffset</td>
+</tr>
+<tr>
+<td>[offsetTop]</td>
+<td><code>number</code></td>
+<td><code>9</code></td>
+<td>Obenoffset</td>
+</tr>
+</tbody></table>
+<p><a name="highlightDropzone"></a></p>
+<h2>highlightDropzone(x, y, playerCards) ⇒ <code>HTMLElement</code> | <code>null</code></h2>
+<p>Hebt Drop-Zonen hervor, über denen die Maus ist.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLElement</code> | <code>null</code> - Aktive Dropzone  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x</td>
+<td><code>number</code></td>
+<td>Maus X</td>
+</tr>
+<tr>
+<td>y</td>
+<td><code>number</code></td>
+<td>Maus Y</td>
+</tr>
+<tr>
+<td>playerCards</td>
+<td><code>Array.&lt;HTMLElement&gt;</code></td>
+<td>Zielkarten</td>
+</tr>
+</tbody></table>
+<p><a name="swapCards"></a></p>
+<h2>swapCards(original, targetCard)</h2>
+<p>Tauscht die Inhalte der gezogenen Karte und Zielkarte.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>original</td>
+<td><code>HTMLElement</code></td>
+<td>Gezogene Karte</td>
+</tr>
+<tr>
+<td>targetCard</td>
+<td><code>HTMLElement</code></td>
+<td>Zielkarte im Grid</td>
+</tr>
+</tbody></table>
+<p><a name="resetClone"></a></p>
+<h2>resetClone(clone, original)</h2>
+<p>Setzt die Klonkarte zurück, wenn kein Drop erfolgt.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>clone</td>
+<td><code>HTMLElement</code></td>
+<td>Clone der Karte</td>
+</tr>
+<tr>
+<td>original</td>
+<td><code>HTMLElement</code></td>
+<td>Originalkarte</td>
+</tr>
+</tbody></table>
+<p><a name="refreshPoints"></a></p>
+<h2>refreshPoints(wrapper)</h2>
+<p>Berechnet die aktuellen Punkte eines Spielers anhand der aufgedeckten Karten</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Grid-Wrapper des Spielers</td>
+</tr>
+</tbody></table>
+<p><a name="handleFinishState"></a></p>
+<h2>handleFinishState()</h2>
+<p>wenn ein Spielzug beendet wird, rotiert das Spielfeld, nächster Spieler beginnt.</p>
+<p><strong>Kind</strong>: global function<br><a name="isFieldComplete"></a></p>
+<h2>isFieldComplete(wrapper) ⇒ <code>boolean</code></h2>
+<p>Prüft, ob alle Karten in einem Spielerfeld aufgedeckt sind.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>boolean</code> - True, wenn alle Karten aufgedeckt sind, sonst false.  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Das Wrapper-Element des Spielerfeldes.</td>
+</tr>
+</tbody></table>
+<p><a name="startLastRound"></a></p>
+<h2>startLastRound()</h2>
+<p>Startet die letzte Runde des Spiels.</p>
+<p><strong>Kind</strong>: global function<br><a name="showLastRoundBanner"></a></p>
+<h2>showLastRoundBanner()</h2>
+<p>Zeigt Info letzte Runde, dann ist das Spiel vorbei.</p>
+<p><strong>Kind</strong>: global function<br><a name="revealRemainingCards"></a></p>
+<h2>revealRemainingCards()</h2>
+<p>Deckt alle noch nicht aufgedeckten Karten aller Spieler auf, 
+aktualisiert die Punktestände und bestimmt den Gewinner des Spiels.</p>
+<p><strong>Kind</strong>: global function<br><a name="applyFirstPlayerPenalty"></a></p>
+<h2>applyFirstPlayerPenalty()</h2>
+<p>Prüft, ob der erste Spieler, der die Runde beendet hat, die niedrigste Punktzahl hat,
+wenn nicht, dann bekommt er eine Strafe (Punkte werden verdoppelt)</p>
+<p><strong>Kind</strong>: global function<br><a name="checkThreeInColumn"></a></p>
+<h2>checkThreeInColumn(wrapper)</h2>
+<p>Prüft, ob in ein Speiler in einer Spalte drei gleiche Kartenwerte hat.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Grid-Wrapper des Spielers</td>
+</tr>
+</tbody></table>
+<p><a name="highlightColumn"></a></p>
+<h2>highlightColumn(wrapper, column)</h2>
+<p>Hebt die Spalte hervor, wo drei Kartenwerte gleich sind.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Grid-Wrapper des Spielers</td>
+</tr>
+<tr>
+<td>column</td>
+<td><code>number</code></td>
+<td>Spaltenindex</td>
+</tr>
+</tbody></table>
+<p><a name="animateColumn"></a></p>
+<h2>animateColumn(cards)</h2>
+<p>Animiert das Entfernen von drei gleichen Karten aus einer Spalte
+und verschiebt sie in den Ablagestapel.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cards</td>
+<td><code>Array.&lt;HTMLElement&gt;</code></td>
+<td>Array von drei Karten, die entfernt werden sollen</td>
+</tr>
+</tbody></table>
+<p><a name="checkPlayingFieldIsEmpty"></a></p>
+<h2>checkPlayingFieldIsEmpty(wrapper)</h2>
+<p>Prüft, ob das Grid des Spielers leer ist und startet die letzte Runde.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Grid-Element eines Spielers</td>
+</tr>
+</tbody></table>
+<p><a name="isWrapperEmpty"></a></p>
+<h2>isWrapperEmpty(wrapper) ⇒ <code>boolean</code></h2>
+<p>Prüft, ob ein Wrapper keine Karten mehr hat.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>boolean</code> - - true, wenn keine Karten mehr vorhanden sind  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>wrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Das Grid-Element eines Spielers</td>
+</tr>
+</tbody></table>
+<p><a name="checkEndOfGame"></a></p>
+<h2>checkEndOfGame()</h2>
+<p>Prüft alle Grids, ob das Spiel beendet ist, und löst ggf. das Endspiel aus.</p>
+<p><strong>Kind</strong>: global function<br><a name="setupGameSettings"></a></p>
+<h2>setupGameSettings()</h2>
+<p>Initialisiert die Toggle-Icons für Sound und Musik.
+Speichert den Status in localStorage und spielt/stoppt Sounds.</p>
+<p><strong>Kind</strong>: global function<br><a name="setupToggles"></a></p>
+<h2>setupToggles()</h2>
+<p>Initialisiert Sound- und Musik-Toggles, synchronisiert deren Status mit dem localStorage.</p>
+<p><strong>Kind</strong>: global function<br><a name="initializeToggleButton"></a></p>
+<h2>initializeToggleButton(button, key, [onEnable], [onDisable])</h2>
+<p>Initialisiert einen Toggle-Button (Sound oder Musik).</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>button</td>
+<td><code>HTMLButtonElement</code></td>
+<td>Der ursprüngliche Button im DOM.</td>
+</tr>
+<tr>
+<td>key</td>
+<td><code>string</code></td>
+<td>&quot;Sound&quot; oder &quot;Musik&quot;</td>
+</tr>
+<tr>
+<td>[onEnable]</td>
+<td><code>function</code></td>
+<td>Funktion, wenn der Toggle aktiviert wird.</td>
+</tr>
+<tr>
+<td>[onDisable]</td>
+<td><code>function</code></td>
+<td>Funktion, wenn der Toggle deaktiviert wird.</td>
+</tr>
+</tbody></table>
+<p><a name="showPopUp"></a></p>
+<h2>showPopUp(content, [soundOptions])</h2>
+<p>Zeigt ein Popup-Fenster an.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>content</td>
+<td><code>string</code></td>
+<td></td>
+<td>HTML-Inhalt, der im Popup angezeigt werden soll.</td>
+</tr>
+<tr>
+<td>[soundOptions]</td>
+<td><code>Object</code></td>
+<td><code>{}</code></td>
+<td>Optionen für den Sound:</td>
+</tr>
+</tbody></table>
+<p><strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>[volume]</td>
+<td><code>number</code></td>
+<td>Lautstärke des Sounds (0–1)</td>
+</tr>
+<tr>
+<td>[delay]</td>
+<td><code>number</code></td>
+<td>Verzögerung vor dem Abspielen des Sounds in ms</td>
+</tr>
+</tbody></table>
+<p><a name="showStartPopup"></a></p>
+<h2>showStartPopup(player)</h2>
+<p>Zeigt das Popup an mit dem Startspieler.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>player</td>
+<td><code>Object</code></td>
+<td>Spieler-Daten</td>
+</tr>
+</tbody></table>
+<p><a name="showWinPopup"></a></p>
+<h2>showWinPopup()</h2>
+<p>Zeigt das HighScore-Popup am Ende des Spiels an.</p>
+<p><strong>Kind</strong>: global function<br><a name="loadPlayers"></a></p>
+<h2>loadPlayers() ⇒ <code>Array</code></h2>
+<p>Lädt die Spieler aus dem LocalStorage.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Array</code> - - Spieler  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>[options.updateTotal]</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Addiert Punkte zu totalPoints</td>
+</tr>
+<tr>
+<td>[options.sort]</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Sortiert Spieler nach Punkten (aufsteigend)</td>
+</tr>
+</tbody></table>
+<p><a name="generateHighscoreHTML"></a></p>
+<h2>generateHighscoreHTML(players, isSettings) ⇒ <code>string</code></h2>
+<p>Generiert das HTML für das Highscore-Popup.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>string</code> - HTML-Markup für das Highscore-Popup  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>players</td>
+<td><code>Array.&lt;{name: string, points: number}&gt;</code></td>
+<td></td>
+<td>Sortierte Spieler mit Punkten</td>
+</tr>
+<tr>
+<td>isSettings</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>bei Klick auf Setting-Bereich true, sonst false</td>
+</tr>
+</tbody></table>
+<p><a name="calculateRanks"></a></p>
+<h2>calculateRanks(players, pointKey) ⇒ <code>Array.&lt;number&gt;</code></h2>
+<p>Berechnet die Platzierungen der Spieler basierend auf ihren Punkten.
+Gleiche Punktzahlen erhalten den gleichen Rang.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Array.&lt;number&gt;</code> - - Array der Ränge für jeden Spieler.  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>players</td>
+<td><code>Array</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>pointKey</td>
+<td><code>string</code></td>
+<td><code>&quot;points&quot;</code></td>
+<td>Punkte oder Gesamtpunkte.</td>
+</tr>
+</tbody></table>
+<p><a name="setupGameRulesPopup"></a></p>
+<h2>setupGameRulesPopup()</h2>
+<p>Initialisiert das Popup für die Spielregeln.</p>
+<p><strong>Kind</strong>: global function<br><a name="setupHighScorePopup"></a></p>
+<h2>setupHighScorePopup()</h2>
+<p>Initialisiert das Popup für die Highscore.</p>
+<p><strong>Kind</strong>: global function<br><a name="setupClickOutside"></a></p>
+<h2>setupClickOutside(popupWrapper, popupContent, triggerElement, type)</h2>
+<p>Schließt ein Popup, wenn außerhalb des Popup-Inhalts geklickt wird.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>popupWrapper</td>
+<td><code>HTMLElement</code></td>
+<td>Container des Popups</td>
+</tr>
+<tr>
+<td>popupContent</td>
+<td><code>HTMLElement</code></td>
+<td>Klickbarer Inhalt des Popups</td>
+</tr>
+<tr>
+<td>triggerElement</td>
+<td><code>HTMLElement</code></td>
+<td>Element, das das Popup geöffnet hat</td>
+</tr>
+<tr>
+<td>type</td>
+<td><code>string</code></td>
+<td>Typ/Kennung des Popups zur Unterscheidung</td>
+</tr>
+</tbody></table>
+<p><a name="playSound"></a></p>
+<h2>playSound(sound, [volume], [delay], [playbackRate])</h2>
+<p>Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sound</td>
+<td><code>HTMLAudioElement</code></td>
+<td></td>
+<td>Audio-Objekt</td>
+</tr>
+<tr>
+<td>[volume]</td>
+<td><code>number</code></td>
+<td><code>1</code></td>
+<td>Lautstärke (0.0 - 1.0)</td>
+</tr>
+<tr>
+<td>[delay]</td>
+<td><code>number</code></td>
+<td><code>0</code></td>
+<td>Verzögerung vor Abspielen in ms</td>
+</tr>
+<tr>
+<td>[playbackRate]</td>
+<td><code>number</code></td>
+<td><code>1</code></td>
+<td>Geschwindigkeit des Sounds</td>
+</tr>
+</tbody></table>
+<p><a name="resetCards"></a></p>
+<h2>resetCards()</h2>
+<p>Setzt alle Karten zurück und löscht Spielerinformationen.</p>
+<p><strong>Kind</strong>: global function<br><a name="openPaperRoll"></a></p>
+<h2>openPaperRoll(content, isSettings, isPlayerForm, triggerBtn)</h2>
+<p>Öffnet die Paper-Roll mit Inhalt.
+Fügt automatisch einen Close-Button hinzu.
+Start-Button wird kurz deaktiviert.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>content</td>
+<td><code>string</code></td>
+<td></td>
+<td>HTML Inhalt, der angezeigt wird</td>
+</tr>
+<tr>
+<td>isSettings</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>true: initBackgroundCarousel &amp; MusicToggle aufrufen</td>
+</tr>
+<tr>
+<td>isPlayerForm</td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>true: Player-Formular initialisieren</td>
+</tr>
+<tr>
+<td>triggerBtn</td>
+<td><code>HTMLElement</code></td>
+<td><code></code></td>
+<td>jeweilige Button, der geklickt wird</td>
+</tr>
+</tbody></table>
+<p><a name="closePaperRoll"></a></p>
+<h2>closePaperRoll()</h2>
+<p>Schließt die Paper-Roll und aktiviert den Start-Button wieder.</p>
+<p><strong>Kind</strong>: global function<br><a name="resetPlayers"></a></p>
+<h2>resetPlayers(newNum)</h2>
+<p>Löscht alte Spieler- und Gegnerdaten aus dem LocalStorage, wenn Anzahl Gegner sich ändert und speichert die neue Anzahl..</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>newNum</td>
+<td><code>number</code></td>
+<td>Neue Anzahl der Gegner</td>
+</tr>
+</tbody></table>
+<p><a name="initPlayers"></a></p>
+<h2>initPlayers(newNum)</h2>
+<p>Initialisiert Standardwerte für den Spieler und die Gegner im LocalStorage, wenn nichts existiert.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>newNum</td>
+<td><code>number</code></td>
+<td>Anzahl der Gegner</td>
+</tr>
+</tbody></table>
+<p><a name="setupAvatarSelect"></a></p>
+<h2>setupAvatarSelect()</h2>
+<p>Öffnet die Avatar-Auswahl für den jeweiligen Spieler.</p>
+<p><strong>Kind</strong>: global function<br><a name="showAvatarPicker"></a></p>
+<h2>showAvatarPicker(playerIndex) ⇒ <code>void</code></h2>
+<p>Öffnet das Avatar-Auswahl-Submenu für einen Spieler und ermöglicht Auswahl.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>playerIndex</td>
+<td><code>number</code></td>
+<td>Index des Spielers, dessen Avatar gewählt wird.</td>
+</tr>
+</tbody></table>
+<p><a name="renderAvatarMenu"></a></p>
+<h2>renderAvatarMenu(form, playerIndex)</h2>
+<p>Rendert das HTML für das Avatar-Auswahlmenü eines Spielers.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>form</td>
+<td><code>HTMLElement</code></td>
+<td>Container des Player-Formulars</td>
+</tr>
+<tr>
+<td>playerIndex</td>
+<td><code>number</code></td>
+<td>Index des Spielers, dessen Avatar gewählt wird</td>
+</tr>
+</tbody></table>
+<p><a name="adjustThreePlayersLayout"></a></p>
+<h2>adjustThreePlayersLayout(form, container)</h2>
+<p>Passt Layout für drei Spieler an.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>form</td>
+<td><code>HTMLElement</code></td>
+<td>Player-Formular</td>
+</tr>
+<tr>
+<td>container</td>
+<td><code>HTMLElement</code></td>
+<td>Container für das Drei-Spieler-Layout</td>
+</tr>
+</tbody></table>
+<p><a name="setupAvatarClick"></a></p>
+<h2>setupAvatarClick(avatars, playerIndex)</h2>
+<p>Bindet Klick-Events auf alle Avatar-Bilder und speichert die Auswahl.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>avatars</td>
+<td><code>Array.&lt;HTMLImageElement&gt;</code></td>
+<td>Alle Avatar-Bilder</td>
+</tr>
+<tr>
+<td>playerIndex</td>
+<td><code>number</code></td>
+<td>Index des Spielers, dessen Avatar gewählt wird</td>
+</tr>
+</tbody></table>
+<p><a name="restorePlayerForm"></a></p>
+<h2>restorePlayerForm(form, prevContent, inputValues, submitBtn, threePlayers)</h2>
+<p>Stellt das ursprüngliche Player-Formular wieder her und initialisiert Events.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>form</td>
+<td><code>HTMLElement</code></td>
+<td>Player-Formular</td>
+</tr>
+<tr>
+<td>prevContent</td>
+<td><code>string</code></td>
+<td>HTML-Inhalt vor dem Avatar-Menü</td>
+</tr>
+<tr>
+<td>inputValues</td>
+<td><code>Array.&lt;string&gt;</code></td>
+<td>Gesicherte Werte der Inputfelder</td>
+</tr>
+<tr>
+<td>submitBtn</td>
+<td><code>HTMLElement</code></td>
+<td>Submit-Button</td>
+</tr>
+<tr>
+<td>threePlayers</td>
+<td><code>HTMLElement</code></td>
+<td>Container für Drei-Spieler-Layout</td>
+</tr>
+</tbody></table>
+<p><a name="handlePlayerFormSubmit"></a></p>
+<h2>handlePlayerFormSubmit()</h2>
+<p>Bindet den Submit-Button des Spielerformulars.
+Speichert die Werte und schließt die Paper-Roll. Verhindert doppelte Listener (bound).</p>
+<p><strong>Kind</strong>: global function<br><a name="applyPlayerDefaults"></a></p>
+<h2>applyPlayerDefaults()</h2>
+<p>Wendet Standardwerte für Spieler und Gegner an, falls keine Daten vorhanden sind.</p>
+<p><strong>Kind</strong>: global function<br><a name="validateInputs"></a></p>
+<h2>validateInputs(inputElements)</h2>
+<p>Validiert Inputfelder: erlaubt nur Buchstaben und Bindestriche.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>inputElements</td>
+<td><code>Array.&lt;HTMLInputElement&gt;</code></td>
+<td>Inputfelder</td>
+</tr>
+</tbody></table>
+<p><a name="restorePlayerFormData"></a></p>
+<h2>restorePlayerFormData()</h2>
+<p>Stellt gespeicherte Spieler- und Gegnerdaten im Formular wieder her. Inputs leeren, wenn Standardwerte.</p>
+<p><strong>Kind</strong>: global function<br><a name="markSelectedAvatar"></a></p>
+<h2>markSelectedAvatar(avatarBtns, selectedSrc)</h2>
+<p>Markiert einen gewählten Avatar und dimmt die anderen.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>avatarBtns</td>
+<td><code>NodeList</code> | <code>Array.&lt;HTMLElement&gt;</code></td>
+<td>Alle Avatare im Formular</td>
+</tr>
+<tr>
+<td>selectedSrc</td>
+<td><code>string</code></td>
+<td>URL des gewählten Avatars</td>
+</tr>
+</tbody></table>
+<p><a name="showSelectedAvatarInPlayerForm"></a></p>
+<h2>showSelectedAvatarInPlayerForm(form)</h2>
+<p>Setzt das gewählte Avatar-Bild in Formular, bei Deselektierung Default-Image (upload-image.png).</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>form</td>
+<td><code>HTMLElement</code></td>
+<td>Das jeweilige Player-Formular</td>
+</tr>
+</tbody></table>
+<p><a name="initToggle"></a></p>
+<h2>initToggle(toggleId, storageKey, onEnable, onDisable)</h2>
+<p>Initialisiert einen Toggle für Sound oder Musik.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>toggleId</td>
+<td><code>string</code></td>
+<td>ID des Checkbox-Elements</td>
+</tr>
+<tr>
+<td>storageKey</td>
+<td><code>string</code></td>
+<td>Key für localStorage (&#39;sound&#39; oder &#39;music&#39;)</td>
+</tr>
+<tr>
+<td>onEnable</td>
+<td><code>function</code></td>
+<td>Funktion, die aufgerufen wird, wenn aktiviert</td>
+</tr>
+<tr>
+<td>onDisable</td>
+<td><code>function</code></td>
+<td>Funktion, die aufgerufen wird, wenn deaktiviert</td>
+</tr>
+</tbody></table>
+<p><a name="playMusic"></a></p>
+<h2>playMusic()</h2>
+<p>Startet Hintergrundmusik, falls Element vorhanden.</p>
+<p><strong>Kind</strong>: global function<br><a name="stopMusic"></a></p>
+<h2>stopMusic()</h2>
+<p>Stoppt Musik und setzt Zeit auf 0</p>
+<p><strong>Kind</strong>: global function<br><a name="initBackgroundCarousel"></a></p>
+<h2>initBackgroundCarousel()</h2>
+<p>Initialisiert das 3D Carousel für Hintergrundbilder.
+Passt Größe an Bildschirmbreite an.</p>
+<p><strong>Kind</strong>: global function<br><a name="setBackgroundName"></a></p>
+<h2>setBackgroundName(index)</h2>
+<p>Setzt den Screenreader‑Text für den aktuell ausgewählten Hintergrund.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>index</td>
+<td><code>number</code></td>
+<td>Index des ausgewählten Hintergrund vom Array backgroundNames</td>
+</tr>
+</tbody></table>
+<p><a name="updateCells"></a></p>
+<h2>updateCells(images, selectedIndex, theta, radius, rotateFn)</h2>
+<p>Aktualisiert Position und Opazität aller Carousel-Bilder.
+Das vorderste Bild (selectedIndex) wird hervorgehoben, alle anderen leicht transparent.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>images</td>
+<td><code>NodeList</code></td>
+<td>Alle Carousel-Bilder</td>
+</tr>
+<tr>
+<td>selectedIndex</td>
+<td><code>number</code></td>
+<td>Index des aktuell ausgewählten Bildes</td>
+</tr>
+<tr>
+<td>theta</td>
+<td><code>number</code></td>
+<td>Winkel zwischen den Bildern</td>
+</tr>
+<tr>
+<td>radius</td>
+<td><code>number</code></td>
+<td>Radius des 3D-Karussells</td>
+</tr>
+<tr>
+<td>rotateFn</td>
+<td><code>string</code></td>
+<td>Rotationsfunktion (z.B. &#39;rotateY&#39;)</td>
+</tr>
+</tbody></table>
+<p><a name="rotateCarousel"></a></p>
+<h2>rotateCarousel(carousel, images, selectedIndex, theta, radius, rotateFn)</h2>
+<p>Dreht das gesamte Carousel auf das aktuell ausgewählte Bild.
+Ruft updateCells auf und speichert die Auswahl in localStorage.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>carousel</td>
+<td><code>HTMLElement</code></td>
+<td>Das Carousel-Container-Element</td>
+</tr>
+<tr>
+<td>images</td>
+<td><code>NodeList</code></td>
+<td>Alle Carousel-Bilder</td>
+</tr>
+<tr>
+<td>selectedIndex</td>
+<td><code>number</code></td>
+<td>Index des aktuell ausgewählten Bildes</td>
+</tr>
+<tr>
+<td>theta</td>
+<td><code>number</code></td>
+<td>Winkel zwischen den Bildern</td>
+</tr>
+<tr>
+<td>radius</td>
+<td><code>number</code></td>
+<td>Radius des 3D-Karussells</td>
+</tr>
+<tr>
+<td>rotateFn</td>
+<td><code>string</code></td>
+<td>Rotationsfunktion</td>
+</tr>
+</tbody></table>
+<p><a name="resetGame"></a></p>
+<h2>resetGame(isRestart)</h2>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>isRestart</td>
+<td><code>boolean</code></td>
+<td>gibt true bei Neustart des Spiels, sonst default false</td>
+</tr>
+</tbody></table>
+<p><a name="clearGameDOM"></a></p>
+<h2>clearGameDOM()</h2>
+<p>Entfernt alle Karten aus dem DOM</p>
+<p><strong>Kind</strong>: global function<br><a name="resetRotationWrapper"></a></p>
+<h2>resetRotationWrapper()</h2>
+<p>Setzt den Rotation-Wrapper zurück.</p>
+<p><strong>Kind</strong>: global function<br><a name="resetLocalStorage"></a></p>
+<h2>resetLocalStorage()</h2>
+<p>Löscht Spieler-Informationen aus localStorage.</p>
+<p><strong>Kind</strong>: global function<br><a name="showGameScreen"></a></p>
+<h2>showGameScreen(isRestart)</h2>
+<p>Zeigt den Spielbildschirm und initialisiert Spieler und Deck.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>isRestart</td>
+<td><code>boolean</code></td>
+<td>gibt true bei Neustart des Spiels, sonst default false</td>
+</tr>
+</tbody></table>
+<p><a name="updateRound"></a></p>
+<h2>updateRound(increase) ⇒ <code>number</code></h2>
+<p>Zeigt die Rundenanzahl an</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>number</code> - - die aktuelle Runde  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>increase</td>
+<td><code>boolean</code></td>
+<td>true bei Restart, sonst default false</td>
+</tr>
+</tbody></table>
+<p><a name="setBackground"></a></p>
+<h2>setBackground()</h2>
+<p>Setzt den Hintergrund abhängig von der Auswahl.</p>
+<p><strong>Kind</strong>: global function<br><a name="setSoundMusicIcons"></a></p>
+<h2>setSoundMusicIcons()</h2>
+<p>Setzt die Icons für Sound und Musik anhand des LocalStorage-Status.</p>
+<p><strong>Kind</strong>: global function<br><a name="createPlayers"></a></p>
+<h2>createPlayers()</h2>
+<p>Erstellt Spieler- und Gegner-Container und fügt sie dem Rotation-Wrapper hinzu.</p>
+<p><strong>Kind</strong>: global function<br><a name="createContainer"></a></p>
+<h2>createContainer(type, index) ⇒ <code>HTMLElement</code></h2>
+<p>Erstellt einen Container für Spieler oder Gegner inklusive Spielerinfos und Raster.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLElement</code> - Container mit Raster und Spielerinformationen  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>type</td>
+<td><code>string</code></td>
+<td></td>
+<td>&quot;player&quot; oder &quot;opponent&quot;</td>
+</tr>
+<tr>
+<td>index</td>
+<td><code>number</code></td>
+<td><code>0</code></td>
+<td>Index des Gegners (ab 0)</td>
+</tr>
+</tbody></table>
+<p><a name="createPlayerGridWrapper"></a></p>
+<h2>createPlayerGridWrapper(name, id, imageUrl) ⇒ <code>HTMLElement</code></h2>
+<p>Erstellt die Spielerinfo mit Bild, Name und Punkteanzeige.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLElement</code> - Spielerinfo-Container  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name</td>
+<td><code>string</code></td>
+<td>Name des Spielers</td>
+</tr>
+<tr>
+<td>id</td>
+<td><code>string</code></td>
+<td>ID des Containers (player, opponent)</td>
+</tr>
+<tr>
+<td>imageUrl</td>
+<td><code>string</code></td>
+<td>URL für das Spielerbild</td>
+</tr>
+</tbody></table>
+<p><a name="createProfileImage"></a></p>
+<h2>createProfileImage(container, imageUrl)</h2>
+<p>Erstellt ein Profilbild-Element und fügt es in ein Container-Element ein.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>container</td>
+<td><code>HTMLElement</code></td>
+<td>Das HTML-Element, in das das Profilbild eingefügt wird.</td>
+</tr>
+<tr>
+<td>imageUrl</td>
+<td><code>string</code></td>
+<td>Die URL des anzuzeigenden Profilbildes.</td>
+</tr>
+</tbody></table>
+<p><a name="createUserName"></a></p>
+<h2>createUserName(container, name)</h2>
+<p>Erstellt ein Namens-Element und fügt es in ein Container-Element ein.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>container</td>
+<td><code>HTMLElement</code></td>
+<td>Das HTML-Element, in das der Spielername eingefügt wird.</td>
+</tr>
+<tr>
+<td>name</td>
+<td><code>string</code></td>
+<td>Der anzuzeigende Spielername.</td>
+</tr>
+</tbody></table>
+<p><a name="createPointsInfo"></a></p>
+<h2>createPointsInfo(container)</h2>
+<p>Fügt ein Punktefeld in den Container ein.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>container</td>
+<td><code>HTMLElement</code></td>
+<td>Container, in dem die Punkte angezeigt werden</td>
+</tr>
+</tbody></table>
+<p><a name="createGrid"></a></p>
+<h2>createGrid(id, className) ⇒ <code>HTMLElement</code></h2>
+<p>Erstellt ein Raster mit 12 Kartenfeldern.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLElement</code> - Raster mit Kartenfeldern  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td><code>string</code></td>
+<td>Basis-ID für die Kartenfelder</td>
+</tr>
+<tr>
+<td>className</td>
+<td><code>string</code></td>
+<td>CSS-Klasse für das Raster</td>
+</tr>
+</tbody></table>
+<p><a name="createDeck"></a></p>
+<h2>createDeck() ⇒ <code>Array</code></h2>
+<p>Erstellt ein Kartendeck aus skyjoCards-Objekten.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Array</code> - Gemischtes Deck<br><a name="shuffle"></a></p>
+<h2>shuffle(array)</h2>
+<p>Mischt die Karten durch</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>array</td>
+<td><code>Array</code></td>
+<td>Karten</td>
+</tr>
+</tbody></table>
+<p><a name="createStacks"></a></p>
+<h2>createStacks(deck) ⇒ <code>Object</code></h2>
+<p>Teilt das Deck in drei Stacks: Hauptstapel (stack1) und aktuelle Karte (stack2)</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Object</code> - Stacks  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>deck</td>
+<td><code>Array</code></td>
+<td>Gemischtes Deck</td>
+</tr>
+</tbody></table>
+<p><a name="placeStacks"></a></p>
+<h2>placeStacks(stack1)</h2>
+<p>Platziert den Ziehstapel auf dem Spielbildschirm.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>stack1</td>
+<td><code>Object</code></td>
+<td>Ziehspapelkarten</td>
+</tr>
+</tbody></table>
+<p><a name="createCardElement"></a></p>
+<h2>createCardElement(card, width, borderRadius) ⇒ <code>HTMLElement</code></h2>
+<p>Erstellt Kartenelement mit Vorder- und Rückseite</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLElement</code> - - Karten-Element  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>Object</code></td>
+<td>Kartenobjekt</td>
+</tr>
+<tr>
+<td>width</td>
+<td><code>number</code></td>
+<td>Breite der Karte</td>
+</tr>
+<tr>
+<td>borderRadius</td>
+<td><code>string</code></td>
+<td>Border-Radius</td>
+</tr>
+</tbody></table>
+<p><a name="createCardWrapper"></a></p>
+<h2>createCardWrapper(card, width, borderRadius) ⇒ <code>HTMLDivElement</code></h2>
+<p>Erstellt den äußeren Wrapper einer Karte.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLDivElement</code> - - Karten-Wrapper  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>Object</code></td>
+<td>Kartenobjekt mit Metadaten</td>
+</tr>
+<tr>
+<td>width</td>
+<td><code>number</code></td>
+<td>Breite der Karte in Pixeln</td>
+</tr>
+<tr>
+<td>borderRadius</td>
+<td><code>string</code></td>
+<td>CSS Border-Radius</td>
+</tr>
+</tbody></table>
+<p><a name="createCardInner"></a></p>
+<h2>createCardInner() ⇒ <code>HTMLDivElement</code></h2>
+<p>Erstellt den inneren Flip-Container der Karte.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLDivElement</code> - - Innerer Karten-Container<br><a name="createCardFace"></a></p>
+<h2>createCardFace(src, alt, borderRadius, [extraStyles]) ⇒ <code>HTMLImageElement</code></h2>
+<p>Erstellt eine einzelne Kartenfläche (Vorder- oder Rückseite).</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>HTMLImageElement</code> - - Kartenfläche  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>src</td>
+<td><code>string</code></td>
+<td></td>
+<td>Bildquelle (URL oder Data-URL)</td>
+</tr>
+<tr>
+<td>alt</td>
+<td><code>string</code></td>
+<td></td>
+<td>Alt-Text für das Bild</td>
+</tr>
+<tr>
+<td>borderRadius</td>
+<td><code>string</code></td>
+<td></td>
+<td>Border-Radius</td>
+</tr>
+<tr>
+<td>[extraStyles]</td>
+<td><code>Object</code></td>
+<td><code>{}</code></td>
+<td>Zusätzliche Inline-Styles</td>
+</tr>
+</tbody></table>
+<p><a name="generateCardImage"></a></p>
+<h2>generateCardImage(card, width, height) ⇒ <code>string</code></h2>
+<p>Erzeugt ein dynamisches Bild für eine Karte über ein Canvas.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>string</code> - Data-URL des generierten Kartenbildes  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>card</td>
+<td><code>Object</code></td>
+<td>Objekt mit Karteninformationen</td>
+</tr>
+<tr>
+<td>width</td>
+<td><code>number</code></td>
+<td>Breite der Karte</td>
+</tr>
+<tr>
+<td>height</td>
+<td><code>number</code></td>
+<td>Höhe der Karte</td>
+</tr>
+</tbody></table>
+<p><a name="animateDeal"></a></p>
+<h2>animateDeal(players)</h2>
+<p>Startet die Karten-Austeil-Animation für alle Spieler.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>players</td>
+<td><code>Array</code></td>
+<td>Array aus Spieler- und Gegner-Rastern</td>
+</tr>
+</tbody></table>
+<p><a name="afterDeal"></a></p>
+<h2>afterDeal(delayMs)</h2>
+<p>Stoppt den Deal-Sound nach der angegebenen Zeit.
+Startet das Spiel.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>delayMs</td>
+<td><code>number</code></td>
+<td>Dauer in Millisekunden</td>
+</tr>
+</tbody></table>
+<p><a name="incrementStep"></a></p>
+<h2>incrementStep()</h2>
+<p>Erhöht <code>currentStep</code> um 1 und fährt mit dem nächsten Spieler fort.</p>
+<p><strong>Kind</strong>: global function<br><a name="setTurnState"></a></p>
+<h2>setTurnState(state)</h2>
+<p>Setzt den aktuellen Spielzustand.</p>
+<ul>
+<li>&#39;INIT&#39;   : Spiel wird aufgbaut, alle Karten deaktiviert</li>
+<li>&#39;SELECT&#39; : Auswahl wer das Spiel beginnt</li>
+<li>&#39;START&#39;  : Spieler beginnt das Spiel</li>
+<li>&#39;DECIDE&#39; : Spieler hat Zugmöglichkeiten</li>
+<li>&#39;FINISH&#39; : 1. Spielzug fertig, alle Karten deaktiviert</li>
+</ul>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>state</td>
+<td><code>&#x27;INIT&#x27;</code> | <code>&#x27;SELECT&#x27;</code> | <code>&#x27;START&#x27;</code> | <code>&#x27;FINISH&#x27;</code></td>
+<td>Spielzustand</td>
+</tr>
+</tbody></table>
+<p><a name="dealToPlayer"></a></p>
+<h2>dealToPlayer(player, pIndex, fieldWidth, deckRect, startWidth, borderRadius, cardsPerPlayer)</h2>
+<p>Teilt einem Spieler seine Karten aus und startet die Animation jeder Karte.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>player</td>
+<td><code>HTMLElement</code></td>
+<td>Raster des Spielers</td>
+</tr>
+<tr>
+<td>pIndex</td>
+<td><code>number</code></td>
+<td>Index des Spielers</td>
+</tr>
+<tr>
+<td>fieldWidth</td>
+<td><code>number</code></td>
+<td>Breite der Kartenfelder</td>
+</tr>
+<tr>
+<td>deckRect</td>
+<td><code>DOMRect</code></td>
+<td>Position des Decks</td>
+</tr>
+<tr>
+<td>startWidth</td>
+<td><code>number</code></td>
+<td>Startbreite der Karte</td>
+</tr>
+<tr>
+<td>borderRadius</td>
+<td><code>string</code></td>
+<td>Rundung der Karten</td>
+</tr>
+<tr>
+<td>cardsPerPlayer</td>
+<td><code>number</code></td>
+<td>Anzahl Karten pro Spieler</td>
+</tr>
+</tbody></table>
+<p><a name="positionCardAtDeck"></a></p>
+<h2>positionCardAtDeck(cardEl, deckRect, index)</h2>
+<p>Positioniert die Karte am Deck vor dem Start der Animation.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cardEl</td>
+<td><code>HTMLElement</code></td>
+<td>Kartenelement</td>
+</tr>
+<tr>
+<td>deckRect</td>
+<td><code>DOMRect</code></td>
+<td>Position des Decks</td>
+</tr>
+<tr>
+<td>index</td>
+<td><code>number</code></td>
+<td>Index der Karte (für zIndex)</td>
+</tr>
+</tbody></table>
+<p><a name="animateSingleCard"></a></p>
+<h2>animateSingleCard(cardEl, player, index, fieldWidth, deckRect)</h2>
+<p>Animiert eine einzelne Karte vom Deck zum Spielerfeld.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cardEl</td>
+<td><code>HTMLElement</code></td>
+<td>Kartenelement</td>
+</tr>
+<tr>
+<td>player</td>
+<td><code>HTMLElement</code></td>
+<td>Raster des Spielers</td>
+</tr>
+<tr>
+<td>index</td>
+<td><code>number</code></td>
+<td>Index des Kartenfeldes</td>
+</tr>
+<tr>
+<td>fieldWidth</td>
+<td><code>number</code></td>
+<td>Breite des Zielkartenfeldes</td>
+</tr>
+<tr>
+<td>deckRect</td>
+<td><code>DOMRect</code></td>
+<td>Position des Decks</td>
+</tr>
+</tbody></table>
+<p><a name="playDealSound"></a></p>
+<h2>playDealSound()</h2>
+<p>Spielt den Sound des Kartenausteilens einmalig ab, solange er noch nicht läuft.</p>
+<p><strong>Kind</strong>: global function<br><a name="stopDealSound"></a></p>
+<h2>stopDealSound()</h2>
+<p>Stoppt den Deal-Sound, setzt Position zurück und deaktiviert Loop.</p>
+<p><strong>Kind</strong>: global function<br><a name="finalizeCardPlacement"></a></p>
+<h2>finalizeCardPlacement(cardEl, field, widthValue)</h2>
+<p>Platziert die Karte dauerhaft auf dem Spielerfeld und setzt Stil zurück.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cardEl</td>
+<td><code>HTMLElement</code></td>
+<td>Kartenelement</td>
+</tr>
+<tr>
+<td>field</td>
+<td><code>HTMLElement</code></td>
+<td>Zielkartenfeld</td>
+</tr>
+<tr>
+<td>widthValue</td>
+<td><code>number</code></td>
+<td>Breite der Karte</td>
+</tr>
+</tbody></table>
+<p><a name="resizeAllCards"></a></p>
+<h2>resizeAllCards()</h2>
+<p>Passt die Größe aller Karten initial und bei windows resize an ihre jeweiligen Kartenfelder an.</p>
+<p><strong>Kind</strong>: global function<br><a name="positionPlayersInRotationWrapper"></a></p>
+<h2>positionPlayersInRotationWrapper()</h2>
+<p>Positioniert alle Spieler gleichmäßig im Kreis innerhalb des Rotation-Wrappers.</p>
+<p><strong>Kind</strong>: global function<br><a name="calculatePositionOnEllipse"></a></p>
+<h2>calculatePositionOnEllipse(angle, radiusX, radiusY, center) ⇒ <code>Object</code></h2>
+<p>Berechnet die x- und y-Position eines Punktes auf einer Ellipse anhand eines Winkels.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Object</code> - Berechnete Position auf der Ellipse.  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>angle</td>
+<td><code>number</code></td>
+<td>Winkel in Grad, gemessen von der Ellipsenmitte.</td>
+</tr>
+<tr>
+<td>radiusX</td>
+<td><code>number</code></td>
+<td>Horizontaler Radius der Ellipse.</td>
+</tr>
+<tr>
+<td>radiusY</td>
+<td><code>number</code></td>
+<td>Vertikaler Radius der Ellipse.</td>
+</tr>
+<tr>
+<td>center</td>
+<td><code>Object</code></td>
+<td>Mittelpunkt der Ellipse.</td>
+</tr>
+</tbody></table>
+<p><a name="calculatePlayerAngles"></a></p>
+<h2>calculatePlayerAngles(count) ⇒ <code>Array.&lt;number&gt;</code></h2>
+<p>Berechnet die Winkel für jeden Spieler abhängig von der Spielerzahl.</p>
+<p><strong>Kind</strong>: global function<br><strong>Returns</strong>: <code>Array.&lt;number&gt;</code> - Winkel in Grad  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>count</td>
+<td><code>number</code></td>
+<td>Anzahl Spieler</td>
+</tr>
+</tbody></table>
+<p><a name="applyPlayerPosition"></a></p>
+<h2>applyPlayerPosition(player, pos, angle)</h2>
+<p>Setzt die Position, Rotation und CSS-Klassen eines Spielers.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>player</td>
+<td><code>HTMLElement</code></td>
+<td>Spieler-Container</td>
+</tr>
+<tr>
+<td>pos</td>
+<td><code>Object</code></td>
+<td>Position auf dem Kreis</td>
+</tr>
+<tr>
+<td>angle</td>
+<td><code>number</code></td>
+<td>Basiswinkel</td>
+</tr>
+</tbody></table>
+<p><a name="rotatePlayers"></a></p>
+<h2>rotatePlayers(step)</h2>
+<p>Dreht den Spieler-Wrapper und alle Spieler-Container um einen Schritt.
+Berechnet die Rotation für jeden Spieler und passt deren Layout entsprechend an.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>step</td>
+<td><code>number</code></td>
+<td>Anzahl der Rotationsschritte (z. B. +1 = eine Position im Kreis weiter)</td>
+</tr>
+</tbody></table>
+<p><a name="rotateWrapper"></a></p>
+<h2>rotateWrapper(degrees)</h2>
+<p>Dreht den gesamten Spieler-Wrapper.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>degrees</td>
+<td><code>number</code></td>
+<td>Drehung in Grad</td>
+</tr>
+</tbody></table>
+<p><a name="rotatePlayer"></a></p>
+<h2>rotatePlayer(player, wrapperRotation)</h2>
+<p>Dreht einen einzelnen Spieler entgegen der Wrapper-Drehung
+und passt die CSS-Klassen für bottom/top sowie das Grid-Layout an.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>player</td>
+<td><code>HTMLElement</code></td>
+<td>Spieler-Container (.grid-wrapper)</td>
+</tr>
+<tr>
+<td>wrapperRotation</td>
+<td><code>number</code></td>
+<td>Rotation des Wrappers in Grad</td>
+</tr>
+</tbody></table>
+<p><a name="adjustGrid"></a></p>
+<h2>adjustGrid(grid, isBottom)</h2>
+<p>Passt die Breite der Karten und den Abstand (Gap) innerhalb eines Grids an,
+abhängig davon, ob der Spieler unten sitzt und von der Fensterhöhe.</p>
+<p><strong>Kind</strong>: global function  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>grid</td>
+<td><code>HTMLElement</code></td>
+<td>Grid-Container der Karten (.player-grid oder .opponent-grid)</td>
+</tr>
+<tr>
+<td>isBottom</td>
+<td><code>boolean</code></td>
+<td>true, wenn der Spieler unten sitzt, sonst false</td>
+</tr>
+</tbody></table>
+
