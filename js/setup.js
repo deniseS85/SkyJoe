@@ -14,7 +14,8 @@ let afterDealTimeoutId = null;
 
 
 /**
- * Setzt das Spiel vollständig zurück.
+ * 
+ * @param {boolean} isRestart - gibt true bei Neustart des Spiels, sonst default false
  */
 export function resetGame(isRestart = false) {
     isDealing = false;
@@ -82,6 +83,7 @@ function resetLocalStorage() {
 
 /**
  * Zeigt den Spielbildschirm und initialisiert Spieler und Deck.
+ * @param {boolean} isRestart - gibt true bei Neustart des Spiels, sonst default false
  */
 export function showGameScreen(isRestart = false) { 
     if (!isRestart) {
@@ -110,7 +112,7 @@ export function showGameScreen(isRestart = false) {
 
 /**
  * Zeigt die Rundenanzahl an
- * @param {boolean} increase - true bei Restart
+ * @param {boolean} increase - true bei Restart, sonst default false
  * @returns {number} - die aktuelle Runde
  */
 export function updateRound(increase = false) {
@@ -198,6 +200,7 @@ function createContainer(type, index = 0) {
 /**
  * Erstellt die Spielerinfo mit Bild, Name und Punkteanzeige.
  * @param {string} name - Name des Spielers
+ * @param {string} id - ID des Containers (player, opponent)
  * @param {string} imageUrl - URL für das Spielerbild
  * @returns {HTMLElement} Spielerinfo-Container
  */
@@ -442,7 +445,7 @@ function createCardFace(src, alt, borderRadius, extraStyles = {}) {
  * @param {Object} card - Objekt mit Karteninformationen
  * @param {number} width - Breite der Karte
  * @param {number} height - Höhe der Karte
- * @returns 
+ * @returns {string} Data-URL des generierten Kartenbildes
  */
 export function generateCardImage(card, width, height) { 
     const canvas = document.createElement('canvas');
@@ -515,13 +518,12 @@ export function incrementStep() {
 
 /**
  * Setzt den aktuellen Spielzustand.
- * Mögliche States:
  * - 'INIT'   : Spiel wird aufgbaut, alle Karten deaktiviert
  * - 'SELECT' : Auswahl wer das Spiel beginnt
  * - 'START'  : Spieler beginnt das Spiel
  * - 'DECIDE' : Spieler hat Zugmöglichkeiten
  * - 'FINISH' : 1. Spielzug fertig, alle Karten deaktiviert
- * @param {'INIT'|'SELECT'|'START'|'FINISH } state - Spielzustand
+ * @param {'INIT'|'SELECT'|'START'|'FINISH' } state - Spielzustand
  */
 export function setTurnState(state) {
     turnState = state;

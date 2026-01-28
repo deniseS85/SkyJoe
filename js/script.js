@@ -18,6 +18,7 @@ let accessibilityFocusBtn = null;
  * @param {string} content - HTML Inhalt, der angezeigt wird
  * @param {boolean} isSettings - true: initBackgroundCarousel & MusicToggle aufrufen
  * @param {boolean} isPlayerForm - true: Player-Formular initialisieren
+ * @param {HTMLElement} triggerBtn - jeweilige Button, der geklickt wird
  */
 function openPaperRoll(content, isSettings = false, isPlayerForm = false, triggerBtn = null) {
     accessibilityFocusBtn = triggerBtn;
@@ -64,7 +65,6 @@ function closePaperRoll() {
 
 /**
  * Klick außerhalb Paper-Roll schließt diese automatisch.
- * 
  * @param {MouseEvent} e - Das Klick-Ereignis
  */
 document.addEventListener("click", (e) => {
@@ -140,7 +140,6 @@ function initPlayers(newNum) {
 
 /**
  * Öffnet die Avatar-Auswahl für den jeweiligen Spieler.
- * @param {number} playerIndex - Index des Spielers (0 = Spieler, 1+ = Gegner)
  */
 function setupAvatarSelect() {
     const avatarButtons = paperContent.querySelectorAll(".avatar-image");
@@ -155,7 +154,7 @@ function setupAvatarSelect() {
 /**
  * Öffnet das Avatar-Auswahl-Submenu für einen Spieler und ermöglicht Auswahl.
  * @param {number} playerIndex - Index des Spielers, dessen Avatar gewählt wird.
- * @returns 
+ * @returns {void}
  */
 function showAvatarPicker(playerIndex) {
     const playerForm = paperContent.querySelector(".player-form");
@@ -445,8 +444,6 @@ function initToggle(toggleId, storageKey, onEnable = () => {}, onDisable = () =>
     setState(localStorage.getItem(storageKey) === "on");
     toggle.addEventListener("change", () => setState(toggle.checked));
 }
-
-
 
 
 /**

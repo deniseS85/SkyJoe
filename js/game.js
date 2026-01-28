@@ -47,7 +47,7 @@ export function startGame() {
  * @param {HTMLElement} cardEl - Kartenelement (Wrapper)
  * @param {HTMLElement} inner - inneres Flip-Element
  * @param {boolean} [changeCard=false] - true bei Kartentausch (ohne Flip-Regelprüfung)
- * @returns 
+ * @returns {void}
  */
 function flipCard(cardEl, inner, changeCard = false) {
     const wrapper = cardEl.closest('.grid-wrapper');
@@ -122,6 +122,7 @@ function isPlayerBottom (element) {
 /**
  * Aktualisiert die sichtbare Punkteanzeige im DOM und speichert die Werte im localStorage.
  * @param {{id:string, total:number}} playerData - Spielerinformationen
+ * @param {boolean} blink - gitb visuellen Feedback bei true
  */
 function updatePointInfo(playerData, blink = false) {
     const wrapper = document.querySelector(`.grid-wrapper[data-player-id="${playerData.id}"]`);
@@ -956,8 +957,6 @@ function setupToggles() {
 function initializeToggleButton(button, key, onEnable, onDisable) {
         const img = button.querySelector('img');
         const status = localStorage.getItem(key) === 'on' ? 'on' : 'off';
-
-        console.log(status)
         
         button.setAttribute("aria-label", `${key} ${status === 'on' ? 'an' : 'aus'}`);
         img.src = `/assets/img/${key}_${status}.png`;
@@ -978,9 +977,6 @@ function initializeToggleButton(button, key, onEnable, onDisable) {
 /**
  * Zeigt ein Popup-Fenster an.
  * @param {string} content - HTML-Inhalt, der im Popup angezeigt werden soll.
- * @param {HTMLAudioElement} [sound] - Sound, der beim Öffnen des Popups abgespielt wird.
- * @param {string} className - CSS-Klasse für das Popup-Content-Elemente.
- * @param {function} [onShow] - Callback, der aufgerufen wird, sobald das Popup angezeigt wurde.
  * @param {Object} [soundOptions={}] - Optionen für den Sound:
  *      @property {number} [volume] - Lautstärke des Sounds (0–1)
  *      @property {number} [delay] - Verzögerung vor dem Abspielen des Sounds in ms
@@ -1116,6 +1112,8 @@ function loadPlayers({ updateTotal = false, sort = false } = {}) {
 /**
  * Generiert das HTML für das Highscore-Popup.
  * @param {Array<{name: string, points: number}>} players - Sortierte Spieler mit Punkten
+ * @param {boolean} isSettings - bei Klick auf Setting-Bereich true, sonst false
+ * @returns {string} HTML-Markup für das Highscore-Popup
  */
 function generateHighscoreHTML(players, isSettings = false) {
     const medals = ['gold', 'silber', 'bronze'];
@@ -1246,8 +1244,13 @@ function setupHighScorePopup() {
     setupClickOutside(popupWrapper, popupContent, highScoreIcon, 'highscore');
 }
 
+
 /**
- * Schließt Popups, wenn außerhalb geklickt wird.
+ * Schließt ein Popup, wenn außerhalb des Popup-Inhalts geklickt wird.
+ * @param {HTMLElement} popupWrapper - Container des Popups
+ * @param {HTMLElement} popupContent - Klickbarer Inhalt des Popups
+ * @param {HTMLElement} triggerElement - Element, das das Popup geöffnet hat
+ * @param {string} type - Typ/Kennung des Popups zur Unterscheidung
  */
 function setupClickOutside(popupWrapper, popupContent, triggerElement, type) {
     document.addEventListener('click', (e) => {
@@ -1258,6 +1261,7 @@ function setupClickOutside(popupWrapper, popupContent, triggerElement, type) {
         }
     });
 }
+
 
 /**
  * Spielt einen Sound ab, wenn die Soundeinstellungen aktiv sind.
