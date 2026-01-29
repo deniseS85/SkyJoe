@@ -321,8 +321,18 @@ function applyPlayerDefaults() {
  */
 function validateInputs(inputElements) {
     inputElements.forEach((input, index) => {
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'input-tooltip';
+        tooltip.textContent = 'Nur Buchstaben erlaubt 😄';
+
+        input.parentNode.appendChild(tooltip);
+
         input.addEventListener('input', () => {
+            const original = input.value;
+
             input.value = input.value.replace(/[^A-Za-zÄÖÜäöüß -]/g, '').trimStart();
+            tooltip.style.opacity = original !== input.value ? '1' : '0';
 
             const key = index === 0 ? "player" : `opponent${index}`;
             const data = JSON.parse(localStorage.getItem(key)) || { name: "", avatar: "" };
@@ -330,7 +340,10 @@ function validateInputs(inputElements) {
             localStorage.setItem(key, JSON.stringify(data));
         });
 
-        input.addEventListener('blur', () => input.value = input.value.trim());
+        input.addEventListener('blur', () => {
+            input.value = input.value.trim();
+            tooltip.style.opacity = '0';
+        });
     });
 }
 

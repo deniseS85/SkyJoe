@@ -622,6 +622,38 @@ input:checked + .settings-slider:before {
     box-shadow: 0 3px #c28a54, inset 0 0 4px rgba(255,255,255,0.4);
 }
 
+.input-tooltip {
+    position: absolute;
+    background: #5a3b1e;
+    color: white;
+    padding: 2px 2px 2px 7px;
+    border-radius: 4px;
+    font-size: clamp(0.625rem, 0.5357rem + 0.4464vw, 1.25rem);
+    top: 0; 
+    left: 0;
+    letter-spacing: 1px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.input-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    border-width: clamp(0.3125rem, 0.2679rem + 0.2232vw, 0.625rem);
+    border-style: solid;
+    border-color: #5a3b1e transparent transparent transparent;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+
 .submit-player-btn, .submit-avatar-btn {
     font-family: 'biscuit', sans-serif;
     letter-spacing: 2px;

@@ -137,7 +137,7 @@ function updatePointInfo(playerData, blink = false) {
         if (playerData.total >= 100 || blink) {
             playSound(failSound, 0.3);
             pointInfo.classList.add('blink');
-            setTimeout(() => pointInfo.classList.remove('blink'), 1400);
+            setTimeout(() => pointInfo.classList.remove('blink'), 3300);
         }
     }
 

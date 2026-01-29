@@ -1,6 +1,6 @@
 export const skyjoCards = [
-    { value: -2, color: "#4B0082", count: 5, img: null },
-    { value: -1, color: "#8A2BE2", count: 10, img: null },
+    { value: -2, color: "#4B0082", count: 5, img: "assets/img/cards/-2.png" },
+    { value: -1, color: "#8A2BE2", count: 10, img: "assets/img/cards/-1.png" },
     { value: 0,  color: "#1E90FF", count: 15, img: "assets/img/cards/0.png" },
     { value: 1,  color: "#00BFFF", count: 10, img: "assets/img/cards/1.png" },
     { value: 2,  color: "#40E0D0", count: 10, img: "assets/img/cards/2.png" },
