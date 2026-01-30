@@ -1,6 +1,6 @@
 export const paperRollContent = {
       "SPIELREGELN": /*html*/`
-            <div class="paper-roll-header"tabindex="-1" >Skyjoe – Spielregeln</div>
+            <div class="paper-roll-header"tabindex="-1">Skyjoe – Spielregeln</div>
             <p style="margin-bottom:0.25rem;"><strong>Ziel:</strong> Sammle Karten, um am Ende möglichst wenige Punkte zu haben. Wer zuerst 100 Punkte oder mehr erreicht, beendet das Spiel; gewonnen hat der Spieler mit den wenigsten Punkten.</p>
             <p style="margin-bottom:0.25rem;"><strong>Vorbereitung:</strong> Jeder Spieler erhält 12 Karten, die verdeckt in einem 3x4-Rechteck vor ihm liegen. Jeder deckt zu Beginn 2 Karten auf. Die restlichen Karten bilden den Nachziehstapel in der Mitte. Der Spieler mit den meisten Punkten auf seinen aufgedeckten Karten beginnt.</p>
             <p style="margin-bottom:0.25rem;"><strong>Ablauf pro Zug:</strong></p>
